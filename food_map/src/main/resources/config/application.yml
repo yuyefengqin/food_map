@@ -1,0 +1,6 @@
+spring:
+  application.name: food_map
+  profiles.active: dev
+mybatis-plus.global-config.db-config:
+  insert-strategy: always
+  update-strategy: always

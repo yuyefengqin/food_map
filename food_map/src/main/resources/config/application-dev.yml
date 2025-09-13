@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/food_map
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: postgres
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+server.port: 80
+
