@@ -134,23 +134,25 @@ comment on column product_spu.approval_status is '审批状态';
 comment on column product_spu.shelf_status is '上架状态';
 comment on column product_spu.sales is '总销量';
 comment on column product_spu.create_time is '创建时间';
-comment on column product_spu.update_time is '更新时间';
-
--- 商品SKU表
 create table product_sku
 (
     sku_id      bigint primary key,
     spu_id      bigint         not null,
     specs_price jsonb          not null,
+    element_specs jsonb        not null,
     stock       int            not null default 0,
     image_url   bigint                  default null,
     create_time timestamp               default current_timestamp,
     update_time timestamp
 );
+
+-- 商品SKU表
+comment on column product_spu.update_time is '更新时间';
 comment on table product_sku is '商品SKU表';
 comment on column product_sku.sku_id is 'SKU ID';
 comment on column product_sku.spu_id is '关联SPU ID';
-comment on column product_sku.specs_price is '规格:价格';
+comment on column product_sku.specs_price is '规格:价格'; -- 甜 ：5.00
+comment on column product_sku.element_specs is '元素:规格';-- 口味 ：甜
 comment on column product_sku.stock is '库存数量';
 comment on column product_sku.image_url is 'SKU图片URL';
 comment on column product_sku.create_time is '创建时间';
@@ -180,20 +182,19 @@ comment on column shopping_cart.update_time is '更新时间';
 create table product_order
 (
     order_id          bigint primary key,
-    order_no          text           not null,
     user_id           bigint         not null,
     merchant_id       bigint         not null,
     order_amount      numeric(10, 2) not null,
     product_amount    numeric(10, 2) not null,
     delivery_fee      numeric(10, 2) not null,
-    delivery_method   varchar(50)    not null,
+    delivery_method   varchar(50)    not null   default '顺丰快递',
     delivery_time     timestamp   default null,
     address_id        bigint         not null,
     pay_method        varchar(20) default null, -- 后续考虑微信/支付宝等方式
     trade_no          bigint      default null,
-    logistics_company varchar(50) default null,
-    logistics_no      int      default null, -- 1待付款、2待发货、3待收货、4已完成、5已取消、6交易完成、7交易关闭、8未开始
-    order_status      varchar(20)    not null,
+    logistics_company varchar(50) default null  default '顺丰公司',
+    logistics_no      bigint      default null,
+    order_status      smallint    not null,-- 1待付款、2待发货、3待收货、4已完成、5已取消、6交易完成、7交易关闭、8未开始
     create_time       timestamp   default current_timestamp,
     pay_time          timestamp   default null,
     ship_time         timestamp   default null,
@@ -202,21 +203,20 @@ create table product_order
     close_time        timestamp   default null
 );
 comment on table product_order is '普通商品订单表';
-comment on column product_order.order_id is '订单ID';
-comment on column product_order.order_no is '订单编号';
+comment on column product_order.order_id is '订单ID/订单编号';
 comment on column product_order.user_id is '用户ID';
 comment on column product_order.merchant_id is '商户ID';
 comment on column product_order.order_amount is '订单总金额（商品+配送费）';
 comment on column product_order.product_amount is '商品金额';
 comment on column product_order.delivery_fee is '配送费';
-comment on column product_order.delivery_method is '配送方式（如顺丰速递）';
+comment on column product_order.delivery_method is '配送方式（如顺丰速递）'; -- 统一先用顺风
 comment on column product_order.delivery_time is '配送时间（用户选择）';
 comment on column product_order.address_id is '收货地址ID（关联user_address）';
-comment on column product_order.pay_method is '支付方式';
+comment on column product_order.pay_method is '支付方式'; -- 默认统一填网页端
 comment on column product_order.trade_no is '交易流水号（支付成功后生成）';
-comment on column product_order.logistics_company is '物流公司';
-comment on column product_order.logistics_no is '物流单号';
-comment on column product_order.order_status is '订单状态';
+comment on column product_order.logistics_company is '物流公司'; -- 统一先用顺丰
+comment on column product_order.logistics_no is '物流单号'; -- 随机生成
+comment on column product_order.order_status is '订单状态'; -- 1待付款、2待发货、3待收货、4已完成、5已取消、6交易完成、7交易关闭、8未开始
 comment on column product_order.create_time is '创建时间';
 comment on column product_order.pay_time is '支付时间';
 comment on column product_order.ship_time is '发货时间';
