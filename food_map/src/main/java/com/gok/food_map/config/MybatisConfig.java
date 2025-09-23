@@ -15,4 +15,3 @@ public class MybatisConfig {
         return interceptor;
     }
 }
-//tzl看过
