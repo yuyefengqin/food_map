@@ -4,10 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+//新增
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class MerchantSaveDTO {
+
+    private Long merchantId;
 
     //商户管理账号
     private String manageAccount;

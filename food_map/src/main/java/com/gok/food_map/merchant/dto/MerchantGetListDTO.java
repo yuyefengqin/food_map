@@ -5,13 +5,20 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+
+//表格
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class MerchantGetListDTO {
+    //当前页
+    private Long current;
+
+    //页大小
+    private Long size;
 
     //商户编号
-    private Long merchantNo;
+    private String merchantNo;
 
     //商户名称
     private String merchantName;
