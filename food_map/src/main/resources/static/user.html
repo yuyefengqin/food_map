@@ -18,12 +18,28 @@
     <link rel="manifest" href="/favicon_logosc/site.webmanifest">
 </head>
 <body>
+<div id="app">
+    <el-row>
+        <el-form :inline="true" :model="form">
+            <el-form-item label="用户账号:"><el-input v-model="form.code" /></el-form-item>
+            <el-form-item label="用户名:"><el-input v-model="form.name" /></el-form-item>
+            <el-form-item label="注册时间"><el-input v-model="form.mobile" /></el-form-item>
+            <el-form-item ><el-button type="primary" @click="onSearch">查询</el-button></el-form-item>
+        </el-form>
+    </el-row>
+
+</div>
 
 </body>
 <script>
     const app = new Vue({
         create(){
             return {
+                form: {
+                    code: '',
+                    name: '',
+                    mobile: '',
+                }
 
             }
         },
@@ -33,5 +49,4 @@
 
     }).use(ElementPlus).use(VxeUITable).mount('#app');
 </script>
-
 </html>
