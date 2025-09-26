@@ -7,4 +7,4 @@
 2025/9/23 22:44 tzl商户端：1.创建了表 2.实现了dto和vo 3.实现了Controller 4.service实现了add 后面的明天实现 拜拜噜
 2025/9/24 18:14 tzl商户端：除了状态和公司外 后端实现 拜拜咯
 2025/9/26 15:03 wsy用户端: 1.修改了MUser 2.修改了UserSaveDTO 3.添加了LevelChange功能 4.修改getList方法 后端代码大致完成
-2025/9/26 23:33 tzl: user丢失
+2025/9/26 23:33 tzl: user丢失错误
