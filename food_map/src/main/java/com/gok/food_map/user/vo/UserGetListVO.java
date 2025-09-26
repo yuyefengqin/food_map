@@ -1,9 +1,15 @@
 package com.gok.food_map.user.vo;
 
 import com.baomidou.mybatisplus.annotation.TableId;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserGetListVO {
 
     /**
@@ -12,14 +18,24 @@ public class UserGetListVO {
     private Long id;
 
     /**
-     * 账号
+     * 登录账号
      */
-    private Long code;
+    private String code;
 
     /**
-     * 名称
+     * 加密密码
+     */
+    private String password;
+
+    /**
+     * 用户名
      */
     private String name;
+
+    /**
+     * 性别（男/女）
+     */
+    private String gender;
 
     /**
      * 头像
@@ -27,22 +43,22 @@ public class UserGetListVO {
     private Long avatar;
 
     /**
-     * 性别
-     */
-    private String sex;
-
-    /**
-     * 城市
+     * 注册城市
      */
     private String city;
 
     /**
-     * 创建时间
+     * 会员等级
      */
-    private LocalDateTime createTime;
+    private Integer levelId;
 
     /**
-     * 有效
+     * 注册时间
+     */
+    private String createTime;
+
+    /**
+     * 状态
      */
     private Boolean enable;
 }

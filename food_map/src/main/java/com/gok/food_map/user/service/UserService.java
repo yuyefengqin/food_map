@@ -12,7 +12,7 @@ import com.gok.food_map.user.entity.MUser;
 import com.gok.food_map.user.mapper.MAddressMapper;
 import com.gok.food_map.user.mapper.MUserMapper;
 import com.gok.food_map.user.vo.UserGetListVO;
-import com.gok.food_map.user.vo.UserRemoveDTO;
+import com.gok.food_map.user.dto.UserRemoveDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Lazy;
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -43,7 +44,6 @@ public class UserService extends ServiceImpl<MUserMapper, MUser>
     //新增
     @Transactional
     public void add(UserSaveDTO dto) {
-
         checkSave(dto, true);
         MUser mUser = new MUser();
         BeanUtils.copyProperties(dto, mUser);
@@ -69,32 +69,39 @@ public class UserService extends ServiceImpl<MUserMapper, MUser>
         this.updateById(mUser); //更新用户数据
     }
 
+    //会员修改
+    @Transactional
+    public void LevelUpdate(UserSaveDTO dto){
+        checkSave(dto, false);
+        MUser mUser = this.getById(dto.getId());
+        BeanUtils.copyProperties(dto, mUser);
+        this.updateById(mUser); //更新用户数据
+    }
+
     //获取列表
     public IPage<UserGetListVO> getList(UserGetListDTO dto) {
-
         IPage<MUser> page = new Page<>(dto.getCurrent() == null ? 1 : dto.getCurrent(), dto.getSize() == null ? 20 : dto.getSize());
         LambdaQueryWrapper<MUser> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.hasText(dto.getCode()), MUser::getCode, dto.getCode());
         wrapper.like(StringUtils.hasText(dto.getName()), MUser::getName, dto.getName());
         wrapper.between(dto.getBeginTime() != null && dto.getEndTime() != null, MUser::getCreateTime, dto.getBeginTime(), dto.getEndTime());
         page = this.getBaseMapper().selectPage(page, wrapper);
-
         IPage<UserGetListVO> res = new Page<>();
         BeanUtils.copyProperties(page, res);
         List<UserGetListVO> record = page.getRecords().stream().map(mUser -> {
             UserGetListVO vo = new UserGetListVO();
             BeanUtils.copyProperties(mUser, vo);
+            //将LocalDateTime格式类型转为LocalDate再变String
+            vo.setCreateTime(mUser.getCreateTime() == null ? null : LocalDate.of(mUser.getCreateTime().getYear(),mUser.getCreateTime().getMonth(),mUser.getCreateTime().getDayOfMonth()).toString());
             return vo;
         }).toList();
         res.setRecords(record);
-
         return res;
     }
 
     //删除
     @Transactional
     public void remove(UserRemoveDTO dto) {
-
         MUser mUser = this.getById(dto.getId());
         if (mUser != null) {
             this.removeById(dto.getId());
@@ -102,6 +109,8 @@ public class UserService extends ServiceImpl<MUserMapper, MUser>
         }
     }
 
+
+    //校验
     private void checkSave(UserSaveDTO dto, boolean isAdd) {
 
         //id校验
@@ -117,7 +126,7 @@ public class UserService extends ServiceImpl<MUserMapper, MUser>
             }
         }
         //code校验
-        Long code = dto.getCode();
+        String code = dto.getCode();
         if (isAdd) {
             //新增时与已有用户code不能重复
             LambdaQueryWrapper<MUser> wrapper = new LambdaQueryWrapper<>();
@@ -150,10 +159,16 @@ public class UserService extends ServiceImpl<MUserMapper, MUser>
             throw new RuntimeException("头像不存在");//有设置头像文件，但是文件不存在
         }
         //性别校验
-        String sex = dto.getSex();
+        String sex = dto.getGender();
         if (!StringUtils.hasText(sex) || !List.of("男", "女").contains(sex)) {
             throw new RuntimeException("性别输入有误");
         }
+        //会员等级校验
+        Integer levelId = dto.getLevelId();
+        if (levelId == null) {
+            throw new RuntimeException("会员等级异常");
+        }
+
         //城市校验
         String city = dto.getCity();
         if (!StringUtils.hasText(city)) {

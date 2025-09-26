@@ -5,7 +5,7 @@ import com.gok.food_map.user.dto.UserGetListDTO;
 import com.gok.food_map.user.dto.UserSaveDTO;
 import com.gok.food_map.user.service.UserService;
 import com.gok.food_map.user.vo.UserGetListVO;
-import com.gok.food_map.user.vo.UserRemoveDTO;
+import com.gok.food_map.user.dto.UserRemoveDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,14 +37,17 @@ public class UserController {
     //编辑
     @PostMapping("/edit")
     public void edit(@RequestBody UserSaveDTO dto) {
-
         userService.edit(dto);
+    }
+    //会员修改
+    @PostMapping("/levelChange")
+    public void levelChange(@RequestBody UserSaveDTO dto) {
+        userService.LevelUpdate(dto);
     }
 
     //删除
     @PostMapping("/remove")
     public void remove(@RequestBody UserRemoveDTO dto) {
-
         userService.remove(dto);
     }
 }

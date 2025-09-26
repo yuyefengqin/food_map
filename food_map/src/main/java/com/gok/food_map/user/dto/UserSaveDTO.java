@@ -13,25 +13,27 @@ import java.util.Date;
 @AllArgsConstructor
 public class UserSaveDTO {
 
-    /**
-     * 编号
-     */
     private Long id;
 
     /**
-     * 账号
+     * 登录账号
      */
-    private Long code;
+    private String code;
 
     /**
-     * 名称
+     * 加密密码
+     */
+    private String password;
+
+    /**
+     * 用户名
      */
     private String name;
 
     /**
-     * 密码
+     * 性别（男/女）
      */
-    private String password;
+    private String gender;
 
     /**
      * 头像
@@ -39,22 +41,27 @@ public class UserSaveDTO {
     private Long avatar;
 
     /**
-     * 性别
-     */
-    private String sex;
-
-    /**
-     * 城市
+     * 注册城市
      */
     private String city;
 
     /**
-     * 创建时间
+     * 会员等级
+     */
+    private Integer levelId;
+
+    /**
+     * 注册时间
      */
     private LocalDateTime createTime;
 
     /**
-     * 有效
+     * 更新时间
+     */
+    private LocalDateTime updateTime;
+
+    /**
+     * 状态
      */
     private Boolean enable;
 }
