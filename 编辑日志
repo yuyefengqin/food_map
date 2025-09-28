@@ -9,3 +9,4 @@
 2025/9/26 15:03 wsy用户端: 1.修改了MUser 2.修改了UserSaveDTO 3.添加了LevelChange功能 4.修改getList方法 后端代码大致完成
 2025/9/26 23:33 tzl: user丢失错误
 2025/9/26 23:45 wsy: 上传user
+2025/9/28 23:13 zwj: 1.上传log 2.添加aop,redis,json处理依赖 3.在webConfig注册token拦截器
