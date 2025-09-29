@@ -84,7 +84,6 @@ public class UserService extends ServiceImpl<MUserMapper, MUser>
         LambdaQueryWrapper<MUser> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.hasText(dto.getCode()), MUser::getCode, dto.getCode());
         wrapper.like(StringUtils.hasText(dto.getName()), MUser::getName, dto.getName());
-        wrapper.between(dto.getBeginTime() != null && dto.getEndTime() != null, MUser::getCreateTime, dto.getBeginTime(), dto.getEndTime());
         page = this.getBaseMapper().selectPage(page, wrapper);
         IPage<UserGetListVO> res = new Page<>();
         BeanUtils.copyProperties(page, res);

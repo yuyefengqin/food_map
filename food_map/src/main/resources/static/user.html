@@ -23,7 +23,13 @@
         <el-form :inline="true" :model="form">
             <el-form-item label="用户账号:"><el-input v-model="form.code" /></el-form-item>
             <el-form-item label="用户名:"><el-input v-model="form.name" /></el-form-item>
-            <el-form-item label="注册时间"><el-input v-model="form.mobile" /></el-form-item>
+            <el-form-item label="注册时间">
+                <el-date-picker
+                    v-model="form.createTime"
+                    type="date"
+                    placeholder="Pick a day"
+                    :size="size"
+            /></el-form-item>
             <el-form-item ><el-button type="primary" @click="onSearch">查询</el-button></el-form-item>
         </el-form>
     </el-row>
@@ -32,18 +38,28 @@
 
 </body>
 <script>
+    import axios from "./static_resources/vxe-table@4.6.25";
+
     const app = new Vue({
         create(){
             return {
                 form: {
                     code: '',
                     name: '',
-                    mobile: '',
+                    createTime: '',
+                    current: '',
+                    size: '',
+                    total: '',
                 }
-
             }
         },
         methods: {
+            onSearch(){
+                this.getList();
+            },
+            async getList(){
+
+            }
 
         }
 

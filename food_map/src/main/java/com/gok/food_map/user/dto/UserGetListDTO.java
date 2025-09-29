@@ -14,6 +14,8 @@ public class UserGetListDTO {
     //当前页
     private Long current;
 
+    private Long total;
+
     //页大小
     private Long size;
 
@@ -23,9 +25,7 @@ public class UserGetListDTO {
     //名称
     private String name;
 
-    //开始时间
-    private LocalDateTime beginTime;
+    //创建时间
+    private LocalDateTime creatTime;
 
-    //结束时间
-    private LocalDateTime endTime;
 }
