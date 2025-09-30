@@ -75,7 +75,8 @@ public class MerchantService extends ServiceImpl<MMerchantMapper, MMerchant>
         LambdaQueryWrapper<MMerchant> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.hasText(dto.getMerchantNo()),MMerchant::getMerchantNo, dto.getMerchantNo());
         wrapper.like(StringUtils.hasText(dto.getMerchantName()),MMerchant::getMerchantName, dto.getMerchantName());
-        wrapper.between(dto.getBeginTime() != null && dto.getEndTime() != null, MMerchant::getCreateTime, dto.getBeginTime(), dto.getEndTime());
+        wrapper.like(StringUtils.hasText(String.valueOf(dto.getCreateTime())),MMerchant::getCreateTime, dto.getCreateTime());
+        wrapper.like(StringUtils.hasText(dto.getManageAccount()),MMerchant::getManageAccount, dto.getManageAccount());
         page = this.getBaseMapper().selectPage(page, wrapper);
 
         //后端传前端

@@ -24,13 +24,7 @@ public class MerchantGetListDTO {
     private String merchantName;
 
     //创建时间
-    //------>
-
-        //开始时间
-    private LocalDateTime beginTime;
-
-        //结束时间
-    private LocalDateTime endTime;
+    private LocalDateTime createTime;
 
     //商户状态
     private Integer status;

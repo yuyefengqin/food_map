@@ -21,6 +21,9 @@ public class MerchantSaveDTO {
     //商户名称
     private String merchantName;
 
+    //地址
+    private String merchantAddress;
+
     //商户联系方式
     private String contactPhone;
 
@@ -35,5 +38,8 @@ public class MerchantSaveDTO {
 
     //备注
     private String notes;
+
+    //状态
+    private Integer status;
 
 }
