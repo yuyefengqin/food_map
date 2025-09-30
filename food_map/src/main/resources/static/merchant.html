@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>商户管理</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="/static_resources/element-plus-index.css" />
+    <link rel="stylesheet" href="/static_resources/vxe-table-style.css">
+    <script src="/static_resources/vue.global.js"></script>
+    <script src="/static_resources/element-plus-index.full.js"></script>
+    <script src="/static_resources/xe-utils.js"></script>
+    <script src="/static_resources/vxe-table@4.6.25.js"></script>
+    <script src="/static_resources/axios.min.js"></script>
+    <script src="/static_resources/element-plus_icons-vue.js"></script>
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon_logosc/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon_logosc/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon_logosc/favicon-16x16.png">
+    <link rel="manifest" href="/favicon_logosc/site.webmanifest">
+</head>
+<body>
+<div id="app">
+        <strong>商家列表</strong>
+    <el-row>
+        <el-form :inline="true" :model="form">
+            <el-form-item label="商户编号"><el-input v-model="form.code" clearable /></el-form-item>
+            <el-form-item label="商户名称"> <el-input v-model="form.name" clearable /> </el-form-item>
+            <el-form-item label="创建时间"><el-date-picker v-model="form.createTime" type="date" placeholder="Pick a day" :size="size"/></el-form-item>
+        </el-form>
+        <el-form :inline="true" :model="form">
+            <el-form-item label="状态"> <el-input v-model="form.status" clearable /> </el-form-item>
+            <el-form-item label="商户管理账号"> <el-input v-model="form.account" clearable /> </el-form-item>
+            <el-form-item> <el-button type="primary" @click="onSearch">查询</el-button> </el-form-item>
+            <el-form-item> <el-button type="primary" @click="onDelete">重置</el-button> </el-form-item>
+        </el-form>
+    </el-row>
+
+<!--    表格-->
+    <el-row>
+        <vxe-grid v-bind="gridOptions" style="width: 100%">
+
+            <!--            查询按钮（1.类型 2.点击后触发方法 3.按钮显示内容）-->
+            <template #toolbar_buttons><el-button type="primary" @click="add">新增</el-button>
+            </template>
+
+            <!--            有效-->
+            <template #valid="{ row }">
+                <el-switch v-model="row.valid" :active-value="1" :inactive-value="0" disabled />
+            </template>
+
+
+            <!--            操作-->
+            <template #operate="{ row }">
+                <el-button size="small" type="primary" @click="edit(row)">编辑</el-button>
+                <el-button size="small" type="danger" @click="onRemove(row.id)">删除</el-button>
+            </template>
+
+            <!--            换页-->
+            <template #pager>
+                <vxe-pager :layouts="['Sizes', 'PrevPage', 'Number', 'NextPage', 'Total']" v-model:current-page="page.current" v-model:page-size="page.size" :total="page.total" @page-change="onPageChange">
+                </vxe-pager>
+            </template>
+        </vxe-grid>
+<!--编辑和新增页面-->
+        <el-dialog v-model="showDialog" :title="isEdit ? '编辑' : '新增'" width="400">
+            <el-form ref="editForm" :model="editForm" :rules="rules" label-width="auto">
+
+<!--                商户管理账号-->
+                <el-form-item label="商户管理账号" prop="code">
+                    <el-input v-model="editForm.code" :disabled="isEdit" maxlength="20" />
+                </el-form-item>
+
+<!--                商户管理密码-->
+                <el-form-item v-if="!isEdit" label="商户管理密码" prop="password">
+                    <el-input v-model="editForm.password" />
+                </el-form-item>
+
+<!--                商户名称-->
+                <el-form-item label="商户名称" prop="name">
+                    <el-input v-model="editForm.name" maxlength="20" />
+                </el-form-item>
+
+<!--                商户地址-->
+                <el-form-item label="商户地址" prop="address">
+                    <el-input v-model="editForm.address" maxlength="20" />
+                </el-form-item>
+
+<!--                商户联系方式-->
+                <el-form-item label="商户联系方式" prop="mobile">
+                    <el-input v-model="editForm.mobile" maxlength="20" />
+                </el-form-item>
+
+<!--                上传营业执照-->
+                <el-form-item label="上传营业执照" prop="license">
+                    <el-upload :show-MFile-list="false" :before-upload="uploadLicense"  >
+                        <img v-if="editForm.license" :src="`/MFile/download?id=${editForm.license}`" style="width: 100px; height: 100px" />
+                        <el-icon v-else><Plus /></el-icon>
+                    </el-upload>
+                </el-form-item>
+
+<!--                上传logo-->
+                <el-form-item label="上传Logo" prop="logo">
+                    <el-upload :show-MFile-list="false" :before-upload="uploadLogo"  >
+                        <img v-if="editForm.logo" :src="`/MFile/download?id=${editForm.logo}`" style="width: 100px; height: 100px" />
+                        <el-icon v-else><Plus /></el-icon>
+                    </el-upload>
+                </el-form-item>
+
+<!--                企业类型-->
+                <el-form-item label="企业类型" prop="type">
+                    <el-input v-model="editForm.type" />
+                </el-form-item>
+
+<!--                备注-->
+                <el-form-item label="备注" prop="notes">
+                    <el-input v-model="editForm.notes" maxlength="50" />
+                </el-form-item>
+<!--                有效-->
+                <el-form-item v-if="isEdit" label="有效" prop="valid">
+                    <el-switch v-model="editForm.valid" :active-value="1" :inactive-value="0" />
+                </el-form-item>
+
+            </el-form>
+
+            <template #footer>
+                <el-button type="primary" @click="onSubmit">提交</el-button>
+                <el-button @click="showDialog = false">取消</el-button>
+            </template>
+        </el-dialog>
+    </el-row>
+
+</div>
+</body>
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                districts: [],
+                // 查询界面
+                form: {
+                    code: '',
+                    name: '',
+                    createTime: '',
+                    status: '',
+                    account: ''
+                },
+                // 表格
+                gridOptions: {
+                    border: true,
+                    height: 400,
+                    data: [],
+                    headerAlign: 'center',
+                    align: 'center',
+                    columns: [
+                        {type: 'seq', width: 60},
+                        {field: 'code', title: '商户编号'},
+                        {field: 'name', title: '商户名称'},
+                        {field: 'account', title: '商户管理账号'},
+                        {field: 'type', title: '企业类型'},
+                        {field: 'valid', title: '商户状态', slots: {default: 'valid'}, width: 80},
+                        {field: 'openTime', title: '创建时间'},
+                        {title: '操作', slots: {default: 'operate'}, width: 220}
+                    ],
+                    toolbarConfig: {
+                        custom: true,
+                        slots: {buttons: 'toolbar_buttons'}
+                    },
+                },
+                page: {
+                    current: 1,
+                    size: 20,
+                    total: 0
+                },
+                //编辑
+                showDialog: false,
+                //新增
+                isEdit: false,
+                //编辑和新增的界面
+                editForm: {
+                    id: '',
+                    code: '',
+                    name: '',
+                    type: '',
+                    mobile: '',
+                    address: '',
+                    valid: 1,
+                    license: '',
+                    logo: '',
+                    password: '',
+                    notes: ''
+                },
+                rules: {
+                    code: [{required: true, message: '请输入账号'}],
+                    name: [{required: true, message: '请输入名称'}],
+                    mobile: [{required: true, message: '请输入手机号'},
+                        {
+                            validator(rule, value, callback) {
+                                if (value) {
+                                    if (/^(?:0|86|\+86)?1[3-9]\d{9}$/.test(value)) {
+                                        callback();
+                                    } else {
+                                        callback(new Error('手机格式错误'))
+                                    }
+                                } else {
+                                    callback();
+                                }
+                            }, trigger: 'blur'
+                        }],
+                    password: [{required: true, message: '请输入密码'},
+                        {
+                            validator(rule, value, callback) {
+                                if (value) {
+                                    if (/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z\W]{6,18}$/.test(value)) {
+                                        callback();
+                                    } else {
+                                        callback(new Error('请输入包含英文和数字，在6-18位之间'))
+                                    }
+                                } else {
+                                    callback();
+                                }
+                            },
+                            trigger: 'blur'
+                        }
+                    ],
+                },
+            };
+        },
+        async created() {
+            await this.getList();
+        },
+        methods: {
+            //初始化方法
+            async init() {
+                const response= await axios.post('/merchant/init');
+                // 转换所有value为字符串
+                const convertValues = (nodes) => {
+                    return nodes.map(node => ({
+                        ...node,
+                        value: String(node.value), // 强制转为字符串
+                        children: node.children ? convertValues(node.children) : []
+                    }));
+                };
+
+                this.districts = convertValues(response.data);
+                console.log(this.districts);
+            },
+            //换页的更新
+            onPageChange() {
+                this.getList();
+            },
+
+            async getList() {
+                const form= this.form;
+                const response= await axios.post('/merchant/getList', { code: form.code, name: form.name, createTime: form.createTime, staus: form.staus, account: form.account, current: this.page.current, size: this.page.size});
+                this.gridOptions.data= response.data.records;
+                this.page.current= response.data.current;
+                this.page.size= response.data.size;
+                this.page.total= response.data.total;
+                console.log(this.gridOptions.data);
+            },
+            //编辑按钮
+            edit(merchant) {
+                this.showDialog= true;
+                this.isEdit= true;
+                this.editForm= {...merchant};
+            },
+            //新增按钮
+            add() {
+                this.showDialog= true;
+                this.isEdit= false;
+                this.editForm= {};
+
+            },
+            //查询按钮
+            onSearch() {
+                this.getList();
+            },
+            onDelete() {
+                this.form.code = '';
+                this.form.name = '';
+                this.form.createTime = '';
+                this.form.status = '';
+                this.form.account = '';
+            },
+            //移除功能
+            async onRemove(id) {
+                await axios.post('/merchant/remove', { id});
+                await this.getList();
+            },
+            async uploadLogo(f) {
+                debugger;
+                try {
+                    // const { file } = options;  // 从参数中获取文件对象
+                    // const formData = new FormData();
+                    // formData.append('MFile', file);  // 使用标准字段名
+
+                    const response = await axios.post('/MFile/upload', { MFile: f}, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+
+                    this.editForm.logo = response.data.id;
+                    return false;
+                } catch (error) {
+                    console.error('上传失败', error);
+                    // 添加错误提示
+                }
+            },
+
+            async uploadLicense(){
+                try {
+                    // const { file } = options;  // 从参数中获取文件对象
+                    // const formData = new FormData();
+                    // formData.append('MFile', file);  // 使用标准字段名
+
+                    const response = await axios.post('/MFile/upload', { MFile: f}, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+
+                    this.editForm.license = response.data.id;
+                    return false;
+                } catch (error) {
+                    console.error('上传失败', error);
+                    // 添加错误提示
+                }
+            },
+            onSubmit() {
+                this.$refs.editForm.validate(async valid =>{
+                        if(valid) {
+                            await axios.post(this.isEdit? '/merchant/edit': '/merchant/add', this.editForm);
+                            await this.getList();
+                            this.showDialog= false;
+                        }
+                    }
+                );
+            },
+        }
+    });
+    for(const[key, component] of Object.entries(ElementPlusIconsVue)) {app.component(key, component)}
+    app.use(ElementPlus).use(VxeUITable).mount('#app');
+</script>
+</html>
+
+

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -75,7 +76,6 @@ public class MerchantService extends ServiceImpl<MMerchantMapper, MMerchant>
         LambdaQueryWrapper<MMerchant> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.hasText(dto.getMerchantNo()),MMerchant::getMerchantNo, dto.getMerchantNo());
         wrapper.like(StringUtils.hasText(dto.getMerchantName()),MMerchant::getMerchantName, dto.getMerchantName());
-        wrapper.like(StringUtils.hasText(String.valueOf(dto.getCreateTime())),MMerchant::getCreateTime, dto.getCreateTime());
         wrapper.like(StringUtils.hasText(dto.getManageAccount()),MMerchant::getManageAccount, dto.getManageAccount());
         page = this.getBaseMapper().selectPage(page, wrapper);
 

@@ -1,14 +1,20 @@
 package com.gok.food_map.file.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
 public class FileUploadDTO {
-
     private MultipartFile file;
+
+    public FileUploadDTO(MultipartFile file) {
+        this.file = file;
+    }
+    public FileUploadDTO(){
+
+    }
+
+    public void setFile(MultipartFile file) {
+        this.file = file;
+    }
 }

@@ -1,34 +1,39 @@
 package com.gok.food_map.file.controller;
 
+import com.gok.food_map.file.dto.FileRemoveDTO;
 import com.gok.food_map.file.dto.FileUploadDTO;
 import com.gok.food_map.file.service.FileService;
 import com.gok.food_map.file.vo.FileUploadVO;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Collections;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/file")
+@RequestMapping("/MFile")
 @RequiredArgsConstructor(onConstructor_ = @Lazy)
-public class FileController {
+public class FileController{
+    @Resource
+    private  FileService service;
 
-    private final FileService fileService;
-
-    //上传
     @PostMapping("/upload")
-    public FileUploadVO upload(FileUploadDTO dto) {
-
-        return fileService.upload(dto);
+    public Map<String,String> upload(@RequestParam("MFile") MultipartFile dto) {
+        FileUploadDTO fileUploadDTO = new FileUploadDTO(dto);
+        String id = service.upload(fileUploadDTO).getId();
+        return Collections.singletonMap("id", id);
     }
-
-    //下载
     @GetMapping("/download")
     public void download(Long id, HttpServletResponse response) {
-
-        fileService.download(id, response);
+        service.download(id, response);
+    }
+    @PostMapping("/remove")
+    public void remove(@RequestBody FileRemoveDTO dto) {
+        service.remove(dto.getId());
     }
 }
+

@@ -2,6 +2,8 @@ package com.gok.food_map.merchant.entity;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
@@ -82,10 +84,18 @@ public class MMerchant {
     /**
      * 创建时间
      */
-    private LocalDateTime createTime;
+    private Timestamp createTime;
 
     /**
      * 更新时间
      */
     private LocalDateTime updateTime;
+
+    public LocalDateTime getCreateTime() {
+        return createTime.toLocalDateTime();
+    }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = Timestamp.valueOf(createTime);
+    }
 }
