@@ -15,7 +15,7 @@
             <result property="levelId" column="level_id" />
             <result property="createTime" column="create_time" />
             <result property="updateTime" column="update_time" />
-            <result property="enable" column="enable" />
+            <result property="enable" column="valid" />
     </resultMap>
 
     <sql id="Base_Column_List">

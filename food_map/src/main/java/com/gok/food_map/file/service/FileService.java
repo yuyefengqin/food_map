@@ -41,7 +41,6 @@ public class FileService extends ServiceImpl<MFileMapper, MFile> {
 
     //获取
     public MFile get(Long id) {
-
         return mFileMapper.selectById(id);
     }
 

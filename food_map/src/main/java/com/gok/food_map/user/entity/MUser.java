@@ -72,7 +72,7 @@ public class MUser implements Serializable {
     /**
      * 状态
      */
-    private Boolean enable;
+    private Boolean valid;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

@@ -15,7 +15,7 @@ public class UserGetListVO {
     /**
      * 编号
      */
-    private Long id;
+    private String id;
 
     /**
      * 登录账号
@@ -50,7 +50,7 @@ public class UserGetListVO {
     /**
      * 会员等级
      */
-    private Integer levelId;
+    private String levelName;
 
     /**
      * 注册时间
@@ -60,5 +60,5 @@ public class UserGetListVO {
     /**
      * 状态
      */
-    private Boolean enable;
+    private Boolean valid;
 }

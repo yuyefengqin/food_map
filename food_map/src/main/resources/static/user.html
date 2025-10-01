@@ -37,16 +37,16 @@
     <el-row>
         <vxe-grid v-bind="gridOptions" style="width: 100%">
             <template #toolbar buttons><el-button type="primary" @click="add">新增</el-button>
-                <el-button type="warning" @click="onExport">导出</el-button>
+                <el-button type="warning" @click="onExport(fullTableData)">导出</el-button>
             </template>
             <template #valid="{ row }">
-                <el-switch v-model="row.valid" :active-value="1" :inactive-value="0" disabled />
+                <el-switch v-model="row.valid" :active-value=true :inactive-value=false disabled />
             </template>
             <template #avatar="{ row }">
                 <el-image v-if="row.avatar" style="width: 80px; height: 80px" :src="`/MFile/download?id=${row.avatar}`" fit="fill" />
             </template>
             <template #operate="{ row }">
-                <el-button size="small" type="primary" @click="edit(row)">编辑</el-button>
+                <el-button size="small" type="primary" @click="openChangeLevelDialog(row)">编辑</el-button>
                 <el-button size="small" type="danger" @click="onRemove(row.id)">删除</el-button>
             </template>
             <template #pager>
@@ -55,19 +55,73 @@
             </template>
         </vxe-grid>
     </el-row>
-    <el-dialog v-model="showDialog" :title="isEdit ? '编辑' : '新增'" width="400">
-        <el-form ref="editForm" :model="editForm" :rules="rules" label-width="auto">
-            <template>
-                <el-radio-group v-model="radio">
-                    <el-radio
-                            v-for="option in levels"
-                            :key="option.value"
-                            :value="option.value"
+    <el-dialog v-model="showChangeLevelDialog" :title="编辑" width="400">
+        <el-form ref="levelForm" :model="levelForm" label-width="auto">
+            <hr>
+                <el-form-item label="会员等级" prop="newLevel">
+                    <el-radio v-model="levelForm.newLevel"
+                              v-for="level in levels"
+                              :value= "level.levelId"
                     >
-                        {{ option.label }}
+                        {{ level.levelName }}
                     </el-radio>
+                </el-form-item>
+                    <el-form-item label="有效" prop="newLevel">
+                        <el-switch v-model="levelForm.newValid" :active-value="true" :inactive-value="false"/>
+                    </el-form-item>
                 </el-radio-group>
-            </template>
+        </el-form>
+        <template #footer>
+            <el-button @click="showChangeLevelDialog = false">取消</el-button>
+            <el-button type="primary"  @click="levelChange">确定</el-button>
+        </template>
+    </el-dialog>
+    <el-dialog v-model="showDialog" :title="'新增'" width="400">
+        <el-form ref="editForm" :model="editForm" :rules="rules" label-width="auto">
+            <el-form-item label="头像" prop="avatar">
+                <!--                    :http-request="uploadAvatar"-->
+                <el-upload :show-MFile-list="false" :before-upload="uploadAvatar"  >
+                    <img v-if="editForm.avatar" :src="`/MFile/download?id=${editForm.avatar}`" style="width: 100px; height: 100px" />
+                    <el-icon v-else><Plus /></el-icon>
+                </el-upload>
+            </el-form-item>
+            <el-form-item label="账号" prop="code">
+                <el-input v-model="editForm.code"  maxlength="20" />
+            </el-form-item>
+            <el-form-item label="名称" prop="name">
+                <el-input v-model="editForm.name" maxlength="20" />
+            </el-form-item>
+            <el-form-item label="注册城市" prop="city">
+                <el-input v-model="editForm.city" />
+            </el-form-item>
+            <el-form-item label="性别" prop="gender">
+                <el-radio-group v-model="editForm.gender">
+                    <el-radio :value="'男'">男</el-radio>
+                    <el-radio :value="'女'">女</el-radio>
+                </el-radio-group>
+            </el-form-item>
+            <el-form-item label="会员等级" prop="level">
+                <el-radio v-model="editForm.levelName"
+                        v-for="level in levels"
+                        :value= "level.levelId"
+                >
+                    {{ level.levelName }}
+                </el-radio>
+            </el-form-item>
+            <el-form-item label="创建时间" prop="createTime">
+                <el-date-picker
+                        v-model="editForm.createTime"
+                        type="date"
+                        placeholder="请选择时间"
+                        :size="size"
+                />
+            </el-form-item>
+            <el-form-item label="有效" prop="valid">
+                <el-switch v-model="editForm.valid" :active-value="'true'" :inactive-value="'false'"/>
+            </el-form-item>
+            <el-form-item  label="密码" prop="password">
+                <el-input v-model="editForm.password" />
+            </el-form-item>
         </el-form>
         <template #footer>
             <el-button @click="showDialog = false">取消</el-button>
@@ -83,8 +137,8 @@
     const app = Vue.createApp({
         data(){
             return {
-                levels:[]
-                ,
+                levels:[],
+                fullTableData: [],
                 form: {
                     code: '',
                     name: '',
@@ -100,9 +154,10 @@
                         {type: 'seq', width: 60},
                         {field: 'code', title: '账号'},
                         {field: 'name', title: '名称'},
-                        {field: 'mobile', title: '手机'},
-                        {field: 'level', title: '会员等级'},
-                        {field: 'creatTime', title: '创建时间'},
+                        {field: 'city', title: '注册城市'},
+                        {field: 'gender', title: '性别'},
+                        {field: 'levelName', title: '会员等级'},
+                        {field: 'createTime', title: '创建时间'},
                         {field: 'valid', title: '有效', slots: {default: 'valid'}, width: 80} ,
                         {field: 'avatar', title: '头像', slots: {default: 'avatar'}, width: 110},
                         {title: '操作', slots: {default: 'operate'}, width: 220}
@@ -117,16 +172,61 @@
                     size: 20,
                     total: 0
                 },
-
-
+                showDialog: false,
+                showChangeLevelDialog :false,
+                editForm: {
+                    id: '',
+                    code: '',
+                    name: '',
+                    city: '',
+                    gender: '',
+                    levelName: '',
+                    createTime: '',
+                    valid: true,
+                    avatar: '',
+                    password: ''
+                },
+                levelForm: {
+                    id:'',
+                    newLevel:'',
+                    newValid:true,
+                },
+                rules: {
+                    code: [{required: true, message: '请输入账号'}],
+                    name: [{required: true, message: '请输入名称'}],
+                    password: [{required: true, message: '请输入密码'},
+                        {
+                            validator(rule, value, callback) {
+                                if (value) {
+                                    if (/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z\W]{6,18}$/.test(value)) {
+                                        callback();
+                                    } else {
+                                        callback(new Error('请输入包含英文和数字，在6-18位之间'))
+                                    }
+                                } else {
+                                    callback();
+                                }
+                            },
+                            trigger: 'blur'
+                        }
+                    ],
+                },
             }
+        },
+        async created(){
+           await this.init();
+           await this.getList();
         },
         methods: {
             async init() {
-
-            }
-            ,
+                const response = await axios.post('/user/init');
+                this.levels = response.data;
+                console.log(this.levels);
+            },
             onSearch(){
+                this.getList();
+            },
+            onPageChange() {
                 this.getList();
             },
             async getList(){
@@ -139,14 +239,63 @@
                 console.log(this.gridOptions.data);
             },
             onReset(){
+                this.form.code = '';
+                this.form.name = '';
+                this.form.createTime = '';
                 this.getList();
             },
-            onExport(){
+            async onRemove(id) {
+                await axios.post('/user/remove', {id});
+                await this.getList();
+            },
+            async onExport(allData){
+                await axios.post("/user/export",allData)
+            },
+            add(){
+                this.showDialog= true;
+                this.editForm= {};
+            },
+            async uploadAvatar(f) {
+                try {
+                    // const { file } = options;  // 从参数中获取文件对象
+                    // const formData = new FormData();
+                    // formData.append('MFile', file);  // 使用标准字段名
 
-            }
-
+                    const response = await axios.post('/MFile/upload', { MFile: f}, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+                    this.editForm.avatar = response.data.id;
+                    return false;
+                } catch (error) {
+                    console.error('上传失败', error);
+                    // 添加错误提示
+                }
+            },
+            onSubmit(){
+                this.$refs.editForm.validate(async valid =>{
+                        if(valid) {
+                            await axios.post('/user/add', this.editForm);
+                            await this.getList();
+                            this.showDialog= false;
+                        }
+                    }
+                );
+            },
+            openChangeLevelDialog(id){
+                this.showChangeLevelDialog=true;
+                this.levelForm.id = id;
+            },
+            levelChange(){
+                this.$refs.levelForm.validate(async valid =>{
+                    if(valid) {
+                        await axios.post('/user/levelChange' ,this.levelForm);
+                        await this.getList();
+                        this.showChangeLevelDialog= false;
+                    }
+                });
+            },
         }
 
     }).use(ElementPlus).use(VxeUITable).mount('#app');
-</script>
+   </script>
 </html>

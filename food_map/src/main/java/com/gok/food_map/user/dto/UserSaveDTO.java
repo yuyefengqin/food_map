@@ -48,7 +48,7 @@ public class UserSaveDTO {
     /**
      * 会员等级
      */
-    private Integer levelId;
+    private String levelName;
 
     /**
      * 注册时间
@@ -63,5 +63,5 @@ public class UserSaveDTO {
     /**
      * 状态
      */
-    private Boolean enable;
+    private boolean valid;
 }

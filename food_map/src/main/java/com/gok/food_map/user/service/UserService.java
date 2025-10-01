@@ -6,13 +6,13 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.gok.food_map.file.service.FileService;
-import com.gok.food_map.user.dto.UserGetListDTO;
-import com.gok.food_map.user.dto.UserSaveDTO;
+import com.gok.food_map.user.dto.*;
 import com.gok.food_map.user.entity.MUser;
+import com.gok.food_map.user.entity.MemberLevel;
 import com.gok.food_map.user.mapper.MAddressMapper;
 import com.gok.food_map.user.mapper.MUserMapper;
+import com.gok.food_map.user.vo.LevelGetListVO;
 import com.gok.food_map.user.vo.UserGetListVO;
-import com.gok.food_map.user.dto.UserRemoveDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Lazy;
@@ -20,8 +20,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -32,31 +34,46 @@ import java.util.regex.Pattern;
 */
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Lazy)
-public class UserService extends ServiceImpl<MUserMapper, MUser>
-    implements IService<MUser> {
+public class UserService  {
 
     private static final String PASSWORD = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z\\W]{6,18}$";//密码
 
     private final FileService fileService;
 
+
+    private final MUserMapper mUserMapper;
     private final MAddressMapper mAddressMapper;
+
+    private final MemberLevelService memberLevelService;
 
     //新增
     @Transactional
     public void add(UserSaveDTO dto) {
         checkSave(dto, true);
         MUser mUser = new MUser();
+        mUser.setLevelId(Integer.valueOf(dto.getLevelName()));
         BeanUtils.copyProperties(dto, mUser);
-        this.save(mUser); //保存用户数据
+        mUserMapper.insert(mUser); //保存用户数据
         fileService.enable(mUser.getAvatar());//生效用户头像
+    }
+    //初始化
+    public List<LevelGetListVO> init() {
+        List<MemberLevel> levels = memberLevelService.findAll();
+        List<LevelGetListVO> res = new ArrayList<>();
+        BeanUtils.copyProperties(res, levels);
+        for (MemberLevel level : levels) {
+            LevelGetListVO vo = new LevelGetListVO();
+            BeanUtils.copyProperties(level, vo);
+            res.add(vo);
+        }
+        return res;
     }
 
     //编辑
     @Transactional
     public void edit(UserSaveDTO dto) {
-
         checkSave(dto, false);
-        MUser mUser = this.getById(dto.getId());
+        MUser mUser = mUserMapper.selectById(dto.getId());
         if (dto.getAvatar() == null) { //删除原有照片
             fileService.remove(mUser.getAvatar());//删除旧头像
         } else {
@@ -66,16 +83,22 @@ public class UserService extends ServiceImpl<MUserMapper, MUser>
             }
         }
         BeanUtils.copyProperties(dto, mUser);
-        this.updateById(mUser); //更新用户数据
+        mUser.setUpdateTime(LocalDateTime.now());
+        mUserMapper.updateById(mUser); //更新用户数据
     }
 
     //会员修改
     @Transactional
-    public void LevelUpdate(UserSaveDTO dto){
-        checkSave(dto, false);
-        MUser mUser = this.getById(dto.getId());
+    public void LevelUpdate(UserLevelChangeDTO dto){
+        MUser mUser = mUserMapper.selectById(dto.getId());
+        mUser.setUpdateTime(LocalDateTime.now());
+        String level = dto.getNewLevel();
+        Boolean valid = Boolean.valueOf(dto.getNewValid());
         BeanUtils.copyProperties(dto, mUser);
-        this.updateById(mUser); //更新用户数据
+        mUser.setLevelId(Integer.valueOf(level));
+        mUser.setUpdateTime(LocalDateTime.now());
+        mUser.setValid(valid);
+        mUserMapper.updateById(mUser); //更新用户数据
     }
 
     //获取列表
@@ -84,14 +107,17 @@ public class UserService extends ServiceImpl<MUserMapper, MUser>
         LambdaQueryWrapper<MUser> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.hasText(dto.getCode()), MUser::getCode, dto.getCode());
         wrapper.like(StringUtils.hasText(dto.getName()), MUser::getName, dto.getName());
-        page = this.getBaseMapper().selectPage(page, wrapper);
+        page = mUserMapper.selectPage(page, wrapper);
         IPage<UserGetListVO> res = new Page<>();
         BeanUtils.copyProperties(page, res);
         List<UserGetListVO> record = page.getRecords().stream().map(mUser -> {
             UserGetListVO vo = new UserGetListVO();
             BeanUtils.copyProperties(mUser, vo);
             //将LocalDateTime格式类型转为LocalDate再变String
+            vo.setId(mUser.getId().toString());
             vo.setCreateTime(mUser.getCreateTime() == null ? null : LocalDate.of(mUser.getCreateTime().getYear(),mUser.getCreateTime().getMonth(),mUser.getCreateTime().getDayOfMonth()).toString());
+            MemberLevel level = memberLevelService.findById(mUser.getLevelId());
+            vo.setLevelName(level.getLevelName());
             return vo;
         }).toList();
         res.setRecords(record);
@@ -101,10 +127,21 @@ public class UserService extends ServiceImpl<MUserMapper, MUser>
     //删除
     @Transactional
     public void remove(UserRemoveDTO dto) {
-        MUser mUser = this.getById(dto.getId());
+        MUser mUser = mUserMapper.selectById(dto.getId());
         if (mUser != null) {
-            this.removeById(dto.getId());
+            mUserMapper.deleteById(dto.getId());
             fileService.remove(mUser.getAvatar());
+        }
+    }
+    public void export(UserExportDTO dto) {
+        if (dto==null){
+            throw new RuntimeException("没有用户");
+        }
+        try(ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream("C:\\Users\\32741\\IdeaProjects\\food_map\\food_map\\src\\main\\java\\com\\gok\\food_map\\user\\users"));
+        ) {
+            os.writeObject(dto);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -119,7 +156,7 @@ public class UserService extends ServiceImpl<MUserMapper, MUser>
             dto.setId(null);//新增时id设为null，交给雪花算法生成
         } else {
             //编辑时用户必须存在
-            mUser = this.getById(id);
+            mUser = mUserMapper.selectById(id);
             if (mUser == null) {
                 throw new RuntimeException("用户不存在");
             }
@@ -130,7 +167,7 @@ public class UserService extends ServiceImpl<MUserMapper, MUser>
             //新增时与已有用户code不能重复
             LambdaQueryWrapper<MUser> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(MUser::getCode, code);
-            MUser byCode = this.getOne(wrapper);
+            MUser byCode = mUserMapper.selectOne(wrapper);
             if (byCode != null) {
                 throw new RuntimeException("code已经存在");
             }
@@ -163,21 +200,16 @@ public class UserService extends ServiceImpl<MUserMapper, MUser>
             throw new RuntimeException("性别输入有误");
         }
         //会员等级校验
-        Integer levelId = dto.getLevelId();
-        if (levelId == null) {
+        String levelId = dto.getLevelName();
+        if (!StringUtils.hasText(levelId)) {
             throw new RuntimeException("会员等级异常");
         }
 
-        //城市校验
-        String city = dto.getCity();
-        if (!StringUtils.hasText(city)) {
-            throw new RuntimeException("城市必须输入");
-        }
         //创建时间
         dto.setCreateTime(LocalDateTime.now());
         //有效校验
         if (isAdd) {
-            dto.setEnable(true);
+            dto.setValid(true);
         }
     }
 }
