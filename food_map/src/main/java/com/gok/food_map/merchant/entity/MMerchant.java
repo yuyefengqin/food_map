@@ -1,17 +1,8 @@
 package com.gok.food_map.merchant.entity;
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-
-import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
@@ -23,15 +14,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MMerchant {
     /**
-     * 商户ID
+     * 商户编号
      */
     @TableId
     private Long merchantId;
-
-    /**
-     * 商户编号
-     */
-    private String merchantNo;
 
     /**
      * 商户名称
@@ -86,27 +72,18 @@ public class MMerchant {
     /**
      * 创建时间
      */
-    private Timestamp createTime ;
+    private LocalDateTime createTime ;
 
     public LocalDateTime getCreateTime() {
-        return this.createTime != null ? this.createTime.toLocalDateTime() : null;
-    }
-
-
-    public Long getMerchantId() {
-        return merchantId;
+        return this.createTime != null ? this.createTime : LocalDateTime.now();
     }
 
     public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime != null ? Timestamp.valueOf(createTime) : null;
+        this.createTime = createTime != null ? createTime : LocalDateTime.now();
     }
 
-    public String getMerchantNo() {
-        return merchantNo;
-    }
-
-    public void setMerchantNo(String merchantNo) {
-        this.merchantNo = merchantNo;
+    public Long getMerchantId() {
+        return merchantId;
     }
 
     public String getMerchantName() {

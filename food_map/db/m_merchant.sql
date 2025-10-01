@@ -2,7 +2,6 @@
 create table m_merchant
 (
     merchant_id      bigint primary key,
-    merchant_no      text   not null,
     merchant_name    text   not null,
     notes            text      default null,
     merchant_address text   not null,
@@ -17,7 +16,6 @@ create table m_merchant
 );
 comment on table m_merchant is '商户表';
 comment on column m_merchant.merchant_id is '商户ID';
-comment on column m_merchant.merchant_no is '商户编号';
 comment on column m_merchant.merchant_name is '商户名称';
 comment on column m_merchant.notes is '备注';
 comment on column m_merchant.merchant_address is '所在城市';

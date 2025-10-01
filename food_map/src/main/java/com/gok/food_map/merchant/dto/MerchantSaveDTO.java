@@ -12,34 +12,34 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MerchantSaveDTO {
 
-    private Long id;
+    private Long merchantId;
 
     //商户管理账号
-    private String code;
+    private String manageAccount;
 
     //商户名称
-    private String name;
+    private String merchantName;
 
     //企业类型
-    private String type;
+    private String enterpriseType;
 
     //商户联系方式
-    private String mobile;
+    private String contactPhone;
 
     //地址
-    private String address;
+    private String merchantAddress;
 
     //状态
-    private Integer valid;
+    private Integer status;
 
     //营业执照URL
-    private Long license;
+    private Long businessLicense;
 
     //logo图片URL
-    private Long logo;
+    private Long logoUrl;
 
     //管理账号密码
-    private String password;
+    private String managePassword;
 
     //备注
     private String notes;

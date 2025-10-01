@@ -19,10 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.regex.Pattern;
-
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Lazy)
 public class MerchantService extends ServiceImpl<MMerchantMapper, MMerchant>
@@ -42,58 +38,51 @@ public class MerchantService extends ServiceImpl<MMerchantMapper, MMerchant>
         fileService.enable(mMerchant.getLogoUrl());//生效logo
     }
 
-//    //编辑
-//    @Transactional
-//    public void edit(MerchantSaveDTO dto) {
-//        //checkSave(dto, false);
-//        MMerchant mMerchant = mMerchantMapper.selectById(dto.getMerchantId());
-//        //处理营业执照
-//        if (dto.getBusinessLicense() == null) { //删除营业执照
-//            fileService.remove(mMerchant.getBusinessLicense());//删除旧营业执照
-//        } else {
-//            if (!dto.getBusinessLicense().equals(mMerchant.getBusinessLicense())) { //替换营业执照
-//                fileService.remove(mMerchant.getBusinessLicense());//删除旧营业执照
-//                fileService.enable(dto.getBusinessLicense());//生效营业执照
-//            }
-//        }
-//        //处理logo
-//        if (dto.getLogoUrl() == null) { //删除原有logo
-//            fileService.remove(mMerchant.getLogoUrl());//删除旧logo
-//        } else {
-//            if (!dto.getBusinessLicense().equals(mMerchant.getLogoUrl())) { //替换logo
-//                fileService.remove(mMerchant.getLogoUrl());//删除旧logo
-//                fileService.enable(dto.getLogoUrl());//生效logo
-//            }
-//        }
-//        BeanUtils.copyProperties(dto, mMerchant);
-//        mMerchantMapper.updateById(mMerchant);
-//    }
+    //编辑
+    @Transactional
+    public void edit(MerchantSaveDTO dto) {
+        //checkSave(dto, false);
+        MMerchant mMerchant = mMerchantMapper.selectById(dto.getMerchantId());
+        //处理营业执照
+        if (dto.getBusinessLicense() == null) { //删除营业执照
+            fileService.remove(mMerchant.getBusinessLicense());//删除旧营业执照
+        } else {
+            if (!dto.getBusinessLicense().equals(mMerchant.getBusinessLicense())) { //替换营业执照
+                fileService.remove(mMerchant.getBusinessLicense());//删除旧营业执照
+                fileService.enable(dto.getBusinessLicense());//生效营业执照
+            }
+        }
+        //处理logo
+        if (dto.getLogoUrl() == null) { //删除原有logo
+            fileService.remove(mMerchant.getLogoUrl());//删除旧logo
+        } else {
+            if (!dto.getBusinessLicense().equals(mMerchant.getLogoUrl())) { //替换logo
+                fileService.remove(mMerchant.getLogoUrl());//删除旧logo
+                fileService.enable(dto.getLogoUrl());//生效logo
+            }
+        }
+        BeanUtils.copyProperties(dto, mMerchant);
+        mMerchantMapper.updateById(mMerchant);
+    }
 
     //获取列表
     public IPage<MerchantGetListVO> getList(MerchantGetListDTO dto) {
         //前端传后端
         IPage<MMerchant> page = new Page<>(dto.getCurrent() == null ? 1 : dto.getCurrent(), dto.getSize() == null ? 20 : dto.getSize());
         LambdaQueryWrapper<MMerchant> wrapper = new LambdaQueryWrapper<>();
-        wrapper.like(StringUtils.hasText(dto.getMerchantNo()),MMerchant::getMerchantNo, dto.getMerchantNo());
+        wrapper.eq(dto.getMerchantId() != null, MMerchant::getMerchantId, dto.getMerchantId());
         wrapper.like(StringUtils.hasText(dto.getMerchantName()),MMerchant::getMerchantName, dto.getMerchantName());
+        wrapper.eq(dto.getStatus() != null, MMerchant::getStatus, dto.getStatus());
+        wrapper.ge(dto.getCreateTime() != null, MMerchant::getCreateTime, dto.getCreateTime());
         wrapper.like(StringUtils.hasText(dto.getManageAccount()),MMerchant::getManageAccount, dto.getManageAccount());
         page = mMerchantMapper.selectPage(page, wrapper);
 
         //后端传前端
         IPage<MerchantGetListVO> res = new Page<>();
         BeanUtils.copyProperties(page, res);
-
-//        List<MerchantGetListVO> record = page.getRecords().stream().map(mMerchant -> {
-//            MerchantGetListVO vo = new MerchantGetListVO();
-//            BeanUtils.copyProperties(mMerchant, vo);
-//            return vo;
-//        }).toList();
-//        res.setRecords(record);
-//        return res;
-
         res.setRecords(page.getRecords().stream().map(mMerchant ->{MerchantGetListVO vo= new MerchantGetListVO();BeanUtils.copyProperties(mMerchant, vo);
                     vo.setMerchantId(mMerchant.getMerchantId().toString());
-                    vo.setMerchantNo(mMerchant.getMerchantNo());
+                    vo.setCreateTime(mMerchant.getCreateTime());
                     vo.setBusinessLicense(mMerchant.getBusinessLicense() == null ? null : mMerchant.getBusinessLicense().toString());
                     vo.setLogoUrl(mMerchant.getLogoUrl() == null ? null : mMerchant.getLogoUrl().toString());
                     return vo;

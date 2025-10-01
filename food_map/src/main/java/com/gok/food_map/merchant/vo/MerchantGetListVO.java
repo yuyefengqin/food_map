@@ -5,22 +5,18 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class MerchantGetListVO {
     /**
-     * 商户ID
+     * 商户编号
      */
     @TableId
     private String merchantId;
-
-    /**
-     * 商户编号
-     */
-    private String merchantNo;
 
     /**
      * 商户名称
@@ -75,6 +71,6 @@ public class MerchantGetListVO {
     /**
      * 创建时间
      */
-    private String createTime;
+    private LocalDateTime createTime;
 
 }

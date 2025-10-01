@@ -8,8 +8,6 @@ import com.gok.food_map.merchant.service.MerchantService;
 import com.gok.food_map.merchant.vo.MerchantGetListVO;
 
 import jakarta.annotation.Resource;
-import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,12 +32,12 @@ public class MerchantController {
         merchantService.add(dto);
     }
 
-//    //编辑
-//    @PostMapping("/edit")
-//    public void edit(@RequestBody MerchantSaveDTO dto) {
-//
-//        merchantService.edit(dto);
-//    }
+    //编辑
+    @PostMapping("/edit")
+    public void edit(@RequestBody MerchantSaveDTO dto) {
+
+        merchantService.edit(dto);
+    }
 
     //删除
     @PostMapping("/remove")

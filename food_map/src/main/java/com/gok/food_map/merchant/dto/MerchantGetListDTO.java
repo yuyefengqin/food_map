@@ -17,7 +17,7 @@ public class MerchantGetListDTO {
     private Long size;
 
     //商户编号
-    private String merchantNo;
+    private Long merchantId;
 
     //商户名称
     private String merchantName;
