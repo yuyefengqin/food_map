@@ -1,4 +1,6 @@
 package com.gok.food_map.merchant.entity;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
@@ -7,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,7 +19,6 @@ import lombok.NoArgsConstructor;
  * @TableName m_merchant
  */
 @TableName(value ="m_merchant")
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class MMerchant {
@@ -84,18 +86,106 @@ public class MMerchant {
     /**
      * 创建时间
      */
-    private Timestamp createTime;
-
-    /**
-     * 更新时间
-     */
-    private LocalDateTime updateTime;
+    private Timestamp createTime ;
 
     public LocalDateTime getCreateTime() {
-        return createTime.toLocalDateTime();
+        return this.createTime != null ? this.createTime.toLocalDateTime() : null;
+    }
+
+
+    public Long getMerchantId() {
+        return merchantId;
     }
 
     public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = Timestamp.valueOf(createTime);
+        this.createTime = createTime != null ? Timestamp.valueOf(createTime) : null;
+    }
+
+    public String getMerchantNo() {
+        return merchantNo;
+    }
+
+    public void setMerchantNo(String merchantNo) {
+        this.merchantNo = merchantNo;
+    }
+
+    public String getMerchantName() {
+        return merchantName;
+    }
+
+    public void setMerchantName(String merchantName) {
+        this.merchantName = merchantName;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public String getMerchantAddress() {
+        return merchantAddress;
+    }
+
+    public void setMerchantAddress(String merchantAddress) {
+        this.merchantAddress = merchantAddress;
+    }
+
+    public String getContactPhone() {
+        return contactPhone;
+    }
+
+    public void setContactPhone(String contactPhone) {
+        this.contactPhone = contactPhone;
+    }
+
+    public String getEnterpriseType() {
+        return enterpriseType;
+    }
+
+    public void setEnterpriseType(String enterpriseType) {
+        this.enterpriseType = enterpriseType;
+    }
+
+    public Long getLogoUrl() {
+        return logoUrl;
+    }
+
+    public void setLogoUrl(Long logoUrl) {
+        this.logoUrl = logoUrl;
+    }
+
+    public Long getBusinessLicense() {
+        return businessLicense;
+    }
+
+    public void setBusinessLicense(Long businessLicense) {
+        this.businessLicense = businessLicense;
+    }
+
+    public String getManageAccount() {
+        return manageAccount;
+    }
+
+    public void setManageAccount(String manageAccount) {
+        this.manageAccount = manageAccount;
+    }
+
+    public String getManagePassword() {
+        return managePassword;
+    }
+
+    public void setManagePassword(String managePassword) {
+        this.managePassword = managePassword;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 }

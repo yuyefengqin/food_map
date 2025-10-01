@@ -24,7 +24,7 @@
         <el-form :inline="true" :model="form">
             <el-form-item label="商户编号"><el-input v-model="form.code" clearable /></el-form-item>
             <el-form-item label="商户名称"> <el-input v-model="form.name" clearable /> </el-form-item>
-            <el-form-item label="创建时间"><el-date-picker v-model="form.createTime" type="date" placeholder="Pick a day" :size="size"/></el-form-item>
+            <el-form-item label="创建时间"><el-date-picker v-model="form.createTime" type="date" placeholder="Pick a day" :size="form.size"/></el-form-item>
         </el-form>
         <el-form :inline="true" :model="form">
             <el-form-item label="状态"> <el-input v-model="form.status" clearable /> </el-form-item>
@@ -60,7 +60,7 @@
                 </vxe-pager>
             </template>
         </vxe-grid>
-<!--编辑和新增页面-->
+<!--       编辑和新增页面-->
         <el-dialog v-model="showDialog" :title="isEdit ? '编辑' : '新增'" width="400">
             <el-form ref="editForm" :model="editForm" :rules="rules" label-width="auto">
 
@@ -232,16 +232,16 @@
             async init() {
                 const response= await axios.post('/merchant/init');
                 // 转换所有value为字符串
-                const convertValues = (nodes) => {
-                    return nodes.map(node => ({
-                        ...node,
-                        value: String(node.value), // 强制转为字符串
-                        children: node.children ? convertValues(node.children) : []
-                    }));
-                };
-
-                this.districts = convertValues(response.data);
-                console.log(this.districts);
+                // const convertValues = (nodes) => {
+                //     return nodes.map(node => ({
+                //         ...node,
+                //         value: String(node.value), // 强制转为字符串
+                //         children: node.children ? convertValues(node.children) : []
+                //     }));
+                // };
+                //
+                // this.districts = convertValues(response.data);
+                // console.log(this.districts);
             },
             //换页的更新
             onPageChange() {
@@ -268,7 +268,6 @@
                 this.showDialog= true;
                 this.isEdit= false;
                 this.editForm= {};
-
             },
             //查询按钮
             onSearch() {
@@ -287,7 +286,7 @@
                 await this.getList();
             },
             async uploadLogo(f) {
-                debugger;
+                //debugger;
                 try {
                     // const { file } = options;  // 从参数中获取文件对象
                     // const formData = new FormData();
@@ -305,17 +304,18 @@
                 }
             },
 
-            async uploadLicense(){
+            async uploadLicense(f){
+                //debugger;
                 try {
                     // const { file } = options;  // 从参数中获取文件对象
                     // const formData = new FormData();
                     // formData.append('MFile', file);  // 使用标准字段名
 
-                    const response = await axios.post('/MFile/upload', { MFile: f}, {
+                    const response2 = await axios.post('/MFile/upload', { MFile: f}, {
                         headers: { 'Content-Type': 'multipart/form-data' }
                     });
 
-                    this.editForm.license = response.data.id;
+                    this.editForm.license = response2.data.id;
                     return false;
                 } catch (error) {
                     console.error('上传失败', error);

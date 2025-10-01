@@ -1,15 +1,21 @@
 package com.gok.food_map.merchant.vo;
 
 import com.baomidou.mybatisplus.annotation.TableId;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class MerchantGetListVO {
     /**
      * 商户ID
      */
     @TableId
-    private Long merchantId;
+    private String merchantId;
 
     /**
      * 商户编号
@@ -44,12 +50,12 @@ public class MerchantGetListVO {
     /**
      * logo图片URL
      */
-    private Long logoUrl;
+    private String logoUrl;
 
     /**
      * 营业执照URL
      */
-    private Long businessLicense;
+    private String businessLicense;
 
     /**
      * 商户管理账号
@@ -69,10 +75,6 @@ public class MerchantGetListVO {
     /**
      * 创建时间
      */
-    private Date createTime;
+    private String createTime;
 
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
 }

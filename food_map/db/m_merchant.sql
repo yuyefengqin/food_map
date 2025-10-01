@@ -13,8 +13,7 @@ create table m_merchant
     manage_account   text   not null,
     manage_password  text   not null,
     status           smallint  default 1,
-    create_time      timestamp default current_timestamp,
-    update_time      timestamp
+    create_time      timestamp default current_timestamp
 );
 comment on table m_merchant is '商户表';
 comment on column m_merchant.merchant_id is '商户ID';
@@ -30,4 +29,3 @@ comment on column m_merchant.manage_account is '商户管理账号';
 comment on column m_merchant.manage_password is '管理账号密码';
 comment on column m_merchant.status is '商户状态';
 comment on column m_merchant.create_time is '创建时间';
-comment on column m_merchant.update_time is '更新时间';

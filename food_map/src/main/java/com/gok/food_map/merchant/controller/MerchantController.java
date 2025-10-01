@@ -7,6 +7,7 @@ import com.gok.food_map.merchant.dto.MerchantSaveDTO;
 import com.gok.food_map.merchant.service.MerchantService;
 import com.gok.food_map.merchant.vo.MerchantGetListVO;
 
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,9 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/merchant")
-@RequiredArgsConstructor(onConstructor_ = @Lazy)
 public class MerchantController {
-    private final MerchantService merchantService;
+    @Resource
+    private MerchantService merchantService;
 
     //获取列表
     @PostMapping("/getList")
@@ -30,16 +31,15 @@ public class MerchantController {
     //新增
     @PostMapping("/add")
     public void add(@RequestBody MerchantSaveDTO dto) {
-
         merchantService.add(dto);
     }
 
-    //编辑
-    @PostMapping("/edit")
-    public void edit(@RequestBody MerchantSaveDTO dto) {
-
-        merchantService.edit(dto);
-    }
+//    //编辑
+//    @PostMapping("/edit")
+//    public void edit(@RequestBody MerchantSaveDTO dto) {
+//
+//        merchantService.edit(dto);
+//    }
 
     //删除
     @PostMapping("/remove")
