@@ -3,14 +3,11 @@ package com.gok.food_map.user.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gok.food_map.district.mapper.MAddressMapper;
 import com.gok.food_map.file.service.FileService;
-import com.gok.food_map.merchant.entity.MMerchant;
 import com.gok.food_map.user.dto.*;
 import com.gok.food_map.user.entity.MUser;
 import com.gok.food_map.user.entity.MemberLevel;
-import com.gok.food_map.user.mapper.MAddressMapper;
 import com.gok.food_map.user.mapper.MUserMapper;
 import com.gok.food_map.user.vo.LevelGetListVO;
 import com.gok.food_map.user.vo.UserGetListVO;
@@ -52,7 +49,6 @@ public class UserService  {
     public void add(UserSaveDTO dto) {
         checkSave(dto, true);
         MUser mUser = new MUser();
-        mUser.setLevelId(Integer.valueOf(dto.getLevelName()));
         BeanUtils.copyProperties(dto, mUser);
         mUserMapper.insert(mUser); //保存用户数据
         fileService.enable(mUser.getAvatar());//生效用户头像
@@ -119,8 +115,6 @@ public class UserService  {
             //将LocalDateTime格式类型转为LocalDate再变String
             vo.setId(mUser.getId().toString());
             vo.setCreateTime(mUser.getCreateTime() == null ? null : LocalDate.of(mUser.getCreateTime().getYear(),mUser.getCreateTime().getMonth(),mUser.getCreateTime().getDayOfMonth()).toString());
-            MemberLevel level = memberLevelService.findById(mUser.getLevelId());
-            vo.setLevelName(level.getLevelName());
             return vo;
         }).toList();
         res.setRecords(record);
@@ -209,8 +203,8 @@ public class UserService  {
             throw new RuntimeException("性别输入有误");
         }
         //会员等级校验
-        String levelId = dto.getLevelName();
-        if (!StringUtils.hasText(levelId)) {
+        Integer levelId = dto.getLevelId();
+        if (levelId == null) {
             throw new RuntimeException("会员等级异常");
         }
 

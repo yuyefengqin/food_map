@@ -48,7 +48,7 @@ public class UserSaveDTO {
     /**
      * 会员等级
      */
-    private String levelName;
+    private Integer levelId;
 
     /**
      * 注册时间

@@ -83,10 +83,10 @@
                 </el-radio-group>
             </el-form-item>
             <el-form-item label="会员等级" prop="level">
-                <el-radio-group v-model="editForm.levelName">
+                <el-radio-group v-model="editForm.levelId">
                     <template v-for="level in levels">
                 <el-radio
-                        :value= "level.levelName"
+                        :value= "level.levelId"
                 >
                     {{ level.levelName }}
                 </el-radio>
@@ -150,7 +150,7 @@
         data(){
             return {
                 levels:[],
-                fullTableData: [],
+                memberLevelMap: {},
                 form: {
                     code: '',
                     name: '',
@@ -168,7 +168,9 @@
                         {field: 'name', title: '名称'},
                         {field: 'city', title: '注册城市'},
                         {field: 'gender', title: '性别'},
-                        {field: 'levelName', title: '会员等级'},
+                        {field: 'levelId', title: '会员等级', formatter: ({cellValue}) => {
+                                return this.memberLevelMap[cellValue] || `未知等级(${cellValue})`;}
+                        },
                         {field: 'createTime', title: '创建时间'},
                         {field: 'valid', title: '有效', slots: {default: 'valid'}, width: 80} ,
                         {field: 'avatar', title: '头像', slots: {default: 'avatar'}, width: 110},
@@ -193,7 +195,7 @@
                     name: '',
                     city: '',
                     gender: '',
-                    levelName: '',
+                    levelId: '',
                     createTime: '',
                     valid: true,
                     avatar: '',
@@ -238,7 +240,9 @@
             async init() {
                 const response = await axios.post('/user/init');
                 this.levels = response.data;
-                console.log(this.levels);
+                this.memberLevelMap = Object.fromEntries(
+                    this.levels.map(level => [level.levelId, level.levelName])
+                );
             },
             onSearch(){
                 this.getList();
