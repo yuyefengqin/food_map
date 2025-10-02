@@ -12,6 +12,7 @@ import com.gok.food_map.merchant.dto.MerchantSaveDTO;
 import com.gok.food_map.merchant.entity.MMerchant;
 import com.gok.food_map.merchant.mapper.MMerchantMapper;
 import com.gok.food_map.merchant.vo.MerchantGetListVO;
+import com.gok.food_map.merchant.vo.MerchantInfoVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Lazy;
@@ -26,6 +27,12 @@ public class MerchantService extends ServiceImpl<MMerchantMapper, MMerchant>
     private final MMerchantMapper mMerchantMapper;
     private final FileService fileService;
     private static final String PASSWORD = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z\\W]{6,20}$";//密码
+
+    // 获取单商户
+    public MerchantInfoVO getMerchantInfo(Long merchantId) {
+        MMerchant mMerchant = (MMerchant)this.mMerchantMapper.selectById(merchantId);
+        return mMerchant == null ? null : new MerchantInfoVO(mMerchant.getMerchantId().toString(), mMerchant.getMerchantName(), mMerchant.getLogoUrl().toString());
+    }
 
     //新增
     @Transactional

@@ -7,6 +7,7 @@ import com.gok.food_map.merchant.dto.MerchantSaveDTO;
 import com.gok.food_map.merchant.service.MerchantService;
 import com.gok.food_map.merchant.vo.MerchantGetListVO;
 
+import com.gok.food_map.merchant.vo.MerchantInfoVO;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,5 +45,10 @@ public class MerchantController {
     public void remove(@RequestBody MerchantRemoveDTO dto) {
 
         merchantService.remove(dto);
+    }
+    // 获取单商户
+    @PostMapping({"/getMerchantById"})
+    public MerchantInfoVO getMerchantInfo(@RequestBody MerchantRemoveDTO dto) {
+        return this.merchantService.getMerchantInfo(dto.getMerchantId());
     }
 }

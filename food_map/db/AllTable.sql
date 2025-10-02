@@ -114,7 +114,7 @@ create table product_spu
     spu_id           bigint primary key,
     spu_name         text not null,
     spu_desc         text,
-    merchant_id      int  not null,
+    merchant_id      bigint  not null,
     product_category text not null,
     main_image       bigint    default null,
     approval_status  text      default 'pending' check (approval_status in ('pending', 'approved', 'rejected')), -- 审批状态
@@ -134,6 +134,8 @@ comment on column product_spu.approval_status is '审批状态';
 comment on column product_spu.shelf_status is '上架状态';
 comment on column product_spu.sales is '总销量';
 comment on column product_spu.create_time is '创建时间';
+comment on column product_spu.update_time is '更新时间';
+-- 商品SKU表
 create table product_sku
 (
     sku_id      bigint primary key,
@@ -141,19 +143,18 @@ create table product_sku
     specs_price jsonb          not null,
     element_specs jsonb        not null,
     stock       int            not null default 0,
-    image_url   bigint                  default null,
+    image_url   text[]                  default null,
     create_time timestamp               default current_timestamp,
     update_time timestamp
 );
 
 -- 商品SKU表
-comment on column product_spu.update_time is '更新时间';
 comment on table product_sku is '商品SKU表';
 comment on column product_sku.sku_id is 'SKU ID';
 comment on column product_sku.spu_id is '关联SPU ID';
 comment on column product_sku.specs_price is '规格:价格'; -- 甜 ：5.00
 comment on column product_sku.element_specs is '元素:规格';-- 口味 ：甜
-comment on column product_sku.stock is '库存数量';
+comment on column product_sku.stock     is '库存数量';
 comment on column product_sku.image_url is 'SKU图片URL';
 comment on column product_sku.create_time is '创建时间';
 comment on column product_sku.update_time is '更新时间';

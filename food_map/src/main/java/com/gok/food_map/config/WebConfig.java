@@ -17,13 +17,5 @@ public class WebConfig implements WebMvcConfigurer {
                  .allowCredentials(true)
                  .maxAge(3600);
     }
-//    @Resource
-//    private TokenInterceptor tokenInterceptor;
-//    @Override
-//    public void addInterceptors(InterceptorRegistry registry) {
-//        //注册一个token的拦截器
-//        registry.addInterceptor(tokenInterceptor)
-//                .addPathPatterns("/**")
-//                .excludePathPatterns("/user/login");
-//    }
+
 }

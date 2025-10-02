@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gok.food_map.product.mapper.ProductSkuMapper">
+
+    <resultMap id="skuResultMap" type="com.gok.food_map.product.entity.ProductSku">
+        <id property="skuId" column="sku_id"/>
+        <result property="spuId" column="spu_id"/>
+
+        <result property="specsPrice" column="specs_price"
+                typeHandler="com.gok.food_map.definetypehandler.JsonbTypeHandler"/>
+
+        <result property="elementSpecs" column="element_specs"
+                typeHandler="com.gok.food_map.definetypehandler.JsonbTypeHandler"/>
+
+        <result property="imageUrl" column="image_url"
+                typeHandler="com.gok.food_map.definetypehandler.ListStrToArrayTypeHandler"/>
+
+        <result property="stock" column="stock"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="skuResultMap">
+        SELECT sku_id, spu_id, specs_price, element_specs, image_url FROM food_map.public.product_sku WHERE spu_id = #{spuId}::bigint
+    </select>
+</mapper>
