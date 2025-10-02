@@ -249,7 +249,7 @@
                 await this.getList();
             },
             async onExport(allData){
-                await axios.post("/user/export",allData)
+                await axios.post("/user/export",allData);
             },
             add(){
                 this.showDialog= true;

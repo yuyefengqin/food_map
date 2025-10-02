@@ -113,6 +113,7 @@ public class UserService  {
         List<UserGetListVO> record = page.getRecords().stream().map(mUser -> {
             UserGetListVO vo = new UserGetListVO();
             BeanUtils.copyProperties(mUser, vo);
+            vo.setAvatar(mUser.getAvatar() == null ? null : mUser.getAvatar().toString());
             //将LocalDateTime格式类型转为LocalDate再变String
             vo.setId(mUser.getId().toString());
             vo.setCreateTime(mUser.getCreateTime() == null ? null : LocalDate.of(mUser.getCreateTime().getYear(),mUser.getCreateTime().getMonth(),mUser.getCreateTime().getDayOfMonth()).toString());

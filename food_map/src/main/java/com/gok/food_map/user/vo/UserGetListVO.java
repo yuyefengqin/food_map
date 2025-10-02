@@ -40,7 +40,7 @@ public class UserGetListVO {
     /**
      * 头像
      */
-    private Long avatar;
+    private String avatar;
 
     /**
      * 注册城市
