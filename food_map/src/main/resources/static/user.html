@@ -18,7 +18,8 @@
     <link rel="manifest" href="/favicon_logosc/site.webmanifest">
 </head>
 <body>
-<div id="app">
+<div id="app" >
+    <template v-if=!isDetail>
     <el-row>
         <el-form :inline="true" :model="form">
             <el-form-item label="用户账号:"><el-input v-model="form.code" /></el-form-item>
@@ -37,7 +38,7 @@
     <el-row>
         <vxe-grid v-bind="gridOptions" style="width: 100%">
             <template #toolbar buttons><el-button type="primary" @click="add">新增</el-button>
-                <el-button type="warning" @click="onExport(fullTableData)">导出</el-button>
+                <el-button type="warning" @click="onExport">导出</el-button>
             </template>
             <template #valid="{ row }">
                 <el-switch v-model="row.valid" :active-value=true :inactive-value=false disabled />
@@ -46,8 +47,10 @@
                 <el-image v-if="row.avatar" style="width: 80px; height: 80px" :src="`/MFile/download?id=${row.avatar}`" fit="fill" />
             </template>
             <template #operate="{ row }">
-                <el-button size="small" type="primary" @click="openChangeLevelDialog(row)">编辑</el-button>
+                <el-button size="small" type="primary" @click="edit(row)">编辑</el-button>
                 <el-button size="small" type="danger" @click="onRemove(row.id)">删除</el-button>
+                <el-button size="small" @click="showDetailDialog(row)">详细</el-button>
+
             </template>
             <template #pager>
                 <vxe-pager :layouts="['Sizes', 'PrevPage', 'Number', 'NextPage', 'Total']" v-model:current-page="page.current" v-model:page-size="page.size" :total="page.total" @page-change="onPageChange">
@@ -55,28 +58,7 @@
             </template>
         </vxe-grid>
     </el-row>
-    <el-dialog v-model="showChangeLevelDialog" :title="编辑" width="400">
-        <el-form ref="levelForm" :model="levelForm" label-width="auto">
-            <hr>
-                <el-form-item label="会员等级" prop="newLevel">
-                    <el-radio v-model="levelForm.newLevel"
-                              v-for="level in levels"
-                              :value= "level.levelId"
-                    >
-                        {{ level.levelName }}
-                    </el-radio>
-                </el-form-item>
-                    <el-form-item label="有效" prop="newLevel">
-                        <el-switch v-model="levelForm.newValid" :active-value="true" :inactive-value="false"/>
-                    </el-form-item>
-                </el-radio-group>
-        </el-form>
-        <template #footer>
-            <el-button @click="showChangeLevelDialog = false">取消</el-button>
-            <el-button type="primary"  @click="levelChange">确定</el-button>
-        </template>
-    </el-dialog>
-    <el-dialog v-model="showDialog" :title="'新增'" width="400">
+    <el-dialog v-model="showDialog" :title="isEdit ? '编辑' : '新增'" width="400">
         <el-form ref="editForm" :model="editForm" :rules="rules" label-width="auto">
             <el-form-item label="头像" prop="avatar">
                 <!--                    :http-request="uploadAvatar"-->
@@ -86,7 +68,7 @@
                 </el-upload>
             </el-form-item>
             <el-form-item label="账号" prop="code">
-                <el-input v-model="editForm.code"  maxlength="20" />
+                <el-input v-model="editForm.code" :disabled="isEdit" maxlength="20" />
             </el-form-item>
             <el-form-item label="名称" prop="name">
                 <el-input v-model="editForm.name" maxlength="20" />
@@ -101,12 +83,15 @@
                 </el-radio-group>
             </el-form-item>
             <el-form-item label="会员等级" prop="level">
-                <el-radio v-model="editForm.levelName"
-                        v-for="level in levels"
-                        :value= "level.levelId"
+                <el-radio-group v-model="editForm.levelName">
+                    <template v-for="level in levels">
+                <el-radio
+                        :value= "level.levelName"
                 >
                     {{ level.levelName }}
                 </el-radio>
+                    </template>
+                </el-radio-group>
             </el-form-item>
             <el-form-item label="创建时间" prop="createTime">
                 <el-date-picker
@@ -116,8 +101,8 @@
                         :size="size"
                 />
             </el-form-item>
-            <el-form-item label="有效" prop="valid">
-                <el-switch v-model="editForm.valid" :active-value="'true'" :inactive-value="'false'"/>
+            <el-form-item v-if="isEdit"  label="有效" prop="valid">
+                <el-switch v-model="editForm.valid" :active-value=true :inactive-value=false />
             </el-form-item>
             <el-form-item  label="密码" prop="password">
                 <el-input v-model="editForm.password" />
@@ -128,12 +113,39 @@
             <el-button type="primary"  @click="onSubmit">确定</el-button>
         </template>
     </el-dialog>
+    </template>
+    <template v-else-if='isDetail'>
+        <el-button text="plain" @click="isDetail = false"> < 返回</el-button>
+        <el-descriptions
+                title="用户详细"
+                direction="vertical"
+                border
+                style="margin-top: 20px"
+        >
+            <el-descriptions-item
+                    :rowspan="3"
+                    :width="140"
+                    label="Photo"
+                    align="center"
+            >
+                <el-upload :show-MFile-list="false" :before-upload="uploadAvatar"  >
+                    <img v-if="detailForm.avatar" :src="`/MFile/download?id=${detailForm.avatar}`" style="width: 100px; height: 100px" />
+                    <el-icon v-else><Plus /></el-icon>
+                </el-upload>
+            </el-descriptions-item>
+            <el-descriptions-item label="用户ID">{{detailForm.id}}</el-descriptions-item>
+            <el-descriptions-item label="用户账号">{{detailForm.code}}</el-descriptions-item>
+            <el-descriptions-item label="用户名">{{detailForm.code}}</el-descriptions-item>
+            <el-descriptions-item label="注册时间">{{detailForm.createTime}}</el-descriptions-item>
+            <el-descriptions-item label="性别">{{detailForm.gender}}</el-descriptions-item>
+            <el-descriptions-item label="城市">{{detailForm.city}}</el-descriptions-item>
+        </el-descriptions>
+    </template>
 
 </div>
 
 </body>
 <script>
-
     const app = Vue.createApp({
         data(){
             return {
@@ -172,8 +184,9 @@
                     size: 20,
                     total: 0
                 },
+                isEdit: false,
                 showDialog: false,
-                showChangeLevelDialog :false,
+                isDetail: false,
                 editForm: {
                     id: '',
                     code: '',
@@ -186,10 +199,14 @@
                     avatar: '',
                     password: ''
                 },
-                levelForm: {
-                    id:'',
-                    newLevel:'',
-                    newValid:true,
+                detailForm: {
+                    id: '',
+                    code: '',
+                    name: '',
+                    city: '',
+                    gender: '',
+                    createTime: '',
+                    avatar: ''
                 },
                 rules: {
                     code: [{required: true, message: '请输入账号'}],
@@ -248,8 +265,11 @@
                 await axios.post('/user/remove', {id});
                 await this.getList();
             },
-            async onExport(allData){
-                await axios.post("/user/export",allData);
+            async onExport(){
+                const form = this.form;
+                await axios.post("/user/export",{ code: form.code, name: form.name, createTime: form.createTime, current: this.page.current, size: this.page.size});
+                debugger;
+                await this.getList();
             },
             add(){
                 this.showDialog= true;
@@ -274,26 +294,29 @@
             onSubmit(){
                 this.$refs.editForm.validate(async valid =>{
                         if(valid) {
-                            await axios.post('/user/add', this.editForm);
+                            debugger;
+                            await axios.post(this.isEdit? '/user/edit': '/user/add', this.editForm);
                             await this.getList();
                             this.showDialog= false;
                         }
                     }
                 );
             },
-            openChangeLevelDialog(id){
-                this.showChangeLevelDialog=true;
-                this.levelForm.id = id;
+            edit(user) {
+                this.showDialog= true;
+                this.isEdit= true;
+                this.editForm= {...user};
             },
-            levelChange(){
-                this.$refs.levelForm.validate(async valid =>{
-                    if(valid) {
-                        await axios.post('/user/levelChange' ,this.levelForm);
-                        await this.getList();
-                        this.showChangeLevelDialog= false;
-                    }
-                });
-            },
+            showDetailDialog(user){
+                this.isDetail=true;
+                this.detailForm.id =user.id ;
+                this.detailForm.code = user.code;
+                this.detailForm.name = user.name;
+                this.detailForm.city = user.city;
+                this.detailForm.gender = user.gender;
+                this.detailForm.createTime = user.createTime;
+                this.detailForm.avatar = user.avatar;
+            }
         }
 
     }).use(ElementPlus).use(VxeUITable).mount('#app');

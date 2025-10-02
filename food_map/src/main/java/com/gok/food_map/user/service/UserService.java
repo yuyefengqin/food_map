@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.gok.food_map.file.service.FileService;
+import com.gok.food_map.merchant.entity.MMerchant;
 import com.gok.food_map.user.dto.*;
 import com.gok.food_map.user.entity.MUser;
 import com.gok.food_map.user.entity.MemberLevel;
@@ -107,6 +108,7 @@ public class UserService  {
         LambdaQueryWrapper<MUser> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.hasText(dto.getCode()), MUser::getCode, dto.getCode());
         wrapper.like(StringUtils.hasText(dto.getName()), MUser::getName, dto.getName());
+        wrapper.ge(dto.getCreateTime() != null, MUser::getCreateTime, dto.getCreateTime());
         page = mUserMapper.selectPage(page, wrapper);
         IPage<UserGetListVO> res = new Page<>();
         BeanUtils.copyProperties(page, res);
@@ -135,12 +137,18 @@ public class UserService  {
         }
     }
     public void export(UserExportDTO dto) {
-        if (dto==null){
+        LambdaQueryWrapper<MUser> wrapper = new LambdaQueryWrapper<>();
+        wrapper.like(StringUtils.hasText(dto.getCode()), MUser::getCode, dto.getCode());
+        wrapper.like(StringUtils.hasText(dto.getName()), MUser::getName, dto.getName());
+        wrapper.ge(dto.getCreateTime() != null, MUser::getCreateTime, dto.getCreateTime());
+        wrapper.orderByDesc(MUser::getCreateTime);
+        List<MUser> users =  mUserMapper.selectList(wrapper);
+        if (users==null){
             throw new RuntimeException("没有用户");
         }
-        try(ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream("C:\\Users\\32741\\IdeaProjects\\food_map\\food_map\\src\\main\\java\\com\\gok\\food_map\\user\\users"));
+        try(ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream("./users.txt"));
         ) {
-            os.writeObject(dto);
+            os.writeObject(users);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -207,7 +215,7 @@ public class UserService  {
         }
 
         //创建时间
-        dto.setCreateTime(LocalDateTime.now());
+
         //有效校验
         if (isAdd) {
             dto.setValid(true);

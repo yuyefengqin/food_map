@@ -6,7 +6,7 @@
         <option name="generateConfig">
           <GenerateConfig>
             <option name="annotationType" value="MYBATIS_PLUS3" />
-            <option name="basePackage" value="com.gok.food_map.user" />
+            <option name="basePackage" value="com.gok.food_map.district" />
             <option name="basePath" value="src/main/java" />
             <option name="classNameStrategy" value="camel" />
             <option name="encoding" value="UTF-8" />
@@ -68,8 +68,8 @@
             <option name="tableUIInfoList">
               <list>
                 <TableUIInfo>
-                  <option name="className" value="MemberLevel" />
-                  <option name="tableName" value="member_level" />
+                  <option name="className" value="MAddress" />
+                  <option name="tableName" value="m_address" />
                 </TableUIInfo>
               </list>
             </option>

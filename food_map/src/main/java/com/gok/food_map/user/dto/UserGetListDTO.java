@@ -26,6 +26,6 @@ public class UserGetListDTO {
     private String name;
 
     //创建时间
-    private LocalDateTime creatTime;
+    private LocalDateTime createTime;
 
 }
