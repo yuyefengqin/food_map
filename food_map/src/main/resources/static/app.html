@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>购物端</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="../../../../../../../HTMLCode/static/static_resources/element-plus-index.css" />
+    <link rel="stylesheet" href="../../../../../../../HTMLCode/static/static_resources/vxe-table-style.css">
+    <script src="../../../../../../../HTMLCode/static/static_resources/vue.global.js"></script>
+    <script src="../../../../../../../HTMLCode/static/static_resources/element-plus-index.full.js"></script>
+    <script src="../../../../../../../HTMLCode/static/static_resources/xe-utils.js"></script>
+    <script src="../../../../../../../HTMLCode/static/static_resources/vxe-table@4.6.25.js"></script>
+    <script src="../../../../../../../HTMLCode/static/static_resources/axios.min.js"></script>
+    <script src="../../../../../../../HTMLCode/static/static_resources/element-plus_icons-vue.js"></script>
+    <link rel="apple-touch-icon" sizes="180x180" href="../../../../../../../HTMLCode/static/favicon_logosc/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../../../../../../HTMLCode/static/favicon_logosc/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../../../../../../HTMLCode/static/favicon_logosc/favicon-16x16.png">
+    <link rel="manifest" href="../../../../../../../HTMLCode/static/favicon_logosc/site.webmanifest">
+    <link rel="stylesheet" href="../../../../../../../HTMLCode/static/static_resources/app-css.css">
+
+</head>
+<body>
+    <div id="app">
+        <div class="topbar">
+            <div class="container" style="display: flex; justify-content: space-between; ">
+                    <div class="top-left">
+                        <span class="welcome">美食地图欢迎你</span>
+                        <span class="login">请<a href="#">登录</a></span><span class="register"><a href="#">注册</a></span>
+                    </div>
+                    <div class="top-right">
+                        <ul class="top-nav">
+                            <li><a href="#">我的订单</a></li>
+                            <li><a href="#">购物车</a></li>
+                            <li><a href="#">我的</a></li>
+                            <li><a href="#">美食地图会员</a></li>
+                        </ul>
+                    </div>
+            </div>
+        </div>
+        <div class="header">
+            <div class="container" style="display: flex; justify-content: space-between;">
+                <div class="logo-frame">
+                    <img src="../../../../../../../HTMLCode/static/favicon_logosc/android-chrome-512x512.png" alt="美食地图" width="100px" height="100px">
+                </div>
+                <div class="search-frame">
+                    <form action="#" >
+                        <input type="text" placeholder="请输入商品名称" v-model="searchQuery">
+                        <button type="submit" title="搜索" @click="getGoodsList"></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="line">
+            </div>
+        </div>
+        <div class="banner">
+            <div class="container">
+                <el-carousel :interval="4000" type="card" height="200px">
+                    <el-carousel-item v-for="logoId in banner" :key="logoId">
+                        <h3 text="2xl" justify="center">{{ logoId }}</h3>
+                        <!-- <img title="banner-logo" v-if="logoId" :src="`http://localhost:8080/MFile/download?id=${logoId}`" width="100%" height="200px" /> -->
+                    </el-carousel-item>
+                </el-carousel>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="container">
+                <div class="merchantDetailPage" v-if="isOnMerchantPage!=false">
+                    <div class="merchant-compent" >
+                        <el-avatar shape="square" :size="50" v-if="merchantInfo.logoUrl" :src="`http://localhost:8080/MFile/download?id=${merchantInfo.logoUrl}`"/></el-avatar>
+                        <el-avatar shape="square" :size="50" v-else >merchant</el-avatar>
+                        <button type="button" class="merchant-name" >{{merchantInfo.merchantName}}</button>
+                        <el-button class="backShopping" type="text" @click="isOnMerchantPage=false; getGoodsList()">返回商城</el-button>
+                    </div>
+                    <div class="line"></div>
+                    <div class="goods" style="display: flex; flex-wrap: wrap;justify-content: space-around;">
+                        <el-card style="width: 230px; margin:0 25px; margin-bottom: 20px;"
+                          v-for="item in lists" 
+                          :key="item.spuName"
+                          :body-style="{ padding: '0px', marginBottom: '1px' }"
+                        >
+                          <!-- <img title="商品图片" 
+                            :src="`http://localhost:8080/MFile/download?id=${item.mainImage}`"
+                            class="image multi-content"
+                            style="max-width: 100%" 
+                          /> -->
+                            <div style="height: 200px;display:flex;align-items: center;justify-content: center;">{{item.mainImage}}</div>
+
+                          <div style="padding: 14px">
+                            <span>{{ item.spuName }}</span>
+                            <div class="bottom card-header">
+                              <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div class="detail">{{ item.spuDesc }}</div>
+                                <el-button text class="button" @click="onCheckGoodsDetail(item)">></el-button>
+                              </div>
+                            </div>
+                          </div>
+                        </el-card>
+                    </div >
+                    <div class="pagination-block" style="display: flex; justify-content: center;">
+                        <el-pagination
+                            v-model:current-page="page.currentPage"
+                            v-model:page-size="page.pageSize"
+                            :page-sizes="[8, 16, 32, 64]"
+                            layout="sizes, prev, pager, next"
+                            :total="page.total"
+                            @current-change="onPageChangeOnMerchant"
+                            @size-change="onSizeChangeOnMerchant"
+                        />
+                    </div>
+                    <div class="line two"></div>
+                </div>
+                <div class="shopping-main" v-else>
+                    <div class="title" ><font size="4">商城</font></div>
+                    <div class="line"></div>
+                    <div class="goods" style="display: flex; flex-wrap: wrap;justify-content: space-around;">
+                        <el-card style="width: 230px; margin:0 25px; margin-bottom: 20px;"
+                          v-for="item in lists" 
+                          :key="item.spuName"
+                          :body-style="{ padding: '0px', marginBottom: '1px' }"
+                        >
+                          <!-- <img title="商品图片" 
+                            :src="`http://localhost:8080/MFile/download?id=${item.mainImage}`"
+                            class="image multi-content"
+                            style="max-width: 100% ;"
+                            height="200px"
+                          /> -->
+                          <div style="height: 200px;display:flex;align-items: center;justify-content: center;">{{item.mainImage}}</div>
+
+                          <div style="padding: 14px">
+                            <span>{{ item.spuName }}</span>
+                            <div class="bottom card-header">
+                              <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div class="detail">{{ item.spuDesc }}</div>
+                                <el-button text class="button" @click="onCheckGoodsDetail(item)">></el-button>
+                              </div>
+                            </div>
+                          </div>
+                        </el-card>
+                    </div >
+                    <div class="pagination-block" style="display: flex; justify-content: center;">
+                        <el-pagination
+                            v-model:current-page="page.currentPage"
+                            v-model:page-size="page.pageSize"
+                            :page-sizes="[8, 16, 32, 64]"
+                            layout="sizes, prev, pager, next"
+                            :total="page.total"
+                            @current-change="onPageChange"
+                            @size-change="onSizeChange"
+                        />
+                    </div>
+                    <div class="line two"></div>
+                </div>
+            </div>
+            <el-drawer
+              v-model="drawer"
+              title="商品详情"
+              :direction="direction"
+              :before-close="handleClose"
+            >
+                <div class="merchant-compent" >
+                    <el-avatar shape="square" :size="50" v-if="merchantInfo.logoUrl" :src="`http://localhost:8080/MFile/download?id=${merchantInfo.logoUrl}`"/></el-avatar>
+                    <el-avatar shape="square" :size="50" v-else >merchant</el-avatar>
+                    <button type="button" title="进入商铺" class="merchant-name"   @click="onMerchantDetail">{{merchantInfo.merchantName}}</button>
+                </div>
+                <div class="buy-main">
+                    <el-carousel trigger="click" height="300px">
+                        <el-carousel-item v-for="url in skuImageUrls" :key="url">
+                            <h3 text="2xl" justify="center">{{ url }}</h3>
+                            <!-- <img title="goods-detail-img" v-if="url" :src="`http://localhost:8080/MFile/download?id=${url}`" width="100%" height="300px" /> -->
+                        </el-carousel-item>
+                    </el-carousel>
+                    <h3 class="goods-name">{{onCkeckGoodsDetailId.spuName}}</h3>
+                     <h4>{{onCkeckGoodsDetailId.spuDesc}}</h4>
+                    <ul v-for="(skuValue, skuKey) in skuObj">
+                        <li>{{skuKey}}</li>
+                        <el-checkbox-group v-model="selectedSpecs" size="large"  :max="3">
+                            <el-checkbox-button v-for=" vv in skuValue" :key="vv" :label="vv">
+                                {{ vv }}
+                            </el-checkbox-button>
+                        </el-checkbox-group>
+                    </ul>
+                    <div style="display: flex;align-items: center;margin-top: 25px;">
+                         总价: ¥
+                         <div v-if="totalPrice > 0" class="price-display">
+                            {{ totalPrice }}
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex;justify-content: space-between;margin-top: 210px; margin-bottom: 25px;">
+                        <h2>购买数量</h2>
+                        <el-input-number v-model="bugNumber" :min="1" label="购买数量"></el-input-number>
+                    </div>
+                    <div style="display: flex;justify-content: space-between;">
+                        <el-button type="primary" plain>加入购物车</el-button>
+                        <el-button type="danger" plain>立即购买</el-button>
+                    </div>
+                </div>
+            </el-drawer>
+        </div>
+        <div class="floor">
+        <div class="container">
+             <!-- 顶部链接 -->
+            <div class="top-links clearfix">
+                <ul class="links-list">
+                    <li><a href="#">购物指南</a></li>
+                    <li><a href="#">购物流程</a></li>
+                    <li><a href="#">会员介绍</a></li>
+                    <li><a href="#">美食旅行</a></li>
+                    <li><a href="#">常见问题</a></li>
+                    <li><a href="#">联系客服</a></li>
+                </ul>
+                <ul class="links-list">
+                    <li><a href="#">配送方式</a></li>
+                    <li><a href="#">上门自提</a></li>
+                    <li><a href="#">秒送</a></li>
+                    <li><a href="#">配送服务查询</a></li>
+                    <li><a href="#">配送费收取标准</a></li>
+                </ul>
+                <ul class="links-list">
+                    <li><a href="#">支付方式</a></li>
+                    <li><a href="#">货到付款</a></li>
+                    <li><a href="#">在线支付</a></li>
+                    <li><a href="#">生活旅行</a></li>
+                    <li><a href="#">分期付款</a></li>
+                    <li><a href="#">公司转账</a></li>
+                </ul>
+                <ul class="links-list">
+                    <li><a href="#">售后服务</a></li>
+                    <li><a href="#">售后政策</a></li>
+                    <li><a href="#">价格保护</a></li>
+                    <li><a href="#">退款说明</a></li>
+                    <li><a href="#">返修/退换货</a></li>
+                    <li><a href="#">取消订单</a></li>
+                </ul>
+                <ul class="links-list">
+                    <li><a href="#">特色服务</a></li>
+                    <li><a href="#">特色服务</a></li>
+                    <li><a href="#">特色服务</a></li>
+                    <li><a href="#">延保服务</a></li>
+                    <li><a href="#">美食地图E卡</a></li>
+                    <li><a href="#">美食地图通信</a></li>
+                </ul>
+                <ul class="links-list">
+                    <li><a href="#">自营覆盖区县</a></li>
+                    <li><a href="#">美食地图已向全国2661个区县</a></li>
+                    <li><a href="#">提供自营配送服务，支持货到</a></li>
+                    <li><a href="#">付款、POS 机刷卡和售后上门</a></li>
+                    <li><a href="#">常见问题</a></li>
+                    <li><a href="#">查看详情</a></li>
+                </ul>
+            </div>
+            <div class="line"></div>
+            <div class="bottom-links">
+                <ul class="bottom-links-list clearfix">
+                    <li><a href="#">关于我们</a></li>
+                    <li><a href="#">联系我们</a></li>
+                    <li><a href="#">联系客服</a></li>
+                    <li><a href="#">合作招商</a></li>
+                    <li><a href="#">商家帮助</a></li>
+                    <li><a href="#">营销中心</a></li>
+                    <li><a href="#">手机尚品</a></li>
+                    <li><a href="#">友情链接</a></li>
+                    <li><a href="#">销售联盟</a></li>
+                    <li><a href="#">隐私政策</a></li>
+                </ul>
+                <div class="copyright">京ICP备1145141919810</div>
+                <div class="copyright">陈志豪&nbsp;&nbsp;&nbsp;田梓霖&nbsp;&nbsp;&nbsp;王诗炀&nbsp;&nbsp;&nbsp;郑文嘉<sup>著</sup></div>
+            </div>
+        </div>
+        
+        </div>
+    </div>
+    </div>
+</body>
+<script setup>
+    const app =  Vue.createApp({
+        data(){
+            return{
+                isOnMerchantPage:false,
+                searchQuery:'',
+                banner: [],
+                bugNumber:1,
+                direction:'rtl',
+                drawer:false,
+                page: {
+                    currentPage:1,
+                    pageSize:8,
+                    total:0,   
+                },
+                onCkeckGoodsDetailId:{},
+                merchantInfo:{
+                    merchantId:'1973385448478883842',
+                    merchantName:'水产专卖店',
+                    logoUrl:'1973386056489385986',
+                },
+                lists: [],
+                skus: [],
+                skuKeys: [],
+                selectedSpecs: [],
+                skuImageUrls: [],
+            }
+        },
+        async created(){
+            // this.handleSku();
+            await this.getGoodsList();
+            await this.getBanner();
+        },
+        methods:{
+            getMerchantInfo(merchantId){
+                // 根据商户id获取商户信息
+                axios.post('http://localhost:8080/merchant/getMerchantById',{
+                    merchantId:merchantId,
+                }).then(response => {
+                    if (response.status === 200) {
+                        this.merchantInfo = response.data;
+                    } else {
+                        console.error('请求失败，状态码：', response.status);
+                    }
+                }).catch(error => {
+                    console.error('请求出错：', error);
+                });
+            },
+            async getGoodsList(){
+                try {
+                    const response = await axios.post('http://localhost:8080/MGoods/getGoodsList',{
+                        searchQuery:this.searchQuery,
+                        currentPage:this.page.currentPage,
+                        pageSize:this.page.pageSize,
+                    });
+                    if (response.status === 200) {
+                        this.lists = response.data.records;
+                        this.page.currentPage = response.data.current;
+                        this.page.pageSize = response.data.size;
+                        this.page.total = response.data.total;
+                    } else {
+                        console.error('请求失败，状态码：', response.status);
+                    }
+                } catch (error) {
+                    console.error('请求出错：', error);
+                }
+            },
+            onMerchantDetail(){
+                this.clearData();
+                // 跳转到商户的商品列表页
+                this.drawer = false;
+                this.isOnMerchantPage = true;
+                this.lists = [];
+                axios.post('http://localhost:8080/MGoods/getMerchantsGoodsById',{
+                    merchantId:this.merchantInfo.merchantId,
+                    currentPage:this.page.currentPage,
+                    pageSize:this.page.pageSize,
+                }).then(response => {
+                    if (response.status === 200) {
+                        this.lists = response.data.records;
+                        this.page.currentPage = response.data.current;
+                        this.page.pageSize = response.data.size;
+                        this.page.total = response.data.total;
+                    } else {
+                        console.error('请求失败，状态码：', response.status);
+                    }
+                }).catch(error => {
+                    console.error('请求出错：', error);
+                });
+                console.log(merchantId);
+            },
+            async getBanner(){
+                
+                try {
+                    const response = await axios.post('http://localhost:8080/MGoods/getBanner');
+                    if (response.status === 200) {
+                        this.banner = response.data;
+                    } else {
+                        console.error('请求失败，状态码：', response.status);
+                    }
+                } catch (error) {
+                    console.error('请求出错：', error);
+                }
+            },
+            onPageChange(){
+                this.getGoodsList();
+                console.log(this.page.currentPage)
+            },
+            onSizeChange(){
+                this.getGoodsList();
+                console.log(this.page.pageSize)
+            },
+            onPageChangeOnMerchant(){
+                this.onMerchantDetail();
+                console.log(this.page.currentPage)
+            },
+            onSizeChangeOnMerchant(){
+                this.onMerchantDetail();
+                console.log(this.page.pageSize)
+            },
+            handleClose(done) {
+                 this.$confirm('确实要放弃购买吗？', '警告', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                 }).then(() => {
+                    // 点击取消或关闭
+                    done()
+                    this.clearData();
+                 }).catch(() => {
+                   //错误处理
+                 })
+            },
+            clearData(){
+                this.bugNumber = 1;
+                this.selectedSpecs = [];
+                this.onCkeckGoodsDetailId = {};
+                this.skus = [];
+                this.skuKeys = [];
+                this.skuImageUrls = [];
+            },
+            onCheckGoodsDetail(item){
+                console.log(item);
+                this.clearData();
+                // 根据id获取商品详情
+                
+                this.onCkeckGoodsDetailId = item;
+                this.drawer = true;
+                axios.post('http://localhost:8080/MGoods/getSkuBySpuId',{
+                    spuId:item.spuId
+                }
+                ).then(response => {
+                    if (response.status === 200) {
+                        this.skus = response.data.records;
+                        // 根基据商户id获取商户信息
+                        this.getMerchantInfo(item.merchantId);
+                        this.handleSku();
+                        this.handleImageUrls();
+
+                    } else {
+                        console.error('请求失败，状态码：', response.status);
+                    }
+                }).catch(error => {
+                    console.error('请求出错：', error);
+                });
+            },
+            handleSku(){
+                this.skus.forEach(item => {
+                    // const obj = JSON.parse(item.elementSpecs);
+                    const obj = item.elementSpecs;
+                    for (let key in obj) {
+                        if (this.skuKeys.indexOf(key)  == -1){
+                            this.skuKeys.push(key);
+                        }
+                    }
+                });
+            },
+            handleImageUrls(){
+                this.skus.forEach(item => {
+                    const urls = item.imageUrl;
+                    urls.forEach(url => {
+                        if (this.skuImageUrls.indexOf(url) == -1){
+                            this.skuImageUrls.push(url);
+                        }
+                    });
+                });
+            },
+            findPriceBySpecs(specValue){
+                for(let sku of this.skus){
+                    // const priceObj = JSON.parse(sku.specsPrice);
+                    const priceObj = sku.specsPrice;
+                    if(priceObj.hasOwnProperty(specValue)){
+                          return parseFloat(priceObj[specValue]) || 0;
+                    }
+                }
+            },
+        },
+        computed: {
+            skuObj(){
+                let skuObj = {};
+                this.skuKeys.forEach(item => {
+                    skuObj[item] = [];
+                })
+                this.skus.forEach(item => {
+                    // const obj = JSON.parse(item.elementSpecs);
+                    const obj = item.elementSpecs;  
+                    this.skuKeys.forEach(item => {
+                        if (skuObj[item].indexOf(obj[item]) == -1){
+                            skuObj[item].push(obj[item]);
+                        }
+                    })
+                });
+                return skuObj;
+            },
+            totalPrice() {
+                let total = 0;
+                this.selectedSpecs.forEach(specValue => {
+                    total += this.findPriceBySpecs(specValue);
+                });
+                total = total * this.bugNumber;
+                return total;
+            }
+        },
+        
+    }).use(ElementPlus).use(VxeUITable).mount('#app');
+</script>
+</html>

@@ -1,0 +1,248 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+#app{
+    height: 1080px;
+}
+.container{
+    width: 1280px;
+    margin: 0 auto;
+}
+.topbar{
+    width: 100%;
+    background-color: #aaa6a609;
+}
+.welcome{
+    font-size: 20px;
+}
+.top-nav{
+    list-style: none;
+    display: flex;
+    
+}
+.topbar .top-left a {
+    text-decoration: none;
+    color: black;
+
+}
+.topbar {
+    background-color: #ECECEC;
+}
+.topbar .container .login {
+    padding-right: 10px;
+    border-right: 1px solid black;
+}
+.topbar .container .register {
+    padding-left: 10px;
+}
+.topbar .container .welcome {
+    line-height: 30px;
+    margin-right: 28px;
+    font-size: 20px;
+}
+.topbar .container .top-right ul{
+    height: 30px;
+    line-height: 30px;
+}
+.topbar .container .top-right li {
+    float: left;
+}
+.topbar .container .top-right a {
+    padding: 0 15px;
+    border-right: 1px solid black;
+    text-decoration: none;
+    color: black;
+}
+.topbar .container .top-right li:first-child a {
+    padding-left: 0;
+}
+.topbar .container .top-right li:last-child a {
+    padding-right: 0;
+    border: none;
+}
+.header .logo-frame {
+    display: flex;
+    align-items: center;
+}
+.header .search-frame form {
+    margin-top: 40px;
+    margin-bottom: 40px;
+    font-size: 0;
+}
+.header .container .search-frame input {
+    width: 508px;
+    height: 34px;
+    border: 1px solid rgb(20, 80, 211) ;
+}
+.header .container .search-frame button {
+    width: 80px;
+    height: 34px;
+    background-color: rgb(30, 78, 210);
+    vertical-align: top;
+    background-image: url(./serch_icon.png);
+    background-repeat: no-repeat;
+    color: white;
+    cursor: pointer;
+    background-position: 25px 4px;
+}
+.line{
+    height: 2px;
+    background-color:chocolate;
+    margin-bottom: 20px;
+}
+.two{
+    margin-top: 20px;
+}
+
+.el-carousel__item h3 {
+  color: #475669;
+  opacity: 0.75;
+  line-height: 200px;
+  margin: 0;
+  text-align: center;
+}
+
+.el-carousel__item:nth-child(2n) {
+  background-color: #99a9bf;
+}
+
+.el-carousel__item:nth-child(2n + 1) {
+  background-color: #d3dce6;
+}
+
+.el_card {
+    transition: all 0.3s;
+}
+.el-card:hover{
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.5);
+    transform: translateY(-5px) translateX(-5px);
+}
+
+.buy-main ul,li{
+    list-style: none;
+    padding:  0;
+    margin: 0;
+}
+.buy-main ul{
+    margin: 25px 0;
+}
+.merchant-compent{
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+}
+.merchant-name{
+    background-color: white;
+    font-size: 24px;
+    font-weight: bold;
+    margin-left: 15px;
+    border-style: none;
+    cursor: pointer;
+}
+.backShopping{
+    margin-left: 20px;
+    font-size: 16px;
+    color: chocolate;
+    cursor: pointer;
+    border-style: none;
+    align-self: center;
+}
+
+/* 页脚 */
+.floor {
+    margin-top: 48px;
+    height: 440px;
+    background-color:#584D4D;
+}
+.floor a {
+    text-decoration: none;
+}
+.floor .container .top-links .links-list {
+    float: left;
+    width: 190px;
+    height: 176px;
+    margin-top: 48px;
+    margin-right: 10px;
+}
+.floor .container .top-links .links-list:last-child {
+    margin-right: 0;
+}
+.links-list a {
+    color: white;
+    font-size: 14px;
+}
+.line {
+    margin-top: 22px;
+    height: 1px;
+    background-color: #584D4D;
+}
+
+.floor .container .bottom-links {
+    text-align: center;
+    margin-top: 47px;
+}
+.floor .container .bottom-links-list {
+    display: inline-block;
+}
+
+.floor .container .bottom-links .bottom-links-list li {
+    float: left;
+}
+.bottom-links-list li a {
+    padding: 0 26px;
+    border-right: 1px solid white;
+    color: white;
+}
+.bottom-links-list li:first-child a {
+    padding-left: 0;
+}
+.bottom-links-list li:last-child a {
+    padding-right: 0;
+    border: 0;
+}
+.copyright {
+    text-align: center;
+    margin-top: 10px;
+    color: white;
+}
+
+.floor-content {
+    margin-top: 10px;
+}
+.floor-name {
+    font-size: 16px;
+}
+
+.floor-nav-list li {
+    float: left;
+    
+}
+.floor-nav{
+    border-bottom: 1px solid #DD302D;
+
+}
+
+.floor-nav-list li a {
+    padding: 0 10px;
+    border-right: 1px solid #D9D9D9;
+}
+.floor-nav-list li:first-child a {
+    padding-left: 0;
+}
+.floor-nav-list li:last-child a {
+    padding-right: 0;
+    border: none;
+}
+
+.floor-info .item {
+    float: left;
+}
+.floor-info .item1 {
+    width: 190px;
+    height: 392px;
+    background-color: #F4F4F4 ;
+    padding: 20px;
+}
