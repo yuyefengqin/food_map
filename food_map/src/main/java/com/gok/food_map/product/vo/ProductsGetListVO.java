@@ -24,6 +24,10 @@ public class ProductsGetListVO {
      * 商品描述
      */
     private String spuDesc;
+    /**
+     * 所属商户名字
+     */
+    private String merchantName;
 
     /**
      * 所属商户ID
@@ -68,11 +72,12 @@ public class ProductsGetListVO {
     /**
      * 库存数量
      */
-    private String stock;
+    private String totalStock;
 
     /**
      * SKU图片URL
      */
+    @TableField(typeHandler = ListStrToArrayTypeHandler.class)
     private String imageUrl;
 
 }

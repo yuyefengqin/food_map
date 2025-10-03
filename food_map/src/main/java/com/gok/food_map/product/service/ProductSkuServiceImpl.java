@@ -26,7 +26,7 @@ public class ProductSkuServiceImpl extends ServiceImpl<ProductSkuMapper, Product
 
         List<ProductSku> productSkus = productSkuMapper.selectById(spuId);
         IPage<ProductSkuGetListVO> productGetListVOIPage = new Page<>();
-        BeanUtils.copyProperties(productSkus, productSkuMapper);
+        BeanUtils.copyProperties(productSkus, productGetListVOIPage);
         productGetListVOIPage.setRecords(
                 productSkus
                 .stream()

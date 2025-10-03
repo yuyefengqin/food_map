@@ -5,14 +5,39 @@
 <mapper namespace="com.gok.food_map.product.mapper.ProductMapper">
 
     <select id="selectBy" resultType="com.gok.food_map.product.vo.ProductsGetListVO">
-            SELECT e.spu_id, e.spu_name, m.merchant_name, e.shelf_status, e.product_category, e.create_time, e.sales, e.approval_status
-            FROM (SElECT p.merchant_id,sum(k.stock),p.spu_id, p.spu_name, p.shelf_status, p.product_category, p.create_time, p.sales, p.approval_status
-                  FROM product_spu as p
-                           JOIN product_sku as k
-                                ON k.spu_id = p.spu_id
-                  GROUP BY p.spu_id) AS e
-                     LEFT JOIN m_merchant as m
-                               ON m.merchant_id = e.merchant_id
-
+        SELECT e.spu_id as spu_id,
+               e.spu_name as spu_name,
+               e.spu_desc as spu_desc,
+               m.merchant_name as merchant_name,
+               m.merchant_id as merchant_id,
+               e.product_category as product_category,
+               e.main_image as main_image,
+               e.approval_status as approval_status,
+               e.shelf_status as shelf_status,
+               e.sales as sales,
+               e.create_time as create_time,
+               e.update_time as update_time,
+               e.total_stock as total_stock,
+               e.image_url as image_url
+        FROM (SElECT p.merchant_id,
+                     sum(k.stock) as total_stock,
+                     p.spu_id,
+                     p.spu_name,
+                     p.shelf_status,
+                     p.product_category,
+                     p.update_time,
+                     p.create_time,
+                     p.sales,
+                     p.approval_status,
+                     p.spu_desc,
+                     p.main_image,
+                     k.image_url
+              FROM product_spu as p
+                       JOIN product_sku as k
+                            ON k.spu_id = p.spu_id
+                    where p.spu_id = ${spuId}
+              GROUP BY p.spu_id,k.image_url) AS e
+                 LEFT JOIN m_merchant as m
+                           ON m.merchant_id = e.merchant_id
     </select>
 </mapper>

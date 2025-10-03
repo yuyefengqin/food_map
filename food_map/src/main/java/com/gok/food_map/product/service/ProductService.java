@@ -27,30 +27,32 @@ public class ProductService {
     private final ProductMapper productMapper;
     private final FileService fileService;
     public IPage<ProductsGetListVO> getList(ProductsGetListDto dto) {
-        IPage<ProductSpu> page = new Page<>(dto.getCurrent() == null ? 1 : dto.getCurrent(), dto.getSize() == null ? 20 : dto.getSize());
-        LambdaQueryWrapper<ProductSpu> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(dto.getSpuId() != null, ProductSpu::getSpuId, dto.getSpuId());
-        wrapper.like(StringUtils.hasText(dto.getProductCategory()),ProductSpu::getProductCategory, dto.getProductCategory());
-        wrapper.like(StringUtils.hasText(dto.getMerchantId()),ProductSpu::getMerchantId, dto.getMerchantId());
-        wrapper.like(StringUtils.hasText(dto.getSpuName()),ProductSpu::getSpuName, dto.getSpuName());
-        wrapper.ge(dto.getCreateDate() != null, ProductSpu::getCreateTime, dto.getCreateDate());
-        wrapper.like(StringUtils.hasText(dto.getShelfStatus()),ProductSpu::getShelfStatus, dto.getShelfStatus());
-        wrapper.like(StringUtils.hasText(dto.getApprovalStatus()),ProductSpu::getApprovalStatus, dto.getApprovalStatus());
-        page = productSpuMapper.selectPage(page, wrapper);
+//        IPage<ProductSpu> page = new Page<>(dto.getCurrent() == null ? 1 : dto.getCurrent(), dto.getSize() == null ? 20 : dto.getSize());
+//        LambdaQueryWrapper<ProductsGetListVO> wrapper = new LambdaQueryWrapper<>();
+//        wrapper.eq(dto.getSpuId() != null, ProductsGetListVO::getSpuId, dto.getSpuId());
+//        wrapper.like(StringUtils.hasText(dto.getProductCategory()),ProductsGetListVO::getProductCategory, dto.getProductCategory());
+//        wrapper.like(StringUtils.hasText(dto.getMerchantId()),ProductsGetListVO::getMerchantId, dto.getMerchantId());
+//        wrapper.like(StringUtils.hasText(dto.getSpuName()),ProductsGetListVO::getSpuName, dto.getSpuName());
+//        wrapper.ge(dto.getCreateDate() != null, ProductsGetListVO::getCreateTime, dto.getCreateDate());
+//        wrapper.like(StringUtils.hasText(dto.getShelfStatus()),ProductsGetListVO::getShelfStatus, dto.getShelfStatus());
+//        wrapper.like(StringUtils.hasText(dto.getApprovalStatus()),ProductsGetListVO::getApprovalStatus, dto.getApprovalStatus());
+        List<ProductsGetListVO> productsGetListVOList = new ArrayList<>();
 
-        List<ProductsGetListVO> productsGetListVOList = productMapper.selectBy();
+        if (!dto.getSpuId().toString().isEmpty()){
+            productsGetListVOList = productMapper.selectBy(dto.getSpuId().toString());
+        } else {
+            return null;
+        }
+
+
+        productsGetListVOList.forEach(System.out::println);
         IPage<ProductsGetListVO> res = new Page<>();
         BeanUtils.copyProperties(productsGetListVOList, res);
-        res.setRecords(page.getRecords().stream().map(product ->{
-                    ProductsGetListVO vo= new ProductsGetListVO();
-                    BeanUtils.copyProperties(product, vo);
-                    vo.setSpuId(product.getSpuId().toString());
-                    vo.setMerchantId(product.getMerchantId().toString());
-                    vo.setCreateTime(product.getCreateTime());
-                    vo.setMainImage(product.getMainImage() == null ? null : product.getMainImage().toString());
-                    return vo;
-                }
-        ).toList());
+        res.setRecords(productsGetListVOList.stream().map(productsGetListVO -> {
+            ProductsGetListVO vo = new ProductsGetListVO();
+            BeanUtils.copyProperties(productsGetListVO, vo);
+            return vo;
+        }).toList());
         return res;
     }
 }
