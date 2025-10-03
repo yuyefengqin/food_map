@@ -12,6 +12,7 @@
     <script src="/static_resources/vxe-table@4.6.25.js"></script>
     <script src="/static_resources/axios.min.js"></script>
     <script src="/static_resources/element-plus_icons-vue.js"></script>
+    <script src="/static_resources/zh-cn.js"></script>
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon_logosc/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon_logosc/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon_logosc/favicon-16x16.png">
@@ -26,11 +27,13 @@
             <el-form-item label="用户名:"><el-input v-model="form.name" /></el-form-item>
             <el-form-item label="注册时间:">
                 <el-date-picker
-                    v-model="form.createTime"
+                    v-model="this.form.createTime"
                     type="date"
                     placeholder="请选择时间"
                     :size="size"
-            /></el-form-item>
+                    value-format="YYYY-MM-DD"
+                />
+            </el-form-item>
             <el-form-item ><el-button type="primary" @click="onSearch()">查询</el-button></el-form-item>
             <el-form-item ><el-button  @click="onReset">重置</el-button></el-form-item>
         </el-form>
@@ -64,7 +67,7 @@
                 <!--                    :http-request="uploadAvatar"-->
                 <el-upload :show-MFile-list="false" :before-upload="uploadAvatar"  >
                     <img v-if="editForm.avatar" :src="`/MFile/download?id=${editForm.avatar}`" style="width: 100px; height: 100px" />
-                    <el-icon v-else><Plus /></el-icon>
+                    <el-icon v-else><Plus></Plus></el-icon>
                 </el-upload>
             </el-form-item>
             <el-form-item label="账号" prop="code">
@@ -73,8 +76,11 @@
             <el-form-item label="名称" prop="name">
                 <el-input v-model="editForm.name" maxlength="20" />
             </el-form-item>
+<!--            <el-form-item label="注册城市" prop="city">-->
+<!--                <el-input v-model="editForm.city" />-->
+<!--            </el-form-item>-->
             <el-form-item label="注册城市" prop="city">
-                <el-input v-model="editForm.city" />
+                <el-cascader v-model="editForm.city" :options="districts" :show-all-levels="true" placeholder="请选择地址" clearable />
             </el-form-item>
             <el-form-item label="性别" prop="gender">
                 <el-radio-group v-model="editForm.gender">
@@ -117,7 +123,7 @@
     <template v-else-if='isDetail'>
         <el-button text="plain" @click="isDetail = false"> < 返回</el-button>
         <el-descriptions
-                title="用户详细"
+                title="📖用户详细"
                 direction="vertical"
                 border
                 style="margin-top: 20px"
@@ -125,21 +131,28 @@
             <el-descriptions-item
                     :rowspan="3"
                     :width="140"
-                    label="Photo"
+                    label="头像"
                     align="center"
             >
-                <el-upload :show-MFile-list="false" :before-upload="uploadAvatar"  >
+                <div>
                     <img v-if="detailForm.avatar" :src="`/MFile/download?id=${detailForm.avatar}`" style="width: 100px; height: 100px" />
                     <el-icon v-else><Plus /></el-icon>
-                </el-upload>
+                </div>
             </el-descriptions-item>
             <el-descriptions-item label="用户ID">{{detailForm.id}}</el-descriptions-item>
             <el-descriptions-item label="用户账号">{{detailForm.code}}</el-descriptions-item>
             <el-descriptions-item label="用户名">{{detailForm.code}}</el-descriptions-item>
             <el-descriptions-item label="注册时间">{{detailForm.createTime}}</el-descriptions-item>
             <el-descriptions-item label="性别">{{detailForm.gender}}</el-descriptions-item>
-            <el-descriptions-item label="城市">{{detailForm.city}}</el-descriptions-item>
+            <el-descriptions-item label="城市">{{detailForm.cityName}}</el-descriptions-item>
         </el-descriptions>
+        <div class="addressTable">
+            <vxe-grid v-bind="addressOptions" style="width: 100%" disabled="false">
+                <template #toolbar >
+                    <h3>📱收货地址</h3>
+                </template>
+            </vxe-grid>
+        </div>
     </template>
 
 </div>
@@ -149,6 +162,27 @@
     const app = Vue.createApp({
         data(){
             return {
+                size:'default',
+                addressOptions: {
+                    border: true,
+                        height: 400,
+                        data: [],
+                        headerAlign: 'center',
+                        align: 'center',
+                        columns: [
+                            {type: 'seq', width: 60},
+                            {field: 'receiver', title: '名称'},
+                            {field: 'telephone', title: '电话'},
+                            {field: 'detailAddress', title: '详细地址'},
+                            {field: 'zipCode', title: '邮政编码'},
+                            {field: 'default', title: '默认地址',formatter: ({cellValue}) => {
+                                    return cellValue === true ? '✔' : '❌️';}}
+                    ],
+                        toolbarConfig: {
+                        custom: true,
+                            slots: {buttons: 'toolbar_buttons'}
+                    },
+                },
                 levels:[],
                 memberLevelMap: {},
                 form: {
@@ -166,7 +200,6 @@
                         {type: 'seq', width: 60},
                         {field: 'code', title: '账号'},
                         {field: 'name', title: '名称'},
-                        {field: 'city', title: '注册城市'},
                         {field: 'gender', title: '性别'},
                         {field: 'levelId', title: '会员等级', formatter: ({cellValue}) => {
                                 return this.memberLevelMap[cellValue] || `未知等级(${cellValue})`;}
@@ -199,7 +232,7 @@
                     createTime: '',
                     valid: true,
                     avatar: '',
-                    password: ''
+                    password: '',
                 },
                 detailForm: {
                     id: '',
@@ -208,7 +241,8 @@
                     city: '',
                     gender: '',
                     createTime: '',
-                    avatar: ''
+                    avatar: '',
+                    cityName:'',
                 },
                 rules: {
                     code: [{required: true, message: '请输入账号'}],
@@ -230,36 +264,60 @@
                         }
                     ],
                 },
+                districts:[],
             }
         },
         async created(){
-           await this.init();
+           await this.initDistricts();
+           await this.initLevel()
            await this.getList();
         },
         methods: {
-            async init() {
-                const response = await axios.post('/user/init');
+            async initLevel() {
+                const response = await axios.post('/user/initLevel');
                 this.levels = response.data;
                 this.memberLevelMap = Object.fromEntries(
                     this.levels.map(level => [level.levelId, level.levelName])
                 );
             },
-            onSearch(){
+            async initDistricts() {
+                const response = await axios.post('/user/initDistricts');
+                // 转换所有value为字符串
+                const convertValues = (nodes) => {
+                    return nodes.map(node => ({
+                        ...node,
+                        value: String(node.value), // 强制转为字符串
+                        children: node.children ? convertValues(node.children) : []
+                    }));
+                };
+
+                this.districts = convertValues(response.data);
+                console.log(this.districts);
+            },
+            onSearch() {
                 this.getList();
             },
             onPageChange() {
                 this.getList();
             },
-            async getList(){
+            async getList() {
+                console.log(this.form.createTime)
                 const form = this.form;
-                const response = await axios.post("/user/getList",{ code: form.code, name: form.name, createTime: form.createTime, current: this.page.current, size: this.page.size});
-                this.gridOptions.data= response.data.records;
-                this.page.current= response.data.current;
-                this.page.size= response.data.size;
-                this.page.total= response.data.total;
+                const response = await axios.post("/user/getList", {
+                    code: form.code,
+                    name: form.name,
+                    createTime: form.createTime,
+                    current: this.page.current,
+                    size: this.page.size
+                });
+                this.gridOptions.data = response.data.records;
+                this.page.current = response.data.current;
+                this.page.size = response.data.size;
+                this.page.total = response.data.total;
                 console.log(this.gridOptions.data);
+
             },
-            onReset(){
+            onReset() {
                 this.form.code = '';
                 this.form.name = '';
                 this.form.createTime = '';
@@ -269,15 +327,22 @@
                 await axios.post('/user/remove', {id});
                 await this.getList();
             },
-            async onExport(){
+            async onExport() {
                 const form = this.form;
-                await axios.post("/user/export",{ code: form.code, name: form.name, createTime: form.createTime, current: this.page.current, size: this.page.size});
-                debugger;
-                await this.getList();
+                // await axios.post("/user/export", {
+                //     code: form.code,
+                //     name: form.name,
+                //     createTime: form.createTime,
+                //     current: this.page.current,
+                //     size: this.page.size
+                // });
+                window.location.href = `/user/export?code=${this.form.code}&createTime=${this.form.createTime}&current=${this.page.current}&name=${this.form.name}&size=${this.page.size}`;
+                // await this.getList();
             },
-            add(){
-                this.showDialog= true;
-                this.editForm= {};
+            add() {
+                this.showDialog = true;
+                this.isEdit = false;
+                this.editForm = {};
             },
             async uploadAvatar(f) {
                 try {
@@ -285,8 +350,8 @@
                     // const formData = new FormData();
                     // formData.append('MFile', file);  // 使用标准字段名
 
-                    const response = await axios.post('/MFile/upload', { MFile: f}, {
-                        headers: { 'Content-Type': 'multipart/form-data' }
+                    const response = await axios.post('/MFile/upload', {MFile: f}, {
+                        headers: {'Content-Type': 'multipart/form-data'}
                     });
                     this.editForm.avatar = response.data.id;
                     return false;
@@ -295,34 +360,90 @@
                     // 添加错误提示
                 }
             },
-            onSubmit(){
-                this.$refs.editForm.validate(async valid =>{
-                        if(valid) {
-                            debugger;
-                            await axios.post(this.isEdit? '/user/edit': '/user/add', this.editForm);
+            onSubmit() {
+                this.$refs.editForm.validate(async valid => {
+                        if (valid) {
+                            if (Array.isArray(this.editForm.city)) {
+                                this.editForm.city = Number(this.editForm.city[this.editForm.city.length - 1]); // 转换为数字
+                            }
+                            await axios.post(this.isEdit ? '/user/edit' : '/user/add', this.editForm);
                             await this.getList();
-                            this.showDialog= false;
+                            this.showDialog = false;
                         }
                     }
                 );
             },
             edit(user) {
-                this.showDialog= true;
-                this.isEdit= true;
-                this.editForm= {...user};
+                this.showDialog = true;
+                this.isEdit = true;
+                this.editForm = {...user};
             },
-            showDetailDialog(user){
-                this.isDetail=true;
-                this.detailForm.id =user.id ;
+            getUserAddress(id){
+                axios.post('/address/getUserAddress',
+                    {id: id}
+                ).then(response => {
+                    try{
+                        this.addressOptions.data = response.data.records;
+                    }catch(error){
+                        console.log(error);
+                    }
+                });
+            },
+            showDetailDialog(user) {
+                this.isDetail = true;
+                this.addressOptions.data = [];
+                this.getUserAddress(user.id);
+                this.detailForm.id = user.id;
                 this.detailForm.code = user.code;
                 this.detailForm.name = user.name;
                 this.detailForm.city = user.city;
                 this.detailForm.gender = user.gender;
                 this.detailForm.createTime = user.createTime;
                 this.detailForm.avatar = user.avatar;
+            },
+            // 根据地区编码获取地区名称
+            getFullRegionPath(districts, districtCode) {
+                // 1. 查找目标节点并记录路径
+                const findPath = (nodes, code, path = []) => {
+                    for (const node of nodes) {
+                        // 检查当前节点
+                        if (node.value === code) {
+                            return [...path, node.label];
+                        }
+
+                        // 递归检查子节点
+                        if (node.children && node.children.length) {
+                            const found = findPath(
+                                node.children,
+                                code,
+                                [...path, node.label]  // 添加当前节点到路径
+                            );
+                            if (found) return found;
+                        }
+                    }
+                    return null;
+                };
+                const path = findPath(districts, districtCode);
+                return path ? path.join(' ') : '';
+            },
+            updateCityName() {
+                if (this.detailForm.city != null) {
+                    this.detailForm.cityName = this.getFullRegionPath(this.districts,this.detailForm.city);
+                } else {
+                    // this.detailForm.cityName = '';
+                }
+            }
+        },
+        watch: {
+            'detailForm.city':function(newValue, oldValue) {
+                this.updateCityName();
             }
         }
 
-    }).use(ElementPlus).use(VxeUITable).mount('#app');
+    });
+    for(const[key, component] of Object.entries(ElementPlusIconsVue)) {app.component(key, component)}
+    app.use(ElementPlus,{
+        locale: ElementPlusLocaleZhCn,
+    }).use(VxeUITable).mount('#app');
    </script>
 </html>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gok.food_map.district.mapper.DistrictMapper">
+    <select id="getDistrict" resultType="com.gok.food_map.district.vo.DistrictGetVO">
+        WITH RECURSIVE get_district AS (
+            SELECT id, name, parent
+            FROM m_district
+            WHERE parent = #{id}
+            UNION ALL
+            SELECT m.id, m.name, m.parent
+            FROM m_district AS m
+                JOIN get_district AS g
+                    ON g.id = m.parent)
+        SELECT id AS value, name AS label, parent FROM get_district;
+    </select>
+</mapper>
