@@ -4,10 +4,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gok.food_map.product.dto.MerchantGetGoodsDto;
 import com.gok.food_map.product.dto.ProductGetListDto;
 import com.gok.food_map.product.dto.ProductSpuIdDto;
+import com.gok.food_map.product.dto.ProductsGetListDto;
+import com.gok.food_map.product.service.ProductService;
 import com.gok.food_map.product.service.ProductSkuServiceImpl;
 import com.gok.food_map.product.service.ProductSpuServiceImpl;
 import com.gok.food_map.product.vo.ProductSkuGetListVO;
 import com.gok.food_map.product.vo.ProductSpuGetListVO;
+import com.gok.food_map.product.vo.ProductsGetListVO;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,5 +47,16 @@ public class ProductController {
     @PostMapping("/getBanner")
     public List<String> geBanner() {
         return productSpuService.getBanner();
+    }
+
+
+
+//    获取列表
+
+    @Resource
+    private ProductService productService;
+    @PostMapping("/getList")
+    public IPage<ProductsGetListVO> getList(@RequestBody ProductsGetListDto dto) {
+        return productService.getList(dto);
     }
 }

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gok.food_map.product.mapper.ProductMapper">
+
+    <select id="selectBy" resultType="com.gok.food_map.product.vo.ProductsGetListVO">
+            SELECT e.spu_id, e.spu_name, m.merchant_name, e.shelf_status, e.product_category, e.create_time, e.sales, e.approval_status
+            FROM (SElECT p.merchant_id,sum(k.stock),p.spu_id, p.spu_name, p.shelf_status, p.product_category, p.create_time, p.sales, p.approval_status
+                  FROM product_spu as p
+                           JOIN product_sku as k
+                                ON k.spu_id = p.spu_id
+                  GROUP BY p.spu_id) AS e
+                     LEFT JOIN m_merchant as m
+                               ON m.merchant_id = e.merchant_id
+
+    </select>
+</mapper>

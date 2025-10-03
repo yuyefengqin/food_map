@@ -105,6 +105,16 @@
                     </el-select>
                 </el-form-item>
 
+                <!--                库存数量-->
+                <el-form-item label="库存数量" prop="stock">
+                    <el-input v-model="editForm.stock" maxlength="20" />
+                </el-form-item>
+
+                <!--                商品销量-->
+                <el-form-item label="商品销量" prop="sales">
+                    <el-input v-model="editForm.sales" maxlength="20" />
+                </el-form-item>
+
                 <!--                所属商户-->
                 <el-form-item label="所属商户">
                     <el-select v-model="editForm.merchantId" placeholder="请选择" style="width: 240px">
@@ -263,6 +273,8 @@
                     spuName: '',
                     spuDesc: '',
                     productCategory: '',
+                    stock: '',
+                    sales: '',
                     merchantId: '',
                     mainImage: '',
                     imageUrl: '',

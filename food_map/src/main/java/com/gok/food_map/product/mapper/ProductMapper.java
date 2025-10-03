@@ -1,7 +1,7 @@
 package com.gok.food_map.product.mapper;
 
-import com.gok.food_map.product.entity.ProductSpu;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.gok.food_map.product.entity.ProductSpu;
 import com.gok.food_map.product.vo.ProductsGetListVO;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -14,7 +14,8 @@ import java.util.List;
 * @Entity com.gok.food_map.product.entity.ProductSpu
 */
 @Mapper
-public interface ProductSpuMapper extends BaseMapper<ProductSpu> {
+public interface ProductMapper extends BaseMapper<ProductsGetListVO> {
+    List<ProductsGetListVO> selectBy();
 }
 
 

@@ -1,16 +1,11 @@
 package com.gok.food_map.product.service;
-
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.gok.food_map.product.entity.ProductSku;
-import com.gok.food_map.product.entity.ProductSpu;
 import com.gok.food_map.product.mapper.ProductSkuMapper;
 import com.gok.food_map.product.vo.ProductSkuGetListVO;
-import com.gok.food_map.product.vo.ProductSpuGetListVO;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -30,8 +25,8 @@ public class ProductSkuServiceImpl extends ServiceImpl<ProductSkuMapper, Product
     public IPage<ProductSkuGetListVO> getProductSkuBySpuId(String spuId) {
 
         List<ProductSku> productSkus = productSkuMapper.selectById(spuId);
-        BeanUtils.copyProperties(productSkus, productSkuMapper);
         IPage<ProductSkuGetListVO> productGetListVOIPage = new Page<>();
+        BeanUtils.copyProperties(productSkus, productSkuMapper);
         productGetListVOIPage.setRecords(
                 productSkus
                 .stream()
