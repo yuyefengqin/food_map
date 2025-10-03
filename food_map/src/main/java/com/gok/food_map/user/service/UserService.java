@@ -97,9 +97,16 @@ public class UserService  {
                 fileService.enable(dto.getAvatar());//生效用户头像
             }
         }
+        if (!dto.getCreateTime().isEmpty()){
+            LocalDateTime time = null;
+            try {
+                time = new SimpleDateFormat("yy-MM-dd").parse(dto.getCreateTime()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                mUser.setCreateTime(time);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
         BeanUtils.copyProperties(dto, mUser);
-        String dateTimeStr = dto.getCreateTime().replace("Z", "");
-        mUser.setCreateTime(LocalDateTime.parse(dateTimeStr));
         mUser.setUpdateTime(LocalDateTime.now());
         mUserMapper.updateById(mUser); //更新用户数据
     }
