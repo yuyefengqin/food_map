@@ -21,7 +21,7 @@ public class MUser implements Serializable {
     /**
      * 用户ID
      */
-    @TableId
+    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
     /**

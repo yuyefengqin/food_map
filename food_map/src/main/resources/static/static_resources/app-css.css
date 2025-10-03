@@ -3,8 +3,13 @@
     padding: 0;
     box-sizing: border-box;
 }
+body{
 
+    background-image: url('/static/img/夜景.png');
+    background-size:auto;
+}
 #app{
+
     height: 1080px;
 }
 .container{
@@ -21,7 +26,7 @@
 .top-nav{
     list-style: none;
     display: flex;
-    
+
 }
 .topbar .top-left a {
     text-decoration: none;
@@ -30,6 +35,7 @@
 }
 .topbar {
     background-color: #ECECEC;
+    opacity: 80%;
 }
 .topbar .container .login {
     padding-right: 10px;
@@ -98,19 +104,19 @@
 }
 
 .el-carousel__item h3 {
-  color: #475669;
-  opacity: 0.75;
-  line-height: 200px;
-  margin: 0;
-  text-align: center;
+    color: #475669;
+    opacity: 0.75;
+    line-height: 200px;
+    margin: 0;
+    text-align: center;
 }
 
 .el-carousel__item:nth-child(2n) {
-  background-color: #99a9bf;
+    background-color: #99a9bf;
 }
 
 .el-carousel__item:nth-child(2n + 1) {
-  background-color: #d3dce6;
+    background-color: #d3dce6;
 }
 
 .el_card {
@@ -150,12 +156,24 @@
     border-style: none;
     align-self: center;
 }
+.main-content .shopping-main .title{
+    font-size: 20px;
+}
+.login-resgister-btn{
+    display: flex;
+    justify-content: center;
+}
+.login-resgister-btn .el-button{
+    text-align:center;
+    font-size: 20px;
 
+}
 /* 页脚 */
 .floor {
     margin-top: 48px;
-    height: 440px;
+    height: 360px;
     background-color:#584D4D;
+    opacity: 80%;
 }
 .floor a {
     text-decoration: none;
@@ -218,7 +236,7 @@
 
 .floor-nav-list li {
     float: left;
-    
+
 }
 .floor-nav{
     border-bottom: 1px solid #DD302D;

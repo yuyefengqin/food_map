@@ -1,5 +1,7 @@
 package com.gok.food_map.user.service;
 
+import cn.hutool.json.JSONUtil;
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -11,6 +13,8 @@ import com.gok.food_map.user.entity.MemberLevel;
 import com.gok.food_map.user.mapper.MUserMapper;
 import com.gok.food_map.user.vo.LevelGetListVO;
 import com.gok.food_map.user.vo.UserGetListVO;
+import com.gok.food_map.util.TokenUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -30,7 +34,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -52,6 +55,40 @@ public class UserService  {
     private final MAddressMapper mAddressMapper;
 
     private final MemberLevelService memberLevelService;
+
+    public void logout(HttpServletRequest request) {
+        request.getSession().removeAttribute("token");
+    }
+    public void userLogin(UserLoginDto dto, HttpServletRequest request) {
+        LambdaQueryWrapper<MUser> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(dto.getCode() != null, MUser::getCode, dto.getCode());
+        MUser mUser = mUserMapper.selectOne(wrapper);
+        if (mUser == null) {
+            request.getRequestDispatcher("/error/accountError");
+            return;
+        }
+//        request.getSession().setAttribute("user", mUser);
+        JSONObject createJsonp = JSONUtil.createObj().put("id", mUser.getId());
+        assert createJsonp != null;
+        String token = TokenUtil.createToken(createJsonp);
+        request.getSession().setAttribute("token", token);
+        System.out.println(request.getSession().getAttribute("token").toString());
+    }
+    public void UserRegister(UserRegisterDto dto){
+        MUser saveUser = new MUser();
+        if (!dto.getCode().isEmpty() && !dto.getPassword().isEmpty()) {
+            saveUser.setCode(dto.getCode());
+            saveUser.setPassword(dto.getPassword());
+            saveUser.setCreateTime(LocalDateTime.now());
+            saveUser.setLevelId(1);
+            saveUser.setValid(true);
+            mUserMapper.insert(saveUser);
+            System.out.println("save success");
+        }else {
+            System.out.println("save fail");
+        }
+
+    }
 
     //新增
     @Transactional

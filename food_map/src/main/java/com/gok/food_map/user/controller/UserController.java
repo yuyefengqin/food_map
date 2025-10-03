@@ -7,6 +7,7 @@ import com.gok.food_map.user.dto.*;
 import com.gok.food_map.user.service.UserService;
 import com.gok.food_map.user.vo.LevelGetListVO;
 import com.gok.food_map.user.vo.UserGetListVO;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
@@ -22,6 +23,15 @@ public class UserController {
 
     private final UserService userService;
     private final DistrictService districtService;
+
+    @PostMapping("/login")
+    public void login(@RequestBody UserLoginDto dto, HttpServletRequest request) {
+        userService.userLogin(dto,request);
+    }
+    @PostMapping("/register")
+    public void register(@RequestBody UserRegisterDto dto){
+        userService.UserRegister(dto);
+    }
     //获取列表
     @PostMapping("/getList")
     public IPage<UserGetListVO> getList(@RequestBody UserGetListDTO dto) {

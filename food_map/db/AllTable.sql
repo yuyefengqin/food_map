@@ -27,7 +27,7 @@ create table m_user
 );
 comment on table m_user is '用户表';
 comment on column m_user.id is '用户ID';
-comment on column m_user.code is '登录账号';
+comment on column m_user.code is '登录账号'; -- 登录需要邮箱或手机号
 comment on column m_user.password is '加密密码';
 comment on column m_user.name is '用户名';
 comment on column m_user.gender is '性别（男/女）';
