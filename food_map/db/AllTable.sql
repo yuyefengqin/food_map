@@ -54,6 +54,16 @@ values (1, '普通会员', 1.00),
        (2, '白银会员', 0.82),
        (3, '黄金会员', 0.64);
 
+-- 注册城市表
+create table m_district(
+    id bigint primary key ,
+    name text,
+    parent bigint
+);
+comment on table m_district is '注册城市表';
+comment on column m_district.id is '地址ID';
+comment on column m_district.name is '地区名字';
+comment on column m_district.parent is '父级';
 -- 收货地址表
 create table m_address
 (
