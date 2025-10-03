@@ -11,17 +11,26 @@ import com.gok.food_map.user.entity.MemberLevel;
 import com.gok.food_map.user.mapper.MUserMapper;
 import com.gok.food_map.user.vo.LevelGetListVO;
 import com.gok.food_map.user.vo.UserGetListVO;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.*;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -49,6 +58,15 @@ public class UserService  {
     public void add(UserSaveDTO dto) {
         checkSave(dto, true);
         MUser mUser = new MUser();
+        if (!dto.getCreateTime().isEmpty()){
+            LocalDateTime time = null;
+            try {
+                time = new SimpleDateFormat("yy-MM-dd").parse(dto.getCreateTime()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                mUser.setCreateTime(time);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
         BeanUtils.copyProperties(dto, mUser);
         mUserMapper.insert(mUser); //保存用户数据
         fileService.enable(mUser.getAvatar());//生效用户头像
@@ -80,6 +98,8 @@ public class UserService  {
             }
         }
         BeanUtils.copyProperties(dto, mUser);
+        String dateTimeStr = dto.getCreateTime().replace("Z", "");
+        mUser.setCreateTime(LocalDateTime.parse(dateTimeStr));
         mUser.setUpdateTime(LocalDateTime.now());
         mUserMapper.updateById(mUser); //更新用户数据
     }
@@ -100,11 +120,19 @@ public class UserService  {
 
     //获取列表
     public IPage<UserGetListVO> getList(UserGetListDTO dto) {
-        IPage<MUser> page = new Page<>(dto.getCurrent() == null ? 1 : dto.getCurrent(), dto.getSize() == null ? 20 : dto.getSize());
+        IPage<MUser> page = new Page<>(dto.getCurrent() == null ? 1 : Integer.parseInt(dto.getCurrent()), dto.getSize() == null ? 20 : Integer.parseInt(dto.getSize()));
         LambdaQueryWrapper<MUser> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.hasText(dto.getCode()), MUser::getCode, dto.getCode());
         wrapper.like(StringUtils.hasText(dto.getName()), MUser::getName, dto.getName());
-        wrapper.ge(dto.getCreateTime() != null, MUser::getCreateTime, dto.getCreateTime());
+        LocalDateTime time = null;
+        if (!dto.getCreateTime().isEmpty()) {
+            try {
+                time = new SimpleDateFormat("yy-MM-dd").parse(dto.getCreateTime()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                wrapper.ge(dto.getCreateTime() != null, MUser::getCreateTime, time);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
         page = mUserMapper.selectPage(page, wrapper);
         IPage<UserGetListVO> res = new Page<>();
         BeanUtils.copyProperties(page, res);
@@ -112,6 +140,7 @@ public class UserService  {
             UserGetListVO vo = new UserGetListVO();
             BeanUtils.copyProperties(mUser, vo);
             vo.setAvatar(mUser.getAvatar() == null ? null : mUser.getAvatar().toString());
+            vo.setCity(mUser.getCity() == null ? null : mUser.getCity().toString());
             //将LocalDateTime格式类型转为LocalDate再变String
             vo.setId(mUser.getId().toString());
             vo.setCreateTime(mUser.getCreateTime() == null ? null : LocalDate.of(mUser.getCreateTime().getYear(),mUser.getCreateTime().getMonth(),mUser.getCreateTime().getDayOfMonth()).toString());
@@ -130,22 +159,50 @@ public class UserService  {
             fileService.remove(mUser.getAvatar());
         }
     }
-    public void export(UserExportDTO dto) {
+    public void export(UserGetListDTO dto, HttpServletResponse response) {
+        //todo
+        File file= new File("./users.txt");
+        String fileName= file.getName();
         LambdaQueryWrapper<MUser> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.hasText(dto.getCode()), MUser::getCode, dto.getCode());
         wrapper.like(StringUtils.hasText(dto.getName()), MUser::getName, dto.getName());
-        wrapper.ge(dto.getCreateTime() != null, MUser::getCreateTime, dto.getCreateTime());
+        LocalDateTime time = null;
+        if (!dto.getCreateTime().isEmpty()) {
+            try {
+                time = new SimpleDateFormat("yy-MM-dd").parse(dto.getCreateTime()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                wrapper.ge(dto.getCreateTime() != null, MUser::getCreateTime, time);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
         wrapper.orderByDesc(MUser::getCreateTime);
         List<MUser> users =  mUserMapper.selectList(wrapper);
         if (users==null){
             throw new RuntimeException("没有用户");
         }
-        try(ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream("./users.txt"));
-        ) {
-            os.writeObject(users);
+        try(BufferedWriter os = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)))) {
+//            ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(file));
+//            os.writeObject(users);
+            for (MUser user : users) {
+                os.write(user.toString());
+                os.newLine();
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        //设置content-type: application/octet-stream（告知浏览器这是二进制文件）
+        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        //设置content-disposition（attachment用附加方式下载，filename指定文件名【中文名正确解析需要进行编码】）
+        response.addHeader("Content-Disposition", "attachment;filename="+ URLEncoder.encode(fileName, StandardCharsets.UTF_8));
+        //复制文件
+        try(InputStream inputStream= new FileInputStream(file)) {
+            OutputStream outputStream= response.getOutputStream();
+            StreamUtils.copy(inputStream, outputStream);
+        } catch(Exception e) {
+            throw new RuntimeException("文件下载失败");
+        }
+
+
     }
 
 

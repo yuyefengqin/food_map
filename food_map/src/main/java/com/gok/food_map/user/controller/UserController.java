@@ -1,17 +1,18 @@
 package com.gok.food_map.user.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.gok.food_map.district.service.DistrictService;
+import com.gok.food_map.district.vo.DistrictGetVO;
 import com.gok.food_map.user.dto.*;
 import com.gok.food_map.user.service.UserService;
 import com.gok.food_map.user.vo.LevelGetListVO;
 import com.gok.food_map.user.vo.UserGetListVO;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -20,27 +21,32 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-
+    private final DistrictService districtService;
     //获取列表
     @PostMapping("/getList")
     public IPage<UserGetListVO> getList(@RequestBody UserGetListDTO dto) {
         return userService.getList(dto);
     }
     //初始化
-    @PostMapping("/init")
-    public List<LevelGetListVO> init() {
+    @PostMapping("/initLevel")
+    public List<LevelGetListVO> initLevel() {
         return userService.init();
     }
 
+    @RequestMapping("/initDistricts")
+    public List<DistrictGetVO> initDistricts() {
+        return districtService.getByParent(null);
+    }
     //新增
     @PostMapping("/add")
     public void add(@RequestBody UserSaveDTO dto) {
         userService.add(dto);
     }
     //导出
-    @PostMapping("/export")
-    public void export(@RequestBody UserExportDTO dto) {
-        userService.export(dto);
+    @RequestMapping("/export")
+    public void export( String code, String createTime, String current, String name, String size  , HttpServletResponse response) {
+        UserGetListDTO dto = new UserGetListDTO(current,size,code,name,createTime);
+        userService.export(dto, response);
     }
 
     //编辑

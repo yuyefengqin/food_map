@@ -43,7 +43,7 @@ public class UserSaveDTO {
     /**
      * 注册城市
      */
-    private String city;
+    private Long city;
 
     /**
      * 会员等级

@@ -12,12 +12,10 @@ import java.time.LocalDateTime;
 public class UserGetListDTO {
 
     //当前页
-    private Long current;
-
-    private Long total;
+    private String current;
 
     //页大小
-    private Long size;
+    private String size;
 
     //账号
     private String code;
@@ -26,6 +24,6 @@ public class UserGetListDTO {
     private String name;
 
     //创建时间
-    private LocalDateTime createTime;
+    private String createTime;
 
 }
