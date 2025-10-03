@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>商品管理</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="/static_resources/element-plus-index.css" />
+    <link rel="stylesheet" href="/static_resources/vxe-table-style.css">
+    <script src="/static_resources/vue.global.js"></script>
+    <script src="/static_resources/element-plus-index.full.js"></script>
+    <script src="/static_resources/xe-utils.js"></script>
+    <script src="/static_resources/vxe-table@4.6.25.js"></script>
+    <script src="/static_resources/axios.min.js"></script>
+    <script src="/static_resources/element-plus_icons-vue.js"></script>
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon_logosc/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon_logosc/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon_logosc/favicon-16x16.png">
+    <link rel="manifest" href="/favicon_logosc/site.webmanifest">
+</head>
+<body>
+<div id="app">
+    <el-row>
+        <el-form :inline="true" :model="form">
+            <el-form-item label="商品编号"><el-input v-model="form.spuId" clearable /></el-form-item>
+
+            <el-form-item label="商品分类">
+                <el-select v-model="form.productCategory" placeholder="请选择" style="width: 240px">
+                    <el-option v-for="item in options1" :key="item.value" :label="item.label" :value="item.value"/>
+                </el-select>
+            </el-form-item>
+
+            <el-form-item label="所属商户">
+                <el-select v-model="form.merchantId" placeholder="请选择" style="width: 240px">
+                    <el-option v-for="item in options2" :key="item.value" :label="item.label" :value="item.value"/>
+                </el-select>
+            </el-form-item>
+
+            <el-form-item> <el-button type="primary" @click="onSearch">查询</el-button> </el-form-item>
+
+            <el-form-item> <el-button type="primary" @click="onDelete">重置</el-button> </el-form-item>
+        </el-form>
+
+        <el-form :inline="true" :model="form">
+            <el-form-item label="商品名称"><el-input v-model="form.spuName" clearable /></el-form-item>
+            <el-form-item label="创建时间"><el-date-picker v-model="form.createTime" type="date" placeholder="Pick a day" :size="form.size"/></el-form-item>
+            <el-form-item label="上架状态">
+                <el-select v-model="form.shelfStatus" placeholder="请选择" style="width: 240px">
+                    <el-option v-for="item in options3" :key="item.value" :label="item.label" :value="item.value"/>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="审批状态">
+                <el-select v-model="form.approvalStatus" placeholder="请选择" style="width: 240px">
+                    <el-option v-for="item in options4" :key="item.value" :label="item.label" :value="item.value"/>
+                </el-select>
+            </el-form-item>
+        </el-form>
+    </el-row>
+
+    <!--    表格-->
+    <el-row>
+        <vxe-grid v-bind="gridOptions" style="width: 100%">
+
+            <!--            查询按钮（1.类型 2.点击后触发方法 3.按钮显示内容）-->
+            <template #toolbar_buttons><el-button type="primary" @click="add">新增</el-button>
+            </template>
+
+
+            <!--            操作-->
+            <template #operate="{ row }">
+                <el-button size="small" type="primary" @click="view(row)">查看</el-button>
+                <el-button size="small" type="primary" @click="edit(row)">审核</el-button>
+                <el-button size="small" type="danger" @click="onRemove(row.merchantId)">删除</el-button>
+            </template>
+
+            <!--            换页-->
+            <template #pager>
+                <vxe-pager :layouts="['Sizes', 'PrevPage', 'Number', 'NextPage', 'Total']" v-model:current-page="page.current" v-model:page-size="page.size" :total="page.total" @page-change="onPageChange">
+                </vxe-pager>
+            </template>
+        </vxe-grid>
+
+        <!--       审核和新增页面-->
+        <el-dialog v-model="showDialog" :title="isEdit ? '审核' : '新增'" width="400">
+            <el-form ref="editForm" :model="editForm" :rules="rules" label-width="auto">
+
+                <!--                商品ID-->
+                <el-form-item v-if="isEdit" label="商品ID" prop="spuId">
+                    <el-input v-model="editForm.spuId" :disabled="isEdit" maxlength="20" />
+                </el-form-item>
+
+                <!--                商品名称-->
+                <el-form-item label="商品名称" prop="spuName">
+                    <el-input v-model="editForm.spuName" maxlength="20" />
+                </el-form-item>
+
+                <!--                商品描述-->
+                <el-form-item label="商品描述" prop="spuDesc">
+                    <el-input v-model="editForm.spuDesc" maxlength="20" />
+                </el-form-item>
+
+                <!--                商品分类-->
+                <el-form-item label="商品分类">
+                    <el-select v-model="editForm.productCategory" placeholder="请选择" style="width: 240px">
+                        <el-option v-for="item in options1" :key="item.value" :label="item.label" :value="item.value"/>
+                    </el-select>
+                </el-form-item>
+
+                <!--                所属商户-->
+                <el-form-item label="所属商户">
+                    <el-select v-model="editForm.merchantId" placeholder="请选择" style="width: 240px">
+                        <el-option v-for="item in options2" :key="item.value" :label="item.label" :value="item.value"/>
+                    </el-select>
+                </el-form-item>
+
+                <!--                主图-->
+                <el-form-item label="主图" prop="mainImage">
+                    <el-upload :show-MFile-list="false" :before-upload="uploadMainImage"  >
+                        <img v-if="editForm.mainImage" :src="`/MFile/download?id=${editForm.mainImage}`" style="width: 100px; height: 100px" />
+                        <el-icon v-else><Plus /></el-icon>
+                    </el-upload>
+                </el-form-item>
+
+                <!--                上传SKU图片URL-->
+                <el-form-item label="详细图" prop="imageUrl">
+                    <el-upload :show-MFile-list="false" :before-upload="uploadImageUrl"  >
+                        <img v-if="editForm.imageUrl" :src="`/MFile/download?id=${editForm.imageUrl}`" style="width: 100px; height: 100px" />
+                        <el-icon v-else><Plus /></el-icon>
+                    </el-upload>
+                </el-form-item>
+                <!--                上架状态-->
+                <el-form-item v-if="isEdit" label="上架状态">
+                    <el-select v-model="editForm.shelfStatus" placeholder="请选择" style="width: 240px">
+                        <el-option v-for="item in options3" :key="item.value" :label="item.label" :value="item.value"/>
+                    </el-select>
+                </el-form-item>
+                <!--                审批状态-->
+                <el-form-item v-if="isEdit" label="审批状态">
+                    <el-select v-model="editForm.approvalStatus" placeholder="请选择" style="width: 240px">
+                        <el-option v-for="item in options4" :key="item.value" :label="item.label" :value="item.value"/>
+                    </el-select>
+                </el-form-item>
+
+            </el-form>
+
+            <template #footer>
+                <el-button type="primary" @click="onSubmit">提交</el-button>
+                <el-button @click="showDialog = false">取消</el-button>
+            </template>
+        </el-dialog>
+
+    </el-row>
+
+</div>
+</body>
+<script>
+    const app =  Vue.createApp({
+        data() {
+            return {
+                districts: [],
+                // 查询界面
+                form: {
+                    spuId: '',
+                    productCategory: '',
+                    merchantId: '',
+                    spuName: '',
+                    createTime: '',
+                    shelfStatus: '',
+                    approvalStatus: ''
+                },
+                //商品分类的选择器
+                options1: [
+                    {
+                        value: '海鲜',
+                        label: '海鲜',
+                    },
+                    {
+                        value: '碳烤食品',
+                        label: '碳烤食品',
+                    },
+                    {
+                        value: '水果',
+                        label: '水果',
+                    },
+                ],
+                //商户名分类的选择器
+                options2: [
+                    {
+                        value: '烧烤店',
+                        label: '烧烤店',
+                    },
+                    {
+                        value: '水产专卖店',
+                        label: '水产专卖店',
+                    },
+                    {
+                        value: '水果店',
+                        label: '水果店',
+                    },
+                ],
+                //上架状态的选择器
+                options3: [
+                    {
+                        value: '上架',
+                        label: '上架',
+                    },
+                    {
+                        value: '下架',
+                        label: '下架',
+                    },
+                ],
+                //审批状态的选择器
+                options4: [
+                    {
+                        value: '待审核',
+                        label: '待审核',
+                    },
+                    {
+                        value: '已审核',
+                        label: '已审核',
+                    },
+                    {
+                        value: '已拒绝',
+                        label: '已拒绝',
+                    },
+                ],
+                // 表格
+                gridOptions: {
+                    border: true,
+                    height: 400,
+                    data: [],
+                    headerAlign: 'center',
+                    align: 'center',
+                    columns: [
+                        {type: 'seq', width: 60},
+                        {field: 'spuId', title: '商品编号'},
+                        {field: 'spuName', title: '商品名称'},
+                        {field: 'merchantId', title: '所属商户'},
+                        {field: 'shelfStatus', title: '上架状态'},
+                        {field: 'productCategory', title: '商品分类'},
+                        {field: 'createTime', title: '创建时间'},
+                        {field: 'stock', title: 'SPU库存'},
+                        {field: 'sales', title: '销量'},
+                        {field: 'approvalStatus', title: '审批状态'},
+                        {title: '操作', slots: {default: 'operate'}, width: 220}
+                    ],
+                    toolbarConfig: {
+                        custom: true,
+                        slots: {buttons: 'toolbar_buttons'}
+                    },
+                },
+                page: {
+                    current: 1,
+                    size: 20,
+                    total: 0
+                },
+                //编辑
+                showDialog: false,
+                //新增
+                isEdit: false,
+                //编辑和新增的界面
+                editForm: {
+                    spuId: '',
+                    spuName: '',
+                    spuDesc: '',
+                    productCategory: '',
+                    merchantId: '',
+                    mainImage: '',
+                    imageUrl: '',
+                    shelfStatus: '',
+                    approvalStatus: '',
+                },
+                rules: {
+                },
+            };
+        },
+        async created() {
+            await this.getList();
+        },
+        methods: {
+            //查询
+            async getList() {
+                const form= this.form;
+                const response= await axios.post('/MGoods/getList', { spuId: form.spuId, productCategory: form.productCategory, merchantId: form.merchantId, spuName: form.spuName, createTime: form.createTime, shelfStatus: form.shelfStatus, approvalStatus: form.approvalStatus, current: this.page.current, size: this.page.size});
+                this.gridOptions.data= response.data.records;
+                this.page.current= response.data.current;
+                this.page.size= response.data.size;
+                this.page.total= response.data.total;
+                console.log(this.gridOptions.data);
+            },
+            //换页的更新
+            onPageChange() {
+                this.getList();
+            },
+            //编辑按钮
+            edit(product) {
+                this.showDialog= true;
+                this.isEdit= true;
+                this.editForm= {...product};
+            },
+            //新增按钮
+            add() {
+                this.showDialog= true;
+                this.isEdit= false;
+                this.editForm= {};
+            },
+            //查询按钮
+            onSearch() {
+                this.getList();
+            },
+            //重置按钮
+            onDelete() {
+                this.form.spuId = '';
+                this.form.productCategory = '';
+                this.form.merchantId = '';
+                this.form.spuName = '';
+                this.form.createTime = '';
+                this.form.shelfStatus = '';
+                this.form.approvalStatus = '';
+            },
+            //移除功能
+            async onRemove(spuId) {
+                await axios.post('/MGoods/remove', {spuId});
+                await this.getList();
+            },
+            async uploadMainImage(f) {
+                try {
+                    const response = await axios.post('/MFile/upload', { MFile: f}, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+                    this.editForm.mainImage = response.data.id;
+                    return false;
+                } catch (error) {
+                    console.error('上传失败', error);
+                    // 添加错误提示
+                }
+            },
+
+            async uploadImageUrl(f){
+                try {
+                    const response = await axios.post('/MFile/upload', { MFile: f}, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+                    this.editForm.imageUrl = response.data.id;
+                    return false;
+                } catch (error) {
+                    console.error('上传失败', error);
+                    // 添加错误提示
+                }
+            },
+
+            onSubmit() {
+                this.$refs.editForm.validate(async valid =>{
+                        if(valid) {
+                            await axios.post(this.isEdit? '/MGoods/edit': '/MGoods/add', this.editForm);
+                            await this.getList();
+                            this.showDialog= false;
+                        }
+                    }
+                );
+            },
+        }
+    });
+    for(const[key, component] of Object.entries(ElementPlusIconsVue)) {app.component(key, component)}
+    app.use(ElementPlus).use(VxeUITable).mount('#app');
+</script>
+</html>
