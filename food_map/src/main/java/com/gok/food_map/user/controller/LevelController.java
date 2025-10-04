@@ -1,5 +1,7 @@
 package com.gok.food_map.user.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.gok.food_map.user.dto.LevelGetListDTO;
 import com.gok.food_map.user.dto.LevelSaveDTO;
 import com.gok.food_map.user.entity.MemberLevel;
 import com.gok.food_map.user.service.MemberLevelService;
@@ -18,9 +20,9 @@ import java.util.List;
 @RequestMapping("/level")
 public class LevelController {
     private final MemberLevelService service;
-    @PostMapping("/getList")
-    public List<LevelGetListVO> getList(){
-        return service.getList();
+    @PostMapping("/getLevels")
+    public IPage<LevelGetListVO> getList() {
+        return service.getLevelList();
     }
 
     @PostMapping("/edit")

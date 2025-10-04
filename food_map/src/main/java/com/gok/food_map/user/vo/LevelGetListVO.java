@@ -17,5 +17,6 @@ public class LevelGetListVO {
      * 会员等级名称
      */
     private String levelName;
+
     private String discountRate;
 }

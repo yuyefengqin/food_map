@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gok.food_map.order.mapper.ProductOrderMapper">
+
+    <select id="selectBy" resultType="com.gok.food_map.order.vo.OrderGetListVO">
+        select
+            order_id as order_id,
+            p.user_id as user_id,
+            merchant_id as merchant_id ,
+            order_amount,
+            product_amount,
+            delivery_fee,
+            delivery_method,
+            delivery_time,
+            address_id,
+            pay_method,
+            trade_no,
+            logistics_company,
+            logistics_no,
+            order_status,
+            create_time
+            from (select id from m_user where code = #{userCode} or #{userCode} = '' ) as u
+        join product_order as p on u.id=p.user_id
+        <where> 1=1
+            <if test="orderId != null and orderId != ''">
+            AND (p.order_id = #{orderId} OR #{orderId} = '')
+            </if>
+            <if test="orderStatus != null">
+                AND p.orderStatus = #{orderStatus}
+            </if>
+            <if test="merchantId != null ">
+                AND (p.merchantId = #{merchantId})
+            </if>
+            <if test="payMethod != null and payMethod != ''">
+                AND (p.payMethod = #{payMethod} OR #{payMethod} = '')
+            </if>
+        <if test="EndTime !=null and BeginTime !=null">
+                AND (p.create_time between (#{BeginTime},#{EndTime}))
+        </if>
+        </where>
+
+    </select>
+</mapper>
