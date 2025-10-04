@@ -42,7 +42,7 @@
 
         <el-form :inline="true" :model="form">
             <el-form-item label="商品名称"><el-input v-model="form.spuName" clearable /></el-form-item>
-            <el-form-item label="创建时间"><el-date-picker v-model="form.createTime" type="date" placeholder="Pick a day" :size="form.size" value-format="YYYY-MM-DD" /></el-form-item>
+            <el-form-item label="创建时间"><el-date-picker v-model="form.createTime" type="date" placeholder="Pick a day" :size="form.size"/></el-form-item>
             <el-form-item label="上架状态">
                 <el-select v-model="form.shelfStatus" placeholder="请选择" style="width: 240px">
                     <el-option v-for="item in options3" :key="item.value" :label="item.label" :value="item.value"/>
@@ -125,8 +125,7 @@
                 <!--                主图-->
                 <el-form-item label="主图" prop="mainImage">
                     <el-upload :show-MFile-list="false" :before-upload="uploadMainImage"  >
-<!--                        <img v-if="editForm.mainImage" :src="`/MFile/download?id=${editForm.mainImage}`" style="width: 100px; height: 100px" />-->
-                        <img v-if="editForm.mainImage"  style="width: 100px; height: 100px" />
+                        <img v-if="editForm.mainImage" :src="`/MFile/download?id=${editForm.mainImage}`" style="width: 100px; height: 100px" />
                         <el-icon v-else><Plus /></el-icon>
                     </el-upload>
                 </el-form-item>
@@ -134,8 +133,7 @@
                 <!--                上传SKU图片URL-->
                 <el-form-item label="详细图" prop="imageUrl">
                     <el-upload :show-MFile-list="false" :before-upload="uploadImageUrl"  >
-<!--                        <img v-if="editForm.imageUrl" :src="`/MFile/download?id=${editForm.imageUrl}`" style="width: 100px; height: 100px" />-->
-                        <img v-if="editForm.mainImage"  style="width: 100px; height: 100px" />
+                        <img v-if="editForm.imageUrl" :src="`/MFile/download?id=${editForm.imageUrl}`" style="width: 100px; height: 100px" />
                         <el-icon v-else><Plus /></el-icon>
                     </el-upload>
                 </el-form-item>
@@ -252,7 +250,7 @@
                         {field: 'shelfStatus', title: '上架状态'},
                         {field: 'productCategory', title: '商品分类'},
                         {field: 'createTime', title: '创建时间'},
-                        {field: 'totalStock', title: 'SPU库存'},
+                        {field: 'total_stock', title: 'SPU库存'},
                         {field: 'sales', title: '销量'},
                         {field: 'approvalStatus', title: '审批状态'},
                         {title: '操作', slots: {default: 'operate'}, width: 220}
