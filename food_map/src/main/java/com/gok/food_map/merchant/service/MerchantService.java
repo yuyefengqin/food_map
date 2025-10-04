@@ -87,7 +87,8 @@ public class MerchantService extends ServiceImpl<MMerchantMapper, MMerchant>
         //后端传前端
         IPage<MerchantGetListVO> res = new Page<>();
         BeanUtils.copyProperties(page, res);
-        res.setRecords(page.getRecords().stream().map(mMerchant ->{MerchantGetListVO vo= new MerchantGetListVO();BeanUtils.copyProperties(mMerchant, vo);
+        res.setRecords(page.getRecords().stream().map(mMerchant ->{MerchantGetListVO vo= new MerchantGetListVO();
+            BeanUtils.copyProperties(mMerchant, vo);
                     vo.setMerchantId(mMerchant.getMerchantId().toString());
                     vo.setCreateTime(mMerchant.getCreateTime());
                     vo.setBusinessLicense(mMerchant.getBusinessLicense() == null ? null : mMerchant.getBusinessLicense().toString());

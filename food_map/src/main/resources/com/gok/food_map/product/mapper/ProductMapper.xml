@@ -17,8 +17,7 @@
                e.sales as sales,
                e.create_time as create_time,
                e.update_time as update_time,
-               e.total_stock as total_stock,
-               e.image_url as image_url
+               e.total_stock as total_stock
         FROM (SElECT p.merchant_id,
                      sum(k.stock) as total_stock,
                      p.spu_id,
@@ -30,14 +29,13 @@
                      p.sales,
                      p.approval_status,
                      p.spu_desc,
-                     p.main_image,
-                     k.image_url
+                     p.main_image
               FROM product_spu as p
                        JOIN product_sku as k
-                            ON k.spu_id = p.spu_id
-                    where p.spu_id = ${spuId}
-              GROUP BY p.spu_id,k.image_url) AS e
+                            ON p.spu_id = k.spu_id
+              GROUP BY p.spu_id) AS e
                  LEFT JOIN m_merchant as m
                            ON m.merchant_id = e.merchant_id
+        where (m.merchant_name = #{merchantId} OR #{merchantId} = '' ) AND ( ${spuId} IS NULL OR e.spu_id= ${spuId}) AND (e.product_category = #{productCategory} OR #{productCategory} = '') AND (e.spu_name = #{spuName} OR #{spuName} = '') AND (e.create_time = ${createTime} OR ${createTime} is null)  AND (e.shelf_status = #{shelfStatus} OR #{shelfStatus} = '') AND (e.approval_status = #{approvalStatus} OR #{approvalStatus} = '')
     </select>
 </mapper>

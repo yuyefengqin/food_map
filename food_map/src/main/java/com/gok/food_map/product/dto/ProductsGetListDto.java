@@ -28,7 +28,7 @@ public class ProductsGetListDto {
     private String spuName;
 
     //创建时间
-    private LocalDateTime createDate;
+    private LocalDateTime createTime;
 
     //上架状态
     private String shelfStatus;

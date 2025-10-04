@@ -15,7 +15,7 @@ import java.util.List;
 */
 @Mapper
 public interface ProductMapper extends BaseMapper<ProductsGetListVO> {
-    List<ProductsGetListVO> selectBy(String spuId);
+    List<ProductsGetListVO> selectBy(String spuId, String productCategory, String merchantId, String spuName, String createTime, String shelfStatus, String approvalStatus);
 }
 
 
