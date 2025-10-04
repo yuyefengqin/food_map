@@ -17,7 +17,7 @@ public class MemberLevel {
     /**
      * 会员等级ID
      */
-    @TableId
+    @TableId(type = IdType.AUTO)
     private Integer levelId;
 
     /**

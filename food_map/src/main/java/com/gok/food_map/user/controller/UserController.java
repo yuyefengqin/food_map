@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gok.food_map.district.service.DistrictService;
 import com.gok.food_map.district.vo.DistrictGetVO;
 import com.gok.food_map.user.dto.*;
+import com.gok.food_map.user.service.MemberLevelService;
 import com.gok.food_map.user.service.UserService;
 import com.gok.food_map.user.vo.LevelGetListVO;
 import com.gok.food_map.user.vo.UserGetListVO;
@@ -22,6 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor_ = @Lazy)
 public class UserController {
 
+    private final MemberLevelService memberLevelService;
     private final UserService userService;
     private final DistrictService districtService;
 
@@ -41,7 +43,7 @@ public class UserController {
     //初始化
     @PostMapping("/initLevel")
     public List<LevelGetListVO> initLevel() {
-        return userService.init();
+        return memberLevelService.getList();
     }
 
     @RequestMapping("/initDistricts")

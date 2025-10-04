@@ -41,7 +41,7 @@ comment on column m_user.enable is '状态';
 -- 会员等级表
 create table member_level
 (
-    level_id      smallint primary key,
+    level_id      SERIAL primary key ,
     level_name    text          not null,
     discount_rate numeric(4, 2) not null
 );

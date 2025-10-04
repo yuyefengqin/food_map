@@ -120,17 +120,7 @@ public class UserService  {
         fileService.enable(mUser.getAvatar());//生效用户头像
     }
     //初始化
-    public List<LevelGetListVO> init() {
-        List<MemberLevel> levels = memberLevelService.findAll();
-        List<LevelGetListVO> res = new ArrayList<>();
-        BeanUtils.copyProperties(res, levels);
-        for (MemberLevel level : levels) {
-            LevelGetListVO vo = new LevelGetListVO();
-            BeanUtils.copyProperties(level, vo);
-            res.add(vo);
-        }
-        return res;
-    }
+
 
     //编辑
     @Transactional
