@@ -5,12 +5,17 @@ import com.gok.food_map.file.service.FileService;
 import com.gok.food_map.product.dto.ProductsGetListDto;
 import com.gok.food_map.product.mapper.ProductMapper;
 import com.gok.food_map.product.vo.ProductsGetListVO;
+import com.gok.food_map.user.entity.MUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -20,8 +25,32 @@ public class ProductService {
     private final ProductMapper productMapper;
     private final FileService fileService;
     public IPage<ProductsGetListVO> getList(ProductsGetListDto dto) {
-        List<ProductsGetListVO> productsGetListVOList = productMapper.selectBy(String.valueOf(dto.getSpuId()), dto.getProductCategory(), dto.getMerchantId(), dto.getSpuName(), String.valueOf(dto.getCreateTime()), dto.getShelfStatus(), dto.getApprovalStatus());
-        productsGetListVOList.forEach(System.out::println);
+        LocalDateTime time = null;
+        if (!dto.getCreateTime().isEmpty()) {
+            try {
+                time = new SimpleDateFormat("yy-MM-dd").parse(dto.getCreateTime()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        List<ProductsGetListVO> productsGetListVOList = productMapper.selectBy(
+                (!dto.getSpuId().isEmpty()) ?Long.parseLong(dto.getSpuId()) : null,
+                dto.getProductCategory(),
+                (!dto.getMerchantId().isEmpty())? Long.parseLong(dto.getMerchantId()) : null,
+                dto.getSpuName(),
+                time,
+                dto.getShelfStatus(),
+                dto.getApprovalStatus(),
+                dto.getSize(),
+                dto.getCurrent());
+//        productsGetListVOList.forEach(System.out::println);
+        Integer count = productMapper.countBy((!dto.getSpuId().isEmpty()) ?Long.parseLong(dto.getSpuId()) : null,
+                dto.getProductCategory(),
+                (!dto.getMerchantId().isEmpty())? Long.parseLong(dto.getMerchantId()) : null,
+                dto.getSpuName(),
+                time,
+                dto.getShelfStatus(),
+                dto.getApprovalStatus());
         IPage<ProductsGetListVO> res = new Page<>(dto.getCurrent() == null ? 1 : dto.getCurrent(), dto.getSize() == null ? 20 : dto.getSize());
         BeanUtils.copyProperties(productsGetListVOList, res);
         res.setRecords(productsGetListVOList.stream().map(productsGetListVO -> {
@@ -29,6 +58,7 @@ public class ProductService {
             BeanUtils.copyProperties(productsGetListVO, vo);
             return vo;
         }).toList());
+        res.setTotal(count);
         return res;
     }
 }

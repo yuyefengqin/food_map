@@ -76,9 +76,6 @@
             <el-form-item label="名称" prop="name">
                 <el-input v-model="editForm.name" maxlength="20" />
             </el-form-item>
-<!--            <el-form-item label="注册城市" prop="city">-->
-<!--                <el-input v-model="editForm.city" />-->
-<!--            </el-form-item>-->
             <el-form-item label="注册城市" prop="city">
                 <el-cascader v-model="editForm.city" :options="districts" :show-all-levels="true" placeholder="请选择地址" clearable />
             </el-form-item>

@@ -5,6 +5,7 @@ import com.gok.food_map.product.entity.ProductSpu;
 import com.gok.food_map.product.vo.ProductsGetListVO;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -15,7 +16,22 @@ import java.util.List;
 */
 @Mapper
 public interface ProductMapper extends BaseMapper<ProductsGetListVO> {
-    List<ProductsGetListVO> selectBy(String spuId, String productCategory, String merchantId, String spuName, String createTime, String shelfStatus, String approvalStatus);
+    List<ProductsGetListVO> selectBy(Long spuId,
+                                     String productCategory,
+                                     Long merchantId,
+                                     String spuName,
+                                     LocalDateTime createTime,
+                                     String shelfStatus,
+                                     String approvalStatus,
+                                     Integer limit,
+                                     Integer offset);
+    Integer countBy(Long spuId,
+                    String productCategory,
+                    Long merchantId,
+                    String spuName,
+                    LocalDateTime createTime,
+                    String shelfStatus,
+                    String approvalStatus);
 }
 
 

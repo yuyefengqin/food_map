@@ -10,13 +10,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ProductsGetListDto {
     //当前页
-    private Long current;
+    private Integer current;
 
     //页大小
-    private Long size;
+    private Integer size;
 
     //编号
-    private Long spuId;
+    private String spuId;
 
     //商品分类
     private String productCategory;
@@ -28,7 +28,7 @@ public class ProductsGetListDto {
     private String spuName;
 
     //创建时间
-    private LocalDateTime createTime;
+    private String createTime;
 
     //上架状态
     private String shelfStatus;
