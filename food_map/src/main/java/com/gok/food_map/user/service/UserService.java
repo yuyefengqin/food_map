@@ -13,6 +13,7 @@ import com.gok.food_map.user.entity.MemberLevel;
 import com.gok.food_map.user.mapper.MUserMapper;
 import com.gok.food_map.user.vo.LevelGetListVO;
 import com.gok.food_map.user.vo.UserGetListVO;
+import com.gok.food_map.user.vo.UserLoginVO;
 import com.gok.food_map.util.TokenUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -59,20 +60,29 @@ public class UserService  {
     public void logout(HttpServletRequest request) {
         request.getSession().removeAttribute("token");
     }
-    public void userLogin(UserLoginDto dto, HttpServletRequest request) {
+    public UserLoginVO userLogin(UserLoginDto dto, HttpServletRequest request) {
         LambdaQueryWrapper<MUser> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(dto.getCode() != null, MUser::getCode, dto.getCode());
         MUser mUser = mUserMapper.selectOne(wrapper);
         if (mUser == null) {
             request.getRequestDispatcher("/error/accountError");
-            return;
+            return null;
         }
-//        request.getSession().setAttribute("user", mUser);
+        if(!mUser.getPassword().equals(dto.getPassword())) {
+            request.getRequestDispatcher("/error/passwordError");
+            return null;
+        }
         JSONObject createJsonp = JSONUtil.createObj().put("id", mUser.getId());
         assert createJsonp != null;
         String token = TokenUtil.createToken(createJsonp);
         request.getSession().setAttribute("token", token);
+        UserLoginVO vo = new UserLoginVO();
+        BeanUtils.copyProperties(mUser, vo);
+        vo.setId(mUser.getId().toString());
+        vo.setAvatar(mUser.getAvatar().toString());
+        vo.setCity(mUser.getCity().toString());
         System.out.println(request.getSession().getAttribute("token").toString());
+        return vo;
     }
     public void UserRegister(UserRegisterDto dto){
         MUser saveUser = new MUser();

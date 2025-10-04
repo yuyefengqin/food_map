@@ -36,6 +36,7 @@ public class LoginInterceptor implements HandlerInterceptor {
             if (auth != null && auth.require()) {
                 // 从请求头中获取 token 用于认证
                 String token = request.getSession().getAttribute("token").toString();
+                assert token != null;
 //                String token = request.getHeader("token");
                 // 如果 token 不为空且通过验证
                 if (StringUtils.isNotBlank(token)) {

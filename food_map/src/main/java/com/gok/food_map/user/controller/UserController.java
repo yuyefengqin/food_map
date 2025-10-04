@@ -7,6 +7,7 @@ import com.gok.food_map.user.dto.*;
 import com.gok.food_map.user.service.UserService;
 import com.gok.food_map.user.vo.LevelGetListVO;
 import com.gok.food_map.user.vo.UserGetListVO;
+import com.gok.food_map.user.vo.UserLoginVO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +26,8 @@ public class UserController {
     private final DistrictService districtService;
 
     @PostMapping("/login")
-    public void login(@RequestBody UserLoginDto dto, HttpServletRequest request) {
-        userService.userLogin(dto,request);
+    public UserLoginVO login(@RequestBody UserLoginDto dto, HttpServletRequest request) {
+        return userService.userLogin(dto,request);
     }
     @PostMapping("/register")
     public void register(@RequestBody UserRegisterDto dto){

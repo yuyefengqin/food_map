@@ -1,7 +1,6 @@
 package com.gok.food_map.config;
 
 //import com.gok.food_map.log.interceptor.TokenInterceptor;
-import com.gok.food_map.interceptor.AuthInterceptor;
 import com.gok.food_map.interceptor.LoginInterceptor;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +29,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "/merchant/getMerchantById",
                         "/**.html",
                         "/static_resources/**",
-                        "/static/img/%E5%A4%9C%E6%99%AF.png .png",
+                        "/static/img/**.png",
                         "/favicon_logosc/**");
     }
 
