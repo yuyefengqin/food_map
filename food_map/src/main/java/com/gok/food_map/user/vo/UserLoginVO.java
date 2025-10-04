@@ -8,8 +8,17 @@ public class UserLoginVO {
     private String avatar;
     private String city;
     private Integer levelId;
+    private String createTime;
+    public String getCreateTime() {
+        return createTime;
+    }
 
-    public UserLoginVO(String id, String code, String name, String gender, String avatar, String city, Integer levelId) {
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
+    }
+
+
+    public UserLoginVO(String id, String code, String name, String gender, String avatar, String city, Integer levelId, String createTime) {
         this.id = id;
         this.code = code;
         this.name = name;

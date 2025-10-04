@@ -81,6 +81,7 @@ public class UserService  {
         vo.setId(mUser.getId().toString());
         vo.setAvatar(mUser.getAvatar().toString());
         vo.setCity(mUser.getCity().toString());
+        vo.setCreateTime(mUser.getCreateTime().toString());
         System.out.println(request.getSession().getAttribute("token").toString());
         return vo;
     }
