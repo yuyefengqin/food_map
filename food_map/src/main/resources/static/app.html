@@ -22,13 +22,37 @@
 <body>
 <div id="app">
     <div class="topbar">
-        <div class="container" style="display: flex; justify-content: space-between; ">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
             <div class="top-left">
                 <span class="welcome">美食地图欢迎你</span>
-                <span class="login">请<a href="#" @click="loginTo">登录</a></span><span class="register"><a href="#" @click="resgiterTo">注册</a></span>
+
+                <span v-if="!isLogined"><span class="login">请<a href="#" @click="loginTo">登录</a></span><span class="register"><a href="#" @click="resgiterTo">注册</a></span></span>
+
                 <input type="button" @click="ceshi" value="测试" >
             </div>
             <div class="top-right">
+                <el-popover
+                        :offset="45"
+                        v-if="isLogined"
+                >
+                    <template #reference>
+                        <div class="userAvatar" @click="toUserDetail">
+                            <el-avatar :size="30" :src="`../img/默认头像.png`"></el-avatar>
+                        </div>
+                    </template>
+                    <h3 v-if="this.loginedUSerData.name" style="text-align: center;">{{this.loginedUSerData.name}}</h3>
+                    <div class="user-avatar-detail-item">
+
+                        <ul>
+                            <li><div class="item" @click="toUserDetailPage"><h3 >个人中心</h3><span>></span></div></li>
+                            <li><div class="item" @click=""><h3 >购物车</h3><span>></span></div></li>
+                            <li><div class="item" @click=""><h3 >我的订单</h3><span>></span></div></li>
+                            <li><div class="item" @click=""><h3 >设置</h3><span>></span></div></li>
+                        </ul>
+                        <el-button type="danger" plain style="width: 100%;" @click="outLogin">退出登录</el-button>
+                    </div>
+                </el-popover>
+
                 <ul class="top-nav">
                     <li><a href="#">我的订单</a></li>
                     <li><a href="#">购物车</a></li>
@@ -174,6 +198,10 @@
                 </el-carousel>
                 <h3 class="goods-name">{{onCkeckGoodsDetailId.spuName}}</h3>
                 <h4>{{onCkeckGoodsDetailId.spuDesc}}</h4>
+                <span class="selected-spec">
+                    已选择{{selectedSpecs}}
+                    {{selectedSpecsPrice}}
+                </span>
                 <ul v-for="(skuValue, skuKey) in skuObj">
                     <li>{{skuKey}}</li>
                     <el-checkbox-group v-model="selectedSpecs" size="large"  :max="3">
@@ -194,7 +222,7 @@
                     <el-input-number v-model="bugNumber" :min="1" label="购买数量"></el-input-number>
                 </div>
                 <div style="display: flex;justify-content: space-between;">
-                    <el-button type="primary" plain>加入购物车</el-button>
+                    <el-button type="primary" plain @click="addShoppingCart()">加入购物车</el-button>
                     <el-button type="danger" plain>立即购买</el-button>
                 </div>
             </div>
@@ -282,7 +310,7 @@
             <el-button type="text" @click="isLogin = false">🤗注册</el-button>
         </div>
         <div v-if="isLogin">
-            <el-form
+            <el-form ref="loginedUSerData"
                     style="max-width: 600px"
                     :model="loginFormData"
                     status-icon
@@ -297,13 +325,12 @@
                             placeholder="请输入密码"
                             v-model="loginFormData.password"
                             type="password"
-                            autocomplete="off"
-                    />
+                            autocomplete="off"></el-input>
                 </el-form-item>
             </el-form>
         </div>
         <div v-else>
-            <el-form
+            <el-form ref="loginedUSerData"
                     style="max-width: 600px"
                     :model="loginFormData"
                     status-icon
@@ -344,9 +371,22 @@
 </div>
 </body>
 <script setup>
+    axios.defaults.withCredentials = true;
     const app =  Vue.createApp({
         data(){
             return{
+                isLogined:false,
+                loginedUSerData:{
+                    id:'',
+                    code:'',
+                    name:'',
+                    gender:'',
+                    avatar:'',
+                    city:'',
+                    levelId:'',
+                    createTime:'',
+                },
+                isUserAvatarDetail:false,
                 isLogin:true,
                 loginFormData: {
                     code: '',
@@ -420,6 +460,7 @@
                 skus: [],
                 skuKeys: [],
                 selectedSpecs: [],
+                selectedSpecsPrice: new Map(),
                 skuImageUrls: [],
             }
         },
@@ -429,17 +470,67 @@
             await this.getBanner();
         },
         methods:{
+            addShoppingCart(){
+                const toSendData = Object.fromEntries(this.selectedSpecsPrice);
+                if (this.loginedUSerData.id !== '') {
+                    axios.post('http://localhost:8080/shoppingCart/addShoppingCart', {
+                        userId: this.loginedUSerData.id,
+                        spuId:this.onCkeckGoodsDetailId.spuId ,
+                        quantity: this.bugNumber,
+                        specsPrice:toSendData,
+                        totalPrice:this.totalPrice,
+                    }).then(res => {
+                        if (res.status === 200) {
+                            this.$message({
+                                message:'添加成功',
+                                type: 'success'
+                            })
+                            this.clearData();
+                            this.drawer = false;
+                        }else {
+                            this.$message({
+                                message:'添加失败',
+                                type: 'error'
+                            })
+                        }
+                    }).catch(err => {
+                        this.$message({
+                            message:'异常'+err.message,
+                            type: 'error'
+                        })
+                    })
+                }else {
+                    this.$message({
+                        message:'请先登录',
+                        type: 'warning'
+                    })
+                }
+            },
+            toUserDetail(){
+                this.userAvatarSize = 50;
+            },
+            toUserDetailPage(){
+                if(!this.isLogined){
+                    this.$message({
+                        message: '请先登录',
+                        type: 'warning'
+                    });
+                    return;
+                }else{
+                    window.location.href = `http://localhost:8080/userDetail.html`;
+                }
+            },
             ceshi(){
                 axios.post('http://localhost:8080/test/hello').then(response => {
                     if (response.status === 200) {
                         this.$message({
-                            message: '测试成功',
+                            message: response.data,
                             type: 'success'
                         });
                         console.log(response.data);
                     } else {
                         this.$message({
-                            message: '测试失败',
+                            message: response.data,
                             type: 'warning'
                         });
                         console.error('请求失败，状态码：', response.status);
@@ -451,6 +542,18 @@
                     });
                     console.error('请求出错：', error);
                 });
+            },
+            outLogin(){
+                this.isLogined = false;
+                this.loginedUSerData = {
+                    id:'',
+                    code:'',
+                    name:'',
+                    gender:'',
+                    avatar:'',
+                    city:'',
+                    levelId:'',
+                }
             },
             loginTo(){
                 this.loginDialogVisible = true;
@@ -487,6 +590,8 @@
                                 message: '登录成功',
                                 type: 'success'
                             });
+                            this.loginedUSerData =  response.data;
+                            this.isLogined = true;
                             this.dislabeloginDialog();
                         } else {
                             this.$message({
@@ -666,6 +771,7 @@
                 this.skus = [];
                 this.skuKeys = [];
                 this.skuImageUrls = [];
+                this.selectedSpecsPrice  = new Map();
             },
             onCheckGoodsDetail(item){
                 console.log(item);
@@ -752,6 +858,7 @@
             totalPrice() {
                 let total = 0;
                 this.selectedSpecs.forEach(specValue => {
+                    this.selectedSpecsPrice.set(specValue,this.findPriceBySpecs(specValue));
                     total += this.findPriceBySpecs(specValue);
                 });
                 total = total * this.bugNumber;

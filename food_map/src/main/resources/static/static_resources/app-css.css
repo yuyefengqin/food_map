@@ -49,6 +49,11 @@ body{
     margin-right: 28px;
     font-size: 20px;
 }
+.topbar .top-right{
+    display: flex;
+    align-items: center;
+
+}
 .topbar .container .top-right ul{
     height: 30px;
     line-height: 30px;
@@ -69,6 +74,40 @@ body{
     padding-right: 0;
     border: none;
 }
+.topbar .top-right .userAvatar .el-avatar{
+    border: 2px solid white;
+}
+.topbar .top-right .userAvatar{
+    cursor: pointer;
+    margin-right: 25px;
+    transition: all 0.3s ease-in;
+
+}
+.topbar .top-right .userAvatar:hover{
+    transform: scale(2) translateY(15px);
+}
+.user-avatar-detail-item:hover .userAvatar{
+    transform: scale(2) translateY(15px);
+}
+.user-avatar-detail-item .item{
+    display: flex;
+    justify-content: space-around;
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 5px 5px;
+    border-radius: 10px;
+    transition: all 0.3s ease-in;
+}
+.user-avatar-detail-item li:hover .item{
+    background-color: #47566915;
+}
+.user-avatar-detail-item ul {
+    list-style: none;
+    padding: 0;
+}
+
+
 .header .logo-frame {
     display: flex;
     align-items: center;
@@ -167,6 +206,12 @@ body{
     text-align:center;
     font-size: 20px;
 
+}
+.buy-main .selected-spec{
+    margin-left: 20px;
+    padding: 0 5px;
+    background-color: rgba(128, 128, 128, 0.281);
+    border-radius: 5px;
 }
 /* 页脚 */
 .floor {

@@ -25,7 +25,7 @@ public class ProductSpu {
     /**
      * SPU ID
      */
-    @TableId
+    @TableId(type = IdType.ASSIGN_ID)
     private Long spuId;
 
     /**
