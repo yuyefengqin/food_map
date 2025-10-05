@@ -7,7 +7,8 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Date;
+import java.util.*;
+import java.util.stream.Stream;
 
 
 //Token生成工具类 用于生成和验证JWT令牌
@@ -63,6 +64,23 @@ public class TokenUtil {
 //    检查token令牌是否过期
     public static boolean checkToken(String token) {
         return JWT.decode(token).getExpiresAt().before(new Date());
+    }
+    public static Map<String,String> getToken(String token) {
+        //todo
+        List<String> stream = Arrays.stream(JWT.decode(token)
+                .getClaim("sub")
+                .toString()
+                .replace("\"", "")
+                .replace(" ", "")
+                .replace("-", "")
+                .replace("{", "")
+                .replace("}", "")
+                .replace("\\", "")
+                .split(":")).toList();
+        Map<String, String> map = new HashMap<String, String>();
+        map.put(stream.getFirst(), stream.get(1));
+        return map;
+
     }
 }
 
