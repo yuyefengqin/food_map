@@ -61,68 +61,6 @@
                 AND (e.approval_status = #{approvalStatus} OR #{approvalStatus} = '')
             </if>
         </where>
-        limit #{limit} offset #{offset}
-    </select>
-
-    <select id="countBy" resultType="int">
-        SELECT COUNT(*) from
-        (SELECT e.spu_id as spu_id,
-        e.spu_name as spu_name,
-        e.spu_desc as spu_desc,
-        m.merchant_name as merchant_name,
-        m.merchant_id as merchant_id,
-        e.product_category as product_category,
-        e.main_image as main_image,
-        e.approval_status as approval_status,
-        e.shelf_status as shelf_status,
-        e.sales as sales,
-        e.create_time as create_time,
-        e.update_time as update_time,
-        e.total_stock as total_stock
-        FROM (SELECT p.merchant_id,
-        SUM(k.stock) as total_stock,
-        p.spu_id,
-        p.spu_name,
-        p.shelf_status,
-        p.product_category,
-        p.update_time,
-        p.create_time,
-        p.sales,
-        p.approval_status,
-        p.spu_desc,
-        p.main_image
-        FROM product_spu as p
-        JOIN product_sku as k
-        ON p.spu_id = k.spu_id
-        GROUP BY p.spu_id) AS e
-        LEFT JOIN m_merchant as m
-        ON m.merchant_id = e.merchant_id) as res_table
-        <where>
-            <if test="merchantId != null and merchantId != ''">
-                AND (m.merchant_name = #{merchantId} OR #{merchantId} = '')
-            </if>
-            <if test="spuId != null">
-                AND e.spu_id = #{spuId}
-            </if>
-            <if test="productCategory != null and productCategory != ''">
-                AND (e.product_category = #{productCategory} OR #{productCategory} = '')
-            </if>
-            <if test="spuName != null and spuName != ''">
-                AND (e.spu_name = #{spuName} OR #{spuName} = '')
-            </if>
-            <if test="createTime != null">
-                AND e.create_time >= #{createTime}
-            </if>
-            <if test="createTime == null">
-                AND (1=1)
-            </if>
-            <if test="shelfStatus != null and shelfStatus != ''">
-                AND (e.shelf_status = #{shelfStatus} OR #{shelfStatus} = '')
-            </if>
-            <if test="approvalStatus != null and approvalStatus != ''">
-                AND (e.approval_status = #{approvalStatus} OR #{approvalStatus} = '')
-            </if>
-        </where>
     </select>
 </mapper>
 

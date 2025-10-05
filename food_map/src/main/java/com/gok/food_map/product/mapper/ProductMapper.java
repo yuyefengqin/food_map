@@ -1,6 +1,7 @@
 package com.gok.food_map.product.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gok.food_map.product.entity.ProductSpu;
 import com.gok.food_map.product.vo.ProductsGetListVO;
 import org.apache.ibatis.annotations.Mapper;
@@ -16,22 +17,14 @@ import java.util.List;
 */
 @Mapper
 public interface ProductMapper extends BaseMapper<ProductsGetListVO> {
-    List<ProductsGetListVO> selectBy(Long spuId,
-                                     String productCategory,
-                                     Long merchantId,
-                                     String spuName,
-                                     LocalDateTime createTime,
-                                     String shelfStatus,
-                                     String approvalStatus,
-                                     Integer limit,
-                                     Integer offset);
-    Integer countBy(Long spuId,
-                    String productCategory,
-                    Long merchantId,
-                    String spuName,
-                    LocalDateTime createTime,
-                    String shelfStatus,
-                    String approvalStatus);
+    IPage<ProductsGetListVO> selectBy(IPage<ProductsGetListVO> page,
+                   Long spuId,
+                   String productCategory,
+                   Long merchantId,
+                   String spuName,
+                   LocalDateTime createTime,
+                   String shelfStatus,
+                   String approvalStatus);
 }
 
 
