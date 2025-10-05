@@ -3,17 +3,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductsGetListDto {
     //当前页
-    private Integer current;
+    private Long current;
 
     //页大小
-    private Integer size;
+    private Long size;
 
     //编号
     private String spuId;
