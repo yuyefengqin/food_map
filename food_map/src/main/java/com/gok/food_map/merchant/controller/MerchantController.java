@@ -36,7 +36,6 @@ public class MerchantController {
     //编辑
     @PostMapping("/edit")
     public void edit(@RequestBody MerchantSaveDTO dto) {
-
         merchantService.edit(dto);
     }
 

@@ -1,10 +1,7 @@
 package com.gok.food_map.product.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.gok.food_map.product.dto.MerchantGetGoodsDto;
-import com.gok.food_map.product.dto.ProductGetListDto;
-import com.gok.food_map.product.dto.ProductSpuIdDto;
-import com.gok.food_map.product.dto.ProductsGetListDto;
+import com.gok.food_map.product.dto.*;
 import com.gok.food_map.product.service.ProductService;
 import com.gok.food_map.product.service.ProductSkuServiceImpl;
 import com.gok.food_map.product.service.ProductSpuServiceImpl;
@@ -50,13 +47,23 @@ public class ProductController {
     }
 
 
-
-//    获取列表
-
+    //查找
     @Resource
     private ProductService productService;
     @PostMapping("/getList")
     public IPage<ProductsGetListVO> getList(@RequestBody ProductsGetListDto dto) {
         return productService.getList(dto);
+    }
+
+    //新增
+    @PostMapping("/add")
+    public void add(@RequestBody ProductsSpuDto dto) {
+        productSpuService.add(dto);
+    }
+
+    //编辑
+    @PostMapping("/edit")
+    public void edit(@RequestBody ProductsSpuDto dto) {
+        productSpuService.edit(dto);
     }
 }

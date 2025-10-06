@@ -12,6 +12,7 @@
     <script src="/static_resources/vxe-table@4.6.25.js"></script>
     <script src="/static_resources/axios.min.js"></script>
     <script src="/static_resources/element-plus_icons-vue.js"></script>
+    <script src="/static_resources/zh-cn.js"></script>
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon_logosc/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon_logosc/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon_logosc/favicon-16x16.png">
@@ -19,6 +20,7 @@
 </head>
 <body>
 <div id="app">
+    <template v-if=!isDetail>
     <el-row>
         <el-form :inline="true" :model="form">
             <el-form-item label="商品编号"><el-input v-model="form.spuId" clearable /></el-form-item>
@@ -67,7 +69,7 @@
 
             <!--            操作-->
             <template #operate="{ row }">
-                <el-button size="small" type="primary" @click="view(row)">查看</el-button>
+                <el-button size="small" type="primary" @click="showDetailDialog(row)">查看</el-button>
                 <el-button size="small" type="primary" @click="edit(row)">审核</el-button>
                 <el-button size="small" type="danger" @click="onRemove(row.merchantId)">删除</el-button>
             </template>
@@ -105,11 +107,6 @@
                     </el-select>
                 </el-form-item>
 
-                <!--                库存数量-->
-                <el-form-item label="库存数量" prop="stock">
-                    <el-input v-model="editForm.stock" maxlength="20" />
-                </el-form-item>
-
                 <!--                商品销量-->
                 <el-form-item label="商品销量" prop="sales">
                     <el-input v-model="editForm.sales" maxlength="20" />
@@ -128,19 +125,6 @@
                         <img v-if="editForm.mainImage"  :src="`/MFile/download?id=${editForm.mainImage}`" style="width: 100px; height: 100px" />
                         <el-icon v-else><Plus /></el-icon>
                     </el-upload>
-                </el-form-item>
-
-                <!--                上传SKU图片URL-->
-                <el-form-item label="详细图" prop="imageUrl">
-                    <el-upload
-                               :before-upload="uploadImageUrl"
-                                multiple>
-                        <img v-if="editForm.imageUrl"  :src="`/MFile/download?id=${editForm.imageUrl}`" style="width: 100px; height: 100px" />
-                        <el-icon v-else><Plus /></el-icon>
-                    </el-upload>
-                    <el-dialog :visible.sync="dialogVisible">
-                        <img v-if="editForm.imageUrl"  :src="`/MFile/download?id=${editForm.imageUrl}`" style="width: 100px; height: 100px" width="100%" alt="">
-                    </el-dialog>
                 </el-form-item>
 
                 <!--                上架状态-->
@@ -163,13 +147,40 @@
                 <el-button @click="showDialog = false">取消</el-button>
             </template>
 
-
         </el-dialog>
-
-
-
     </el-row>
-
+    </template>
+<!--    详细表（spu层面）-->
+    <template v-else-if='isDetail'>
+        <el-button text="plain" @click="isDetail = false"> < 返回</el-button>
+        <el-descriptions
+                title="📖商品详细"
+                direction="vertical"
+                border
+                style="margin-top: 20px"
+        >
+            <el-descriptions-item
+                    :rowspan="3"
+                    :width="140"
+                    label="头像"
+                    align="center"
+            >
+                <div>
+                    <img v-if="detailForm.mainImage" :src="`/MFile/download?id=${detailForm.mainImage}`" style="width: 100px; height: 100px" />
+                    <el-icon v-else><Plus /></el-icon>
+                </div>
+            </el-descriptions-item>
+            <el-descriptions-item label="商品编号">{{detailForm.spuId}}</el-descriptions-item>
+            <el-descriptions-item label="商品名称">{{detailForm.spuName}}</el-descriptions-item>
+            <el-descriptions-item label="商品详细">{{detailForm.spuDesc}}</el-descriptions-item>
+            <el-descriptions-item label="所属商户">{{detailForm.merchantId}}</el-descriptions-item>
+            <el-descriptions-item label="商品类型">{{detailForm.productCategory}}</el-descriptions-item>
+            <el-descriptions-item label="审批状态">{{detailForm.approvalStatus}}</el-descriptions-item>
+            <el-descriptions-item label="上架状态">{{detailForm.shelfStatus}}</el-descriptions-item>
+            <el-descriptions-item label="销量">{{detailForm.sales}}</el-descriptions-item>
+            <el-descriptions-item label="创建时间">{{detailForm.createTime}}</el-descriptions-item>
+        </el-descriptions>
+    </template>
 </div>
 </body>
 <script>
@@ -207,41 +218,41 @@
                 //商户名分类的选择器
                 options2: [
                     {
-                        value: '烧烤店',
+                        value: '1973386479124234242',
                         label: '烧烤店',
                     },
                     {
-                        value: '水产专卖店',
+                        value: '1973385448478883842',
                         label: '水产专卖店',
                     },
                     {
-                        value: '水果店',
+                        value: '1973386025069854721',
                         label: '水果店',
                     },
                 ],
                 //上架状态的选择器
                 options3: [
                     {
-                        value: '上架',
+                        value: 'on',
                         label: '上架',
                     },
                     {
-                        value: '下架',
+                        value: 'off',
                         label: '下架',
                     },
                 ],
                 //审批状态的选择器
                 options4: [
                     {
-                        value: '待审核',
+                        value: 'pending',
                         label: '待审核',
                     },
                     {
-                        value: '已审核',
+                        value: 'approved',
                         label: '已审核',
                     },
                     {
-                        value: '已拒绝',
+                        value: 'rejected',
                         label: '已拒绝',
                     },
                 ],
@@ -281,17 +292,30 @@
                 isEdit: false,
                 //编辑和新增的界面
                 editForm: {
+                    //spu表
                     spuId: '',
                     spuName: '',
                     spuDesc: '',
                     productCategory: '',
-                    stock: '',
                     sales: '',
                     merchantId: '',
                     mainImage: '',
-                    imageUrl: [],
                     shelfStatus: '',
                     approvalStatus: '',
+                },
+                // 详细内容
+                isDetail: false,
+                detailForm: {
+                    mainImage: '',
+                    spuId: '',
+                    spuName: '',
+                    spuDesc: '',
+                    productCategory: '',
+                    merchantId: '',
+                    approvalStatus: '',
+                    shelfStatus: '',
+                    sales: '',
+                    createTime: '',
                 },
                 rules: {
                 },
@@ -348,23 +372,10 @@
             },
             async uploadMainImage(f) {
                 try {
-                    const response = await axios.post('/MFile/upload', { MFile: f}, {
+                    const response = await axios.post('/MFile/upload', { file: f}, {
                         headers: { 'Content-Type': 'multipart/form-data' }
                     });
                     this.editForm.mainImage = response.data.id;
-                    return false;
-                } catch (error) {
-                    console.error('上传失败', error);
-                    // 添加错误提示
-                }
-            },
-
-            async uploadImageUrl(f){
-                try {
-                    const response = await axios.post('/MFile/upload', { MFile: f}, {
-                        headers: { 'Content-Type': 'multipart/form-data' }
-                    });
-                    this.editForm.imageUrl = response.data.id;
                     return false;
                 } catch (error) {
                     console.error('上传失败', error);
@@ -381,6 +392,21 @@
                         }
                     }
                 );
+            },
+
+            showDetailDialog(product) {
+                this.isDetail = true;
+                this.detailForm.spuId = product.spuId;
+                this.detailForm.spuName = product.spuName;
+                this.detailForm.spuDesc = product.spuDesc;
+                this.detailForm.mainImage = product.mainImage;
+                this.detailForm.productCategory = product.productCategory;
+                this.detailForm.merchantId = product.merchantId;
+                this.detailForm.createTime = product.createTime;
+                this.detailForm.approvalStatus = product.approvalStatus;
+                this.detailForm.shelfStatus = product.shelfStatus;
+                this.detailForm.sales = product.sales;
+                this.detailForm.createTime = product.createTime;
             },
         }
     });

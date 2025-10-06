@@ -7,12 +7,14 @@ import com.gok.food_map.file.vo.FileUploadVO;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collections;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/MFile")
@@ -22,11 +24,11 @@ public class FileController{
     private  FileService service;
 
     @PostMapping("/upload")
-    public Map<String,String> upload(@RequestParam("MFile") MultipartFile dto) {
-        FileUploadDTO fileUploadDTO = new FileUploadDTO(dto);
-        String id = service.upload(fileUploadDTO).getId();
+    public Map<String,String> upload(FileUploadDTO dto) {
+        String id = service.upload(dto).getId();
         return Collections.singletonMap("id", id);
     }
+
     @GetMapping("/download")
     public void download(Long id, HttpServletResponse response) {
         service.download(id, response);

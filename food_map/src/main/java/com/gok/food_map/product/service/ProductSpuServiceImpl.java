@@ -6,16 +6,21 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gok.food_map.file.service.FileService;
 import com.gok.food_map.product.dto.MerchantGetGoodsDto;
 import com.gok.food_map.product.dto.ProductGetListDto;
+import com.gok.food_map.product.dto.ProductsSpuDto;
 import com.gok.food_map.product.entity.ProductSpu;
 
 import com.gok.food_map.product.mapper.ProductSpuMapper;
 import com.gok.food_map.product.vo.ProductSpuGetListVO;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +33,8 @@ import java.util.List;
 public class ProductSpuServiceImpl extends ServiceImpl<ProductSpuMapper, ProductSpu> implements IService<ProductSpu> {
     @Resource
     private ProductSpuMapper productSpuMapper;
+    @Autowired
+    private FileService fileService;
 
     public List<String> getBanner(){
         QueryWrapper<ProductSpu> wrapper = new QueryWrapper<>();
@@ -89,6 +96,36 @@ public class ProductSpuServiceImpl extends ServiceImpl<ProductSpuMapper, Product
                 .like(dto.getSearchQuery() != null,ProductSpu::getSpuName, dto.getSearchQuery());
         return entityToVO(page, wrapper);
     }
+
+
+
+    //新增
+    @Transactional
+    public void add(ProductsSpuDto dto) {
+        ProductSpu productSpu = new ProductSpu();
+        BeanUtils.copyProperties(dto,productSpu);
+        productSpu.setMerchantId(Long.valueOf(dto.getMerchantId()));
+        productSpu.setSales(Integer.valueOf(dto.getSales()));
+        productSpu.setCreateTime(LocalDateTime.now());
+        productSpuMapper.insert(productSpu);
+        fileService.enable(productSpu.getMainImage());
+    }
+    //编辑
+    @Transactional
+    public void edit(ProductsSpuDto dto) {
+        ProductSpu productSpu = productSpuMapper.selectById(dto.getSpuId());
+        if (dto.getMainImage() == null) {
+            fileService.remove(productSpu.getMainImage());
+        } else {
+            if (!dto.getMainImage().equals(productSpu.getMainImage())) {
+                fileService.remove(productSpu.getMainImage());
+                fileService.enable(dto.getMainImage());
+            }
+        }
+        BeanUtils.copyProperties(dto,productSpu);
+        productSpuMapper.updateById(productSpu);
+    }
+
 }
 
 
