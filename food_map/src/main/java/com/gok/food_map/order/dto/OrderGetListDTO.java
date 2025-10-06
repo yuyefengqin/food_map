@@ -12,7 +12,7 @@ public class OrderGetListDTO {
     private Integer orderStatus;
     private Long merchantId;
     private String userCode;
-    private String beginTime;
-    private String endTime;
+    private String BeginTime;
+    private String EndTime;
     private String payMethod;
 }

@@ -205,7 +205,7 @@ create table product_order
     address_id        bigint         not null,
     pay_method        varchar(20) default null, -- 后续考虑微信/支付宝等方式
     trade_no          bigint      default null,
-    logistics_company varchar(50) default '顺丰公司',
+    logistics_company varchar(50) default null  default '顺丰公司',
     logistics_no      bigint      default null,
     order_status      smallint    not null,-- 1待付款、2待发货、3待收货、4已完成、5已取消、6交易完成、7交易关闭、8未开始
     create_time       timestamp   default current_timestamp,

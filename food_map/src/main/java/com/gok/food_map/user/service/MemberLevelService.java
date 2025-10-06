@@ -1,12 +1,8 @@
 package com.gok.food_map.user.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.gok.food_map.user.dto.LevelGetListDTO;
 import com.gok.food_map.user.dto.LevelSaveDTO;
-import com.gok.food_map.user.entity.MUser;
 import com.gok.food_map.user.entity.MemberLevel;
 import com.gok.food_map.user.mapper.MemberLevelMapper;
 import com.gok.food_map.user.vo.LevelGetListVO;
@@ -65,21 +61,6 @@ public class MemberLevelService {
         }
         return res;
     }
-    public IPage<LevelGetListVO> getLevelList( ) {
-        IPage<MemberLevel> page = new Page<>(1,10);
-        page=mapper.selectPage(page,null);
-        IPage<LevelGetListVO> res = new Page<>();
-        BeanUtils.copyProperties(page,res);
-        List<LevelGetListVO> records = page.getRecords().stream().map(memberLevel -> {
-            LevelGetListVO vo = new LevelGetListVO();
-            BeanUtils.copyProperties(memberLevel, vo);
-            vo.setDiscountRate(memberLevel.getDiscountRate()==null ? null : memberLevel.getDiscountRate().toString());
-            return vo;
-        }).toList();
-        res.setRecords(records);
-        return res;
-    }
-
 
     public void add(LevelSaveDTO dto) {
         check(dto,true);

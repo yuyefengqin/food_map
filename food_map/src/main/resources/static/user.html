@@ -152,15 +152,14 @@
             </vxe-grid>
         </div>
     </template>
-
     <template v-else-if='isLevel'>
-        <el-button  text="plain" @click=" isLevel = false"> < 返回</el-button>
+        <el-button text="plain" @click="isLevel = false"> < 返回</el-button>
         <h3>📱角色管理</h3>
         <hr>
         <vxe-grid v-bind="levelOptions" style="width: 100%">
             <template #toolbar >
                 <el-button type="danger" @click="levelAdd">+ 新增</el-button>
-            </template>
+                </template>
             <template #operate="{ row }">
                 <el-button size="small" type="primary" @click="editLevel(row)">编辑</el-button>
                 <el-button size="small" type="danger" @click="onRemoveLevel(row.id)">删除</el-button>
@@ -168,7 +167,7 @@
         </vxe-grid>
         <el-dialog v-model="showLevelDialog" :title="isLevelEdit ? '编辑' : '新增'" width="400">
             <el-form ref="levelForm" :model="levelForm" :rules="levelRules" label-width="auto">
-                <el-form-item label="会员等级名称" prop="levelName">
+                <el-form-item label="会员等级名称" prop="name">
                     <el-input v-model="levelForm.levelName" maxlength="20" />
                 </el-form-item>
                 <el-form-item label="折扣" prop="discountRate">
@@ -179,6 +178,7 @@
                 <el-button @click="showLevelDialog = false">取消</el-button>
                 <el-button type="primary"  @click="onLevelSubmit">确定</el-button>
             </template>
+
         </el-dialog>
     </template>
 </div>
@@ -247,7 +247,7 @@
                     headerAlign: 'center',
                     align: 'center',
                     columns: [
-                        {type: 'seq', width: 60},
+                        {field: 'levelId', title: '会员等级编号',},
                         {field: 'levelName',title: '会员等级'},
                         {field: 'discountRate',title: '折扣'},
                         {title: '操作', slots: {default: 'operate'}, width: 220}
@@ -489,7 +489,6 @@
             },
             onLevel(){
                 this.isLevel = true;
-                this.levelOptions.data = [];
                 this.levelGetList();
             },
             editLevel(level){
@@ -506,14 +505,10 @@
                 await axios.post('/level/remove', {id});
                 await this.levelGetList();
             },
-             levelGetList(){
-                axios.post('/level/getLevels').then(response => {
-                    try{
-                        this.levelOptions.data = response.data.records;
-                    }catch(error){
-                        console.log(error);
-                    }
-                });
+            async levelGetList(){
+                const response = await axios.post('/level/getList')
+                this.levelOptions.data = response.data.records;
+                console.log(this.levelOptions.data);
             },
             async onLevelSubmit(){
                 this.$refs.levelForm.validate(async valid => {
