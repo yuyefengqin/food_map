@@ -23,6 +23,7 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 
@@ -37,16 +38,18 @@ public class ProductOrderService{
     private static volatile long state = 0L;
     private final ProductOrderMapper mapper;
     private final OrderItemMapper orderItemMapper;
+    private final OrderItemService orderItemService;
     private final MUserMapper mUserMapper;
 
     public void remove(OrderRemoveDTO dto) {
         ProductOrder productOrder = mapper.selectById(dto.getOrderId());
-        OrderItem orderItem = orderItemMapper.selectById(dto.getOrderId());
-        if(productOrder == null ||orderItem == null){
+
+        if(productOrder == null){
             throw new RuntimeException("该订单不存在");
         }
+        orderItemService.remove(dto.getOrderId());
         mapper.deleteById(dto.getOrderId());
-        orderItemMapper.deleteById(dto.getOrderId());
+
     }
 
     public void edit(OrderSaveDTO dto) {
@@ -56,7 +59,8 @@ public class ProductOrderService{
             throw new RuntimeException("改订单不存在");
         }
         Long userId = dto.getUserId();
-        if(userId == null){
+        MUser mUser = mUserMapper.selectById(userId);
+        if(mUser == null){
             throw new RuntimeException("用户不存在");
         }
         Long merchantId = dto.getMerchantId();
@@ -127,16 +131,17 @@ public class ProductOrderService{
         List<OrderGetListVO> orders = mapper.selectBy(
                 dto.getOrderId()==null? null:dto.getOrderId(),
                 dto.getOrderStatus(),
+                dto.getMerchantId()==null? null:dto.getMerchantId(),
                 dto.getUserCode()==null? null:dto.getUserCode(),
-                dto.getBeginTime().isEmpty()? null: LocalDateTime.parse(dto.getBeginTime()),
-                dto.getEndTime().isEmpty()? null: LocalDateTime.parse(dto.getEndTime()),
-                dto.getPayMethod().isEmpty()? null:dto.getPayMethod()
+                dto.getBeginTime() == null? null: LocalDateTime.parse(dto.getBeginTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                dto.getEndTime() == null? null: LocalDateTime.parse(dto.getEndTime(),DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                (!StringUtils.hasText(dto.getPayMethod())) ? null:dto.getPayMethod()
         );
         IPage<OrderGetListVO> res = new Page<>();
         BeanUtils.copyProperties(page, res);
-        res.setRecords(orders.stream().map(OrderGetListVO->{
+        res.setRecords(orders.stream().map(orderGetListVO->{
             OrderGetListVO vo = new OrderGetListVO();
-            BeanUtils.copyProperties(vo,res);
+            BeanUtils.copyProperties(orderGetListVO,vo);
             return vo;
         }).toList());
         return res;

@@ -4,6 +4,7 @@ import com.gok.food_map.order.entity.ProductOrder;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.gok.food_map.order.vo.OrderGetListVO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,13 +17,13 @@ import java.util.List;
 */
 @Mapper
 public interface ProductOrderMapper extends BaseMapper<ProductOrder> {
-    List<OrderGetListVO> selectBy(Long orderId,
-                                  Integer orderStatus,
-                                   Long userCode,
-                                  LocalDateTime BeginTime,
-                                  LocalDateTime EndTime,
-                                  String payMethod
-
+    List<OrderGetListVO> selectBy(@Param("orderId") Long orderId,
+                                  @Param("orderStatus") Integer orderStatus,
+                                  @Param("merchantId") Long merchantId,
+                                  @Param("userCode") String  userCode,
+                                  @Param("beginTime") LocalDateTime beginTime,
+                                  @Param("endTime") LocalDateTime endTime,
+                                  @Param("payMethod") String payMethod
     );
 }
 

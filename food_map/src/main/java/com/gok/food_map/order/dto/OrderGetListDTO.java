@@ -11,8 +11,8 @@ public class OrderGetListDTO {
     private Long orderId;
     private Integer orderStatus;
     private Long merchantId;
-    private Long userCode;
-    private String BeginTime;
-    private String EndTime;
+    private String userCode;
+    private String beginTime;
+    private String endTime;
     private String payMethod;
 }

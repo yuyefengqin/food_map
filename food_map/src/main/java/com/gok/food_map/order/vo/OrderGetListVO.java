@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Data
 public class OrderGetListVO {
 
-    private Long orderId;//
+    private String orderId;//
 
     /**
      * 用户ID
@@ -18,7 +18,7 @@ public class OrderGetListVO {
     /**
      * 商户ID
      */
-    private Long merchantId;//
+    private String merchantId;//
 
     /**
      * 订单总金额（商品+配送费）
