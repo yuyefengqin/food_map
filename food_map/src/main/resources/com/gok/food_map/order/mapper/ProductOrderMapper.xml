@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gok.food_map.order.mapper.ProductOrderMapper">
+
+
+    <select id="selectBy" resultType="com.gok.food_map.order.vo.OrderGetListVO">
+    SELECT
+    p.order_id as orderId,
+    <choose>
+        <when test="userCode != null">
+            u.code as userCode,
+        </when>
+        <otherwise>
+            (SELECT code FROM m_user WHERE id = p.user_id) as userCode,
+        </otherwise>
+    </choose>
+    p.merchant_id as merchantId,
+    p.order_amount as orderAmount,
+    p.product_amount as productAmount,
+    p.delivery_fee as deliveryFee,
+    p.delivery_method as deliveryMethod,
+    p.address_id as addressId,
+    p.pay_method as payMethod,
+    p.trade_no as tradeNo,
+    p.logistics_company as logisticsCompany,
+    p.logistics_no as logisticsNo,
+    p.order_status as orderStatus,
+    p.create_time as createTime
+    FROM product_order AS p
+    <!-- 只有当userCode有值时才关联用户表 -->
+    <if test="userCode != null">
+        INNER JOIN m_user AS u ON p.user_id = u.id AND u.code = #{userCode}
+    </if>
+    <where>
+        <!-- 订单ID模糊查询 -->
+        <if test="orderId != null">
+            AND CAST(p.order_id AS TEXT) LIKE CONCAT('%', #{orderId}, '%')
+        </if>
+        <!-- 订单状态精确匹配 -->
+        <if test="orderStatus != null">
+            AND p.order_status = #{orderStatus}
+        </if>
+        <!-- 商户ID模糊查询 -->
+        <if test="merchantId != null">
+            AND CAST(p.merchant_id AS TEXT) LIKE CONCAT('%', #{merchantId}, '%')
+        </if>
+        <!-- 支付方式模糊查询 -->
+        <if test="payMethod != null">
+            AND p.pay_method LIKE CONCAT('%', #{payMethod}, '%')
+        </if>
+        <!-- 时间筛选 -->
+        <if test="beginTime != null">
+            AND p.create_time &gt;= #{beginTime}
+        </if>
+        <if test="endTime != null">
+            AND p.create_time &lt;= #{endTime}
+        </if>
+    </where>
+    ORDER BY p.create_time DESC
+    </select>
+</mapper>

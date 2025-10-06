@@ -19,11 +19,11 @@ create table m_user
     name        text      default null,
     gender      text      default '男',
     avatar      bigint,
-    city        text,
+    city        bigint,
     level_id    smallint  default 1, -- 关联member_level，默认普通会员
     create_time timestamp default current_timestamp,
     update_time timestamp,
-    enable      boolean   default true
+    valid      boolean   default true
 );
 comment on table m_user is '用户表';
 comment on column m_user.id is '用户ID';
@@ -36,7 +36,7 @@ comment on column m_user.city is '注册城市';
 comment on column m_user.level_id is '会员等级';
 comment on column m_user.create_time is '注册时间';
 comment on column m_user.update_time is '更新时间';
-comment on column m_user.enable is '状态';
+comment on column m_user.valid is '状态';
 
 -- 会员等级表
 create table member_level
