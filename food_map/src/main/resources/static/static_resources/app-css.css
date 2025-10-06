@@ -80,7 +80,7 @@ body{
 .topbar .top-right .userAvatar{
     cursor: pointer;
     margin-right: 25px;
-    transition: all 0.3s ease-in;
+    transition: all 0.1s ease-in;
 
 }
 .topbar .top-right .userAvatar:hover{
@@ -91,7 +91,7 @@ body{
 }
 .user-avatar-detail-item .item{
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     font-size: 10px;
     font-weight: bold;
     cursor: pointer;

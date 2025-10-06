@@ -35,9 +35,14 @@ public class LoginInterceptor implements HandlerInterceptor {
             // 如果存在 Auth 注解且要求认证
             if (auth != null && auth.require()) {
                 // 从请求头中获取 token 用于认证
-                String token = request.getSession().getAttribute("token").toString();
-                assert token != null;
-//                String token = request.getHeader("token");
+                Object o = request.getSession().getAttribute("token");
+                String token;
+                if(o == null){
+                    token = request.getHeader("Authorization");
+//                    request.getRequestDispatcher("/error/token").forward(request, response);
+                }else {
+                    token = o.toString();
+                }
                 // 如果 token 不为空且通过验证
                 if (StringUtils.isNotBlank(token)) {
                     if (TokenUtil.verifyToken(token)) {
@@ -45,11 +50,11 @@ public class LoginInterceptor implements HandlerInterceptor {
                         return true;
                     } else {
                         // 认证失败 重定向到 token 错误页面
-                        request.getRequestDispatcher("/error/tokenError").forward(request, response);
+                        response.sendRedirect("/error/tokenError");
                     }
                 } else {
                     // 未提供 token 重定向到 token 缺失页面
-                    request.getRequestDispatcher("/error/token").forward(request, response);
+                    response.sendRedirect("/error/token");
                 }
             } else {
                 // 不需要认证 继续处理请求

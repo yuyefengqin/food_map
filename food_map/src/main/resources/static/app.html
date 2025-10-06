@@ -36,7 +36,7 @@
                         v-if="isLogined"
                 >
                     <template #reference>
-                        <div class="userAvatar" @click="toUserDetail">
+                        <div class="userAvatar">
                             <el-avatar :size="30" :src="`../img/默认头像.png`"></el-avatar>
                         </div>
                     </template>
@@ -45,18 +45,18 @@
 
                         <ul>
                             <li><div class="item" @click="toUserDetailPage"><h3 >个人中心</h3><span>></span></div></li>
-                            <li><div class="item" @click=""><h3 >购物车</h3><span>></span></div></li>
-                            <li><div class="item" @click=""><h3 >我的订单</h3><span>></span></div></li>
-                            <li><div class="item" @click=""><h3 >设置</h3><span>></span></div></li>
+                            <li><div class="item" @click="toUserShoppingCart"><h3 >购物车</h3><span>></span></div></li>
+                            <li><div class="item" @click="toUserOrder"><h3 >我的订单</h3><span>></span></div></li>
+                            <li><div class="item" @click="toSetting"><h3 >设置</h3><span>></span></div></li>
                         </ul>
                         <el-button type="danger" plain style="width: 100%;" @click="outLogin">退出登录</el-button>
                     </div>
                 </el-popover>
 
-                <ul class="top-nav">
-                    <li><a href="#">我的订单</a></li>
-                    <li><a href="#">购物车</a></li>
-                    <li><a href="#">我的</a></li>
+                <ul class="top-nav" v-if="isLogined">
+                    <li><a href="http://localhost:8080/userDetail.html?itemNumber=3">我的订单</a></li>
+                    <li><a href="http://localhost:8080/userDetail.html?itemNumber=2">购物车</a></li>
+                    <li><a href="http://localhost:8080/userDetail.html?itemNumber=1">我的</a></li>
                     <li><a href="#">美食地图会员</a></li>
                 </ul>
             </div>
@@ -205,7 +205,7 @@
                 <ul v-for="(skuValue, skuKey) in skuObj">
                     <li>{{skuKey}}</li>
                     <el-checkbox-group v-model="selectedSpecs" size="large"  :max="3">
-                        <el-checkbox-button v-for=" vv in skuValue" :key="vv" :label="vv">
+                        <el-checkbox-button v-for=" vv in skuValue" :key="vv" :label="vv" >
                             {{ vv }}
                         </el-checkbox-button>
                     </el-checkbox-group>
@@ -468,8 +468,26 @@
             // this.handleSku();
             await this.getGoodsList();
             await this.getBanner();
+            this.autoLogin();
         },
         methods:{
+            autoLogin(){
+                axios.post('/user/autoLogin')
+                    .then(response => {
+                        if (response.status === 200) {
+                            if (response.data.id !== null) {
+                                this.$message({
+                                    message:'自动登录成功',
+                                    type: 'success'
+                                })
+                                this.loginedUSerData =  response.data;
+                                this.isLogined = true;
+                            }
+                        }
+                    }).catch(error => {
+
+                })
+            },
             addShoppingCart(){
                 const toSendData = Object.fromEntries(this.selectedSpecsPrice);
                 if (this.loginedUSerData.id !== '') {
@@ -506,9 +524,6 @@
                     })
                 }
             },
-            toUserDetail(){
-                this.userAvatarSize = 50;
-            },
             toUserDetailPage(){
                 if(!this.isLogined){
                     this.$message({
@@ -517,7 +532,44 @@
                     });
                     return;
                 }else{
-                    window.location.href = `http://localhost:8080/userDetail.html`;
+                    window.location.href = `http://localhost:8080/userDetail.html?itemNumber=1`;
+                    // window.open('http://localhost:8080/userDetail','_blank');
+                }
+            },
+            toUserShoppingCart(){
+                if(!this.isLogined){
+                    this.$message({
+                        message: '请先登录',
+                        type: 'warning'
+                    });
+                    return;
+                }else{
+                    window.location.href = `http://localhost:8080/userDetail.html?itemNumber=2`;
+
+                }
+            },
+            toUserOrder(){
+                if(!this.isLogined){
+                    this.$message({
+                        message: '请先登录',
+                        type: 'warning'
+                    });
+                    return;
+                }else{
+                    window.location.href = `http://localhost:8080/userDetail.html?itemNumber=3`;
+
+                }
+            },
+            toSetting(){
+                if(!this.isLogined){
+                    this.$message({
+                        message: '请先登录',
+                        type: 'warning'
+                    });
+                    return;
+                }else{
+                    window.location.href = `http://localhost:8080/userDetail.html?itemNumber=4`;
+
                 }
             },
             ceshi(){
@@ -857,6 +909,7 @@
             },
             totalPrice() {
                 let total = 0;
+                this.selectedSpecsPrice = new Map();
                 this.selectedSpecs.forEach(specValue => {
                     this.selectedSpecsPrice.set(specValue,this.findPriceBySpecs(specValue));
                     total += this.findPriceBySpecs(specValue);

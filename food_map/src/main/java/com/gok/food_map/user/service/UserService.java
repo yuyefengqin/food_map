@@ -5,6 +5,8 @@ import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.gok.food_map.district.mapper.MAddressMapper;
 import com.gok.food_map.exception.ServiceException;
 import com.gok.food_map.file.service.FileService;
@@ -16,6 +18,7 @@ import com.gok.food_map.user.vo.LevelGetListVO;
 import com.gok.food_map.user.vo.UserGetListVO;
 import com.gok.food_map.user.vo.UserLoginVO;
 import com.gok.food_map.util.TokenUtil;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +41,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -47,7 +51,7 @@ import java.util.regex.Pattern;
 */
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Lazy)
-public class UserService  {
+public class UserService extends ServiceImpl<MUserMapper, MUser> implements IService<MUser> {
 
     private static final String PASSWORD = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z\\W]{6,18}$";//密码
 
@@ -59,15 +63,42 @@ public class UserService  {
 
     private final MemberLevelService memberLevelService;
 
+    @Transactional(rollbackFor = Exception.class)
     public void logout(HttpServletRequest request) {
+        Map<String, String> token = TokenUtil.getIdByTokenSafe(request);
+        this.remove(new UserRemoveDTO(Long.parseLong(token.get("id"))));
         request.getSession().removeAttribute("token");
     }
+
+
+    public UserLoginVO autoLogin(HttpServletRequest request) {
+        Map<String, String> token = TokenUtil.getIdByTokenUnsafe(request);
+        if (token == null) {
+            return new UserLoginVO();
+        }
+        long id = Long.parseLong(token.get("id"));
+        MUser mUser = mUserMapper.selectById(id);
+        if (mUser != null) {
+            UserLoginVO vo = new UserLoginVO();
+            BeanUtils.copyProperties(mUser, vo);
+            vo.setId(mUser.getId().toString());
+            vo.setAvatar((mUser.getAvatar() != null) ? mUser.getAvatar().toString() : "");
+            vo.setCity((mUser.getCity() != null) ? mUser.getCity().toString() : "");
+            vo.setCreateTime(mUser.getCreateTime().toString());
+            return  vo;
+        }
+        return new UserLoginVO();
+    }
     public UserLoginVO userLogin(UserLoginDto dto, HttpServletRequest request) {
+        UserLoginVO vo = new UserLoginVO();
         LambdaQueryWrapper<MUser> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(dto.getCode() != null, MUser::getCode, dto.getCode());
+        wrapper.eq(dto.getPassword() != null, MUser::getPassword, dto.getPassword());
         MUser mUser = mUserMapper.selectOne(wrapper);
         if (mUser == null) {
-            request.getRequestDispatcher("/error/accountError");
+
+//            request.getRequestDispatcher("/error/accountError");
+            ServiceException.build("登录失败");
             return null;
         }
         if(!mUser.getPassword().equals(dto.getPassword())) {
@@ -79,7 +110,6 @@ public class UserService  {
         String token = TokenUtil.createToken(createJsonp);
         request.setAttribute("Authorization", token);
         request.getSession().setAttribute("token", token);
-        UserLoginVO vo = new UserLoginVO();
         BeanUtils.copyProperties(mUser, vo);
         vo.setId(mUser.getId().toString());
         vo.setAvatar((mUser.getAvatar() != null) ? mUser.getAvatar().toString() : "");
@@ -332,8 +362,7 @@ public class UserService  {
     }
 
     public UserLoginVO getUserInfo(HttpServletRequest request) {
-        String token = request.getSession().getAttribute("token").toString();
-        Map<String, String> map = TokenUtil.getToken(token);
+        Map<String, String> map = TokenUtil.getIdByTokenSafe(request);
         MUser user = mUserMapper.selectById(Long.valueOf(map.get("id")));
         if (user == null) {
             ServiceException.build("无效会话或数据不存在");
@@ -346,6 +375,28 @@ public class UserService  {
         vo.setCreateTime(user.getCreateTime() == null ? null : user.getCreateTime().toString());
         return vo;
     }
+
+    public void editPassword(UserEditPasswordDto dto, HttpServletRequest request) {
+        Map<String, String> token = TokenUtil.getIdByTokenSafe(request);
+        LambdaQueryWrapper<MUser> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq((!Objects.equals(
+                token.get("id"), "")),
+                MUser::getId,
+                Long.valueOf(token.get("id")))
+                .eq((!dto.getOldPassword().isEmpty()),
+                MUser::getPassword,
+                dto.getOldPassword());
+        MUser mUser = mUserMapper.selectOne(wrapper);
+        if (mUser == null) {
+            ServiceException.build("用户不存在");
+        }
+        mUser.setPassword(dto.getNewPassword());
+        if(mUserMapper.updateById(mUser) == 0){
+            ServiceException.build("修改失败");
+        }
+    }
+
+
 }
 
 

@@ -5,10 +5,11 @@ import cn.hutool.json.JSONObject;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.gok.food_map.exception.ServiceException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 
 //Token生成工具类 用于生成和验证JWT令牌
@@ -65,8 +66,44 @@ public class TokenUtil {
     public static boolean checkToken(String token) {
         return JWT.decode(token).getExpiresAt().before(new Date());
     }
-    public static Map<String,String> getToken(String token) {
-        //todo
+    public static Map<String,String> getIdByTokenSafe(HttpServletRequest request) {
+        if(request == null){
+            ServiceException.build("request is null");
+        }
+        Object o = request.getSession().getAttribute("token");
+        if(o == null){
+            ServiceException.build("token is null");
+        }
+        String token = o.toString();
+        if (token.isEmpty() || token.isBlank()) {
+            ServiceException.build("无效请求");
+        }
+        if (TokenUtil.checkToken(token)) {
+            ServiceException.build("登录过期");
+        }
+        return TokenToMap(token);
+
+    }
+    public static Map<String,String> getIdByTokenUnsafe(HttpServletRequest request) {
+        if(request == null){
+            return null;
+        }
+        Object o = request.getSession().getAttribute("token");
+        if(o == null){
+            return null;
+        }
+        String token = o.toString();
+        if (token.isEmpty() || token.isBlank()) {
+            return null;
+        }
+        if (TokenUtil.checkToken(token)) {
+            return null;
+        }
+        return TokenToMap(token);
+
+    }
+
+    private static Map<String, String> TokenToMap(String token) {
         List<String> stream = Arrays.stream(JWT.decode(token)
                 .getClaim("sub")
                 .toString()
@@ -80,7 +117,6 @@ public class TokenUtil {
         Map<String, String> map = new HashMap<String, String>();
         map.put(stream.getFirst(), stream.get(1));
         return map;
-
     }
 }
 

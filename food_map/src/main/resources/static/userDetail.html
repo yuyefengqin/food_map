@@ -140,9 +140,9 @@
                             <!-- 设置 -->
                             <h2>设置</h2>
                             <div class="setting-content">
-                                <el-popconfirm title="你确定注销账户？" placement="bottom-start">
+                                <el-popconfirm title="你确定注销账户？" placement="bottom-start" @confirm="deleteAccount">
                                     <template #reference>
-                                        <el-button type="danger" @click="deleteAccount">注销账号</el-button>
+                                        <el-button type="danger" >注销账号</el-button>
                                     </template>
                                 </el-popconfirm>
                                 <el-button type="primary" @click="editPassword">更改密码</el-button>
@@ -184,11 +184,11 @@
         <template v-if="isEditPasswrod" class="editPasswordDialog">
             <el-dialog v-model="showDialogPassword" :title="isEdit ? '编辑' : ''" width="400">
                 <el-form ref="editForm" :model="editForm" :rules="rules" label-width="auto">
-                    <el-form-item label="旧密码" prop="password">
-                        <el-input v-model="editForm.password" maxlength="20" />
+                    <el-form-item label="旧密码" prop="password" >
+                        <el-input v-model="editForm.password" maxlength="20" type="password"/>
                     </el-form-item>
-                    <el-form-item label="新密码" prop="password">
-                        <el-input v-model="editForm.newPassword" maxlength="20" />
+                    <el-form-item label="新密码" prop="password" >
+                        <el-input v-model="editForm.newPassword" maxlength="20"  type='password' />
                     </el-form-item>
                 </el-form>
                 <template #footer>
@@ -202,7 +202,7 @@
         const app =  Vue.createApp({
             data(){
                 return{
-                    finalBuyPrice:'',
+                    finalBuyPrice:'0.00',
                     userShoppingCarts:[],
                     isEditPasswrod:false,
                     showDialogPassword:false,
@@ -212,7 +212,8 @@
                     isShoppingPage:false,
                     isOrderPage:false,
                     isSettingPage:false,
-                    itemNumber:'1',
+                    itemNumber:'',
+                    urlItemNumber: null,
                     cartGoodsBugNumber:1,
                     loginedUSerData:{
                         id:'',
@@ -260,9 +261,15 @@
             async created(){
                 this.getUserInfo();
                 await this.initDistricts();
-
+                this.initItem();
+                this.activateDefaultItem();
+                // this.getUserInfo();
+                this.initDistricts();
             },
             methods:{
+                initItem(){
+
+                },
                 backStore(){
                     // window.location.href = 'http://localhost:8080/app.html';
                     window.open('http://localhost:8080/app.html','_self');
@@ -300,7 +307,7 @@
                             });
                         }
 
-                        item.totalPrice = parseFloat(unitPrice * (item.quantity || 1));
+                        item.totalPrice = parseFloat(unitPrice * (item.quantity || 1).toFixed(2));
                     });
                 },
                 uploadAvatar(f) {
@@ -319,15 +326,14 @@
                     })
                 },
                 deleteAccount(){
-                    axios.post('http://localhost:8080/user/deleteUser',{
-                        id:this.loginedUSerData.id
-                    }).then(response =>{
+                    axios.post('http://localhost:8080/user/logout').then(response =>{
                         if(response.status === 200){
                             this.$message({
                                 message: '注销成功',
                                 type: 'success'
                             });
                             // 返回商城页
+                            this.backStore();
                         }else{
                             this.$message({
                                 message: '注销失败',
@@ -341,15 +347,24 @@
                     this.showDialogPassword = true;
                 },
                 onSubmitPassword(){
+                    if(this.editForm.newPassword == null && this.editForm.password == null){
+                       this.$message({
+                           message:'密码不能为空',
+                           type: 'warning'
+                       });
+                       return false;
+                    }
                     axios.post('http://localhost:8080/user/editPassword',{
-                        id:this.loginedUSerData.id,
-                        newPassword:this.editForm.newPassword
+                        oldPassword:this.editForm.password.trim(),
+                        newPassword:this.editForm.newPassword.trim()
                     }).then(response =>{
                         if(response.status === 200){
                             this.$message({
                                 message: '修改密码成功',
                                 type: 'success'
                             });
+                            this.showDialogPassword = false;
+                            this.editForm = {};
                         }else{
                             this.$message({
                                 message: '修改密码失败',
@@ -358,11 +373,57 @@
                         }
                     })
                 },
+                //解析url参数
+                parseUrlParams() {
+                    const query = window.location.search.substring(1);
+                    const params = {};
+                    query.split('&').forEach(pair => {
+                        const [key, value] = pair.split('=');
+                        params[key] = decodeURIComponent(value);
+                    });
+                    return params;
+                },
+                //根据选择激化菜单
+                activateDefaultItem() {
+                    const params = this.parseUrlParams();
+                    if(params.itemNumber) {
+                        this.urlItemNumber = params.itemNumber;
+                        // 根据itemNumber激活菜单
+                        this.itemNumber = params.itemNumber;
+                        switch(params.itemNumber) {
+                            case '1':
+                                this.toUserDetail();
+                                break;
+                            case '2':
+                                this.toShoppingCart();
+                                break;
+                            case '3':
+                                this.toOrder();
+                                break;
+                            case '4':
+                                this.toSetting();
+                                break;
+                            default:
+                                this.toUserDetail();
+                        }
+                    } else {
+                        // 默认显示详细信息
+                        this.toUserDetail();
+                    }
+                },
+               //更新参数
+                updateUrlItemNumber(number) {
+                    const url = new URL(window.location);
+                    url.searchParams.set('itemNumber', number);
+                    window.history.replaceState(null, null, url.toString());
+                },
                 toUserDetail(){
                     this.isUserDetailPage = true;
                     this.isOrderPage = false;
                     this.isShoppingPage = false;
                     this.isSettingPage = false;
+                    this.updateUrlItemNumber('1')
+                    this.getUserInfo();
                     console.log('用户详细')
                 },
                 toShoppingCart(){
@@ -391,13 +452,15 @@
                             type: 'warning'
                         })
                     })
-                    console.log('购物车')
+                    this.updateUrlItemNumber('2');
+                    console.log('购物车');
                 },
                 toOrder(){
                     this.isUserDetailPage = false;
                     this.isOrderPage = true;
                     this.isShoppingPage = false;
                     this.isSettingPage = false;
+                    this.updateUrlItemNumber('3');
                     console.log('订单')
                 },
                 toSetting(){
@@ -405,6 +468,7 @@
                     this.isOrderPage = false;
                     this.isShoppingPage = false;
                     this.isSettingPage = true;
+                    this.updateUrlItemNumber('4');
                     console.log('设置')
                 },
                 async initDistricts() {
@@ -467,7 +531,7 @@
                            message:'请完成先补全性别和姓名',
                            type: 'warning'
                         });
-                        return;
+                        return false;
                     }
                     axios.post('http://localhost:8080/user/edit',
                         this.editForm

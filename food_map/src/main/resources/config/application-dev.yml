@@ -12,6 +12,12 @@ spring:
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-
+  type-handlers-package: com.gok.food_map.definetypehandler
 server.port: 8080
-
+server:
+  error:
+    whitelabel:
+      enabled: false
+  servlet:
+    session:
+      timeout: 30m
