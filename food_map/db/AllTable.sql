@@ -174,8 +174,9 @@ create table shopping_cart
 (
     cart_id     bigint primary key,
     user_id     bigint not null,
-    sku_id      bigint not null,
+    spu_id      bigint not null,
     quantity    int    not null default 1,
+    specs_price jsonb not null ,
     is_selected boolean         default true, -- 是否选中
     create_time timestamp       default current_timestamp,
     update_time timestamp
@@ -183,8 +184,9 @@ create table shopping_cart
 comment on table shopping_cart is '购物车表';
 comment on column shopping_cart.cart_id is '购物车ID';
 comment on column shopping_cart.user_id is '所属用户ID';
-comment on column shopping_cart.sku_id is '商品SKU ID';
+comment on column shopping_cart.spu_id is '商品SKU ID';
 comment on column shopping_cart.quantity is '购买数量';
+comment on column shopping_cart.specs_price is '规格:价钱';
 comment on column shopping_cart.is_selected is '是否选中';
 comment on column shopping_cart.create_time is '添加时间';
 comment on column shopping_cart.update_time is '更新时间';
@@ -224,12 +226,12 @@ comment on column product_order.delivery_method is '配送方式（如顺丰速�
 comment on column product_order.delivery_time is '配送时间（用户选择）';
 comment on column product_order.address_id is '收货地址ID（关联user_address）';
 comment on column product_order.pay_method is '支付方式'; -- 默认统一填网页端
-comment on column product_order.trade_no is '交易流水号（支付成功后生成）';
+comment on column product_order.trade_no is '交易流水号（支付成功后生成）';--
 comment on column product_order.logistics_company is '物流公司'; -- 统一先用顺丰
 comment on column product_order.logistics_no is '物流单号'; -- 随机生成
 comment on column product_order.order_status is '订单状态'; -- 1待付款、2待发货、3待收货、4已完成、5已取消、6交易完成、7交易关闭、8未开始
 comment on column product_order.create_time is '创建时间';
-comment on column product_order.pay_time is '支付时间';
+comment on column product_order.pay_time is '支付时间';--
 comment on column product_order.ship_time is '发货时间';
 comment on column product_order.receive_time is '收货时间';
 comment on column product_order.complete_time is '交易完成时间';
@@ -243,7 +245,7 @@ create table order_item
     spu_id        bigint         not null,
     sku_id        bigint         not null,
     product_name  text           not null,
-    specs         text           not null,
+    specs         jsonb          not null,
     unit_price    numeric(10, 2) not null,
     quantity      int            not null,
     sub_amount    numeric(10, 2) not null,                                                                                     -- 单价*数量

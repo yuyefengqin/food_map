@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.gok.food_map.district.mapper.MAddressMapper;
+import com.gok.food_map.exception.ServiceException;
 import com.gok.food_map.file.service.FileService;
 import com.gok.food_map.user.dto.*;
 import com.gok.food_map.user.entity.MUser;
@@ -36,6 +37,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -75,12 +77,13 @@ public class UserService  {
         JSONObject createJsonp = JSONUtil.createObj().put("id", mUser.getId());
         assert createJsonp != null;
         String token = TokenUtil.createToken(createJsonp);
+        request.setAttribute("Authorization", token);
         request.getSession().setAttribute("token", token);
         UserLoginVO vo = new UserLoginVO();
         BeanUtils.copyProperties(mUser, vo);
         vo.setId(mUser.getId().toString());
-        vo.setAvatar(mUser.getAvatar().toString());
-        vo.setCity(mUser.getCity().toString());
+        vo.setAvatar((mUser.getAvatar() != null) ? mUser.getAvatar().toString() : "");
+        vo.setCity((mUser.getCity() != null) ? mUser.getCity().toString() : "");
         vo.setCreateTime(mUser.getCreateTime().toString());
         System.out.println(request.getSession().getAttribute("token").toString());
         return vo;
@@ -316,6 +319,22 @@ public class UserService  {
         if (isAdd) {
             dto.setValid(true);
         }
+    }
+
+    public UserLoginVO getUserInfo(HttpServletRequest request) {
+        String token = request.getSession().getAttribute("token").toString();
+        Map<String, String> map = TokenUtil.getToken(token);
+        MUser user = mUserMapper.selectById(Long.valueOf(map.get("id")));
+        if (user == null) {
+            ServiceException.build("无效会话或数据不存在");
+        }
+        UserLoginVO vo = new UserLoginVO();
+        BeanUtils.copyProperties(user, vo);
+        vo.setId(user.getId().toString());
+        vo.setAvatar(user.getAvatar() == null ? null : user.getAvatar().toString());
+        vo.setCity(user.getCity() == null ? null : user.getCity().toString());
+        vo.setCreateTime(user.getCreateTime() == null ? null : user.getCreateTime().toString());
+        return vo;
     }
 }
 

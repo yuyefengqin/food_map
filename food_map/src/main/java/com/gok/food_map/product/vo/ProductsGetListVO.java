@@ -5,6 +5,8 @@ import com.gok.food_map.definetypehandler.ListStrToArrayTypeHandler;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -23,6 +25,7 @@ public class ProductsGetListVO {
      * 商品描述
      */
     private String spuDesc;
+
     /**
      * 所属商户名字
      */
@@ -79,4 +82,11 @@ public class ProductsGetListVO {
     @TableField(typeHandler = ListStrToArrayTypeHandler.class)
     private String imageUrl;
 
+    public LocalDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
 }

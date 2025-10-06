@@ -80,7 +80,7 @@
         </vxe-grid>
 
         <!--       审核和新增页面-->
-        <el-dialog v-model="showDialog" :title="isEdit ? '审核' : '新增'" width="400">
+        <el-dialog v-model="showDialog" :title="isEdit ? '审核' : '新增'" width="600">
             <el-form ref="editForm" :model="editForm" :rules="rules" label-width="auto">
 
                 <!--                商品ID-->
@@ -124,21 +124,25 @@
 
                 <!--                主图-->
                 <el-form-item label="主图" prop="mainImage">
-                    <el-upload :show-MFile-list="false" :before-upload="uploadMainImage"  >
-<!--                        <img v-if="editForm.mainImage" :src="`/MFile/download?id=${editForm.mainImage}`" style="width: 100px; height: 100px" />-->
-                        <img v-if="editForm.mainImage"  style="width: 100px; height: 100px" />
+                    <el-upload :show-MFile-list="false" :before-upload="uploadMainImage">
+                        <img v-if="editForm.mainImage"  :src="`/MFile/download?id=${editForm.mainImage}`" style="width: 100px; height: 100px" />
                         <el-icon v-else><Plus /></el-icon>
                     </el-upload>
                 </el-form-item>
 
                 <!--                上传SKU图片URL-->
                 <el-form-item label="详细图" prop="imageUrl">
-                    <el-upload :show-MFile-list="false" :before-upload="uploadImageUrl"  >
-<!--                        <img v-if="editForm.imageUrl" :src="`/MFile/download?id=${editForm.imageUrl}`" style="width: 100px; height: 100px" />-->
-                        <img v-if="editForm.mainImage"  style="width: 100px; height: 100px" />
+                    <el-upload
+                               :before-upload="uploadImageUrl"
+                                multiple>
+                        <img v-if="editForm.imageUrl"  :src="`/MFile/download?id=${editForm.imageUrl}`" style="width: 100px; height: 100px" />
                         <el-icon v-else><Plus /></el-icon>
                     </el-upload>
+                    <el-dialog :visible.sync="dialogVisible">
+                        <img v-if="editForm.imageUrl"  :src="`/MFile/download?id=${editForm.imageUrl}`" style="width: 100px; height: 100px" width="100%" alt="">
+                    </el-dialog>
                 </el-form-item>
+
                 <!--                上架状态-->
                 <el-form-item v-if="isEdit" label="上架状态">
                     <el-select v-model="editForm.shelfStatus" placeholder="请选择" style="width: 240px">
@@ -158,6 +162,8 @@
                 <el-button type="primary" @click="onSubmit">提交</el-button>
                 <el-button @click="showDialog = false">取消</el-button>
             </template>
+
+
         </el-dialog>
 
 
@@ -167,6 +173,8 @@
 </div>
 </body>
 <script>
+
+
     const app =  Vue.createApp({
         data() {
             return {
@@ -281,7 +289,7 @@
                     sales: '',
                     merchantId: '',
                     mainImage: '',
-                    imageUrl: '',
+                    imageUrl: [],
                     shelfStatus: '',
                     approvalStatus: '',
                 },

@@ -29,7 +29,7 @@ public class ProductSku {
     /**
      * SKU ID
      */
-    @TableId
+    @TableId(type = IdType.ASSIGN_ID)
     private Long skuId;
 
     /**

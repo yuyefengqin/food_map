@@ -1,6 +1,7 @@
 package com.gok.food_map.user.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.gok.food_map.annotation.Auth;
 import com.gok.food_map.district.service.DistrictService;
 import com.gok.food_map.district.vo.DistrictGetVO;
 import com.gok.food_map.user.dto.*;
@@ -77,5 +78,10 @@ public class UserController {
     @PostMapping("/remove")
     public void remove(@RequestBody UserRemoveDTO dto) {
         userService.remove(dto);
+    }
+    @Auth
+    @PostMapping("/getUserInfo")
+    public UserLoginVO getUserInfo(HttpServletRequest request) {
+        return userService.getUserInfo(request);
     }
 }
