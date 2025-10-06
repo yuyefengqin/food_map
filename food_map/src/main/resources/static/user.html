@@ -20,7 +20,7 @@
 </head>
 <body>
 <div id="app" >
-    <template v-if='!isDetail && !isLevel' >
+    <template v-if=!isDetail>
     <el-row>
         <el-form :inline="true" :model="form">
             <el-form-item label="用户账号:"><el-input v-model="form.code" /></el-form-item>
@@ -40,9 +40,8 @@
     </el-row>
     <el-row>
         <vxe-grid v-bind="gridOptions" style="width: 100%">
-            <template #toolbar ><el-button type="primary" @click="add">新增</el-button>
+            <template #toolbar buttons><el-button type="primary" @click="add">新增</el-button>
                 <el-button type="warning" @click="onExport">导出</el-button>
-                <el-button type="danger" @click="onLevel">会员管理</el-button>
             </template>
             <template #valid="{ row }">
                 <el-switch v-model="row.valid" :active-value=true :inactive-value=false disabled />
@@ -54,6 +53,7 @@
                 <el-button size="small" type="primary" @click="edit(row)">编辑</el-button>
                 <el-button size="small" type="danger" @click="onRemove(row.id)">删除</el-button>
                 <el-button size="small" @click="showDetailDialog(row)">详细</el-button>
+
             </template>
             <template #pager>
                 <vxe-pager :layouts="['Sizes', 'PrevPage', 'Number', 'NextPage', 'Total']" v-model:current-page="page.current" v-model:page-size="page.size" :total="page.total" @page-change="onPageChange">
@@ -152,35 +152,7 @@
             </vxe-grid>
         </div>
     </template>
-    <template v-else-if='isLevel'>
-        <el-button text="plain" @click="isLevel = false"> < 返回</el-button>
-        <h3>📱角色管理</h3>
-        <hr>
-        <vxe-grid v-bind="levelOptions" style="width: 100%">
-            <template #toolbar >
-                <el-button type="danger" @click="levelAdd">+ 新增</el-button>
-                </template>
-            <template #operate="{ row }">
-                <el-button size="small" type="primary" @click="editLevel(row)">编辑</el-button>
-                <el-button size="small" type="danger" @click="onRemoveLevel(row.id)">删除</el-button>
-            </template>
-        </vxe-grid>
-        <el-dialog v-model="showLevelDialog" :title="isLevelEdit ? '编辑' : '新增'" width="400">
-            <el-form ref="levelForm" :model="levelForm" :rules="levelRules" label-width="auto">
-                <el-form-item label="会员等级名称" prop="name">
-                    <el-input v-model="levelForm.levelName" maxlength="20" />
-                </el-form-item>
-                <el-form-item label="折扣" prop="discountRate">
-                    <el-input v-model="levelForm.discountRate" maxlength="20" />
-                </el-form-item>
-            </el-form>
-            <template #footer>
-                <el-button @click="showLevelDialog = false">取消</el-button>
-                <el-button type="primary"  @click="onLevelSubmit">确定</el-button>
-            </template>
 
-        </el-dialog>
-    </template>
 </div>
 
 </body>
@@ -240,23 +212,6 @@
                         slots: {buttons: 'toolbar_buttons'}
                     },
                 },
-                levelOptions: {
-                    border: true,
-                    height: 400,
-                    data: [],
-                    headerAlign: 'center',
-                    align: 'center',
-                    columns: [
-                        {field: 'levelId', title: '会员等级编号',},
-                        {field: 'levelName',title: '会员等级'},
-                        {field: 'discountRate',title: '折扣'},
-                        {title: '操作', slots: {default: 'operate'}, width: 220}
-                    ],
-                    toolbarConfig: {
-                        custom: true,
-                        slots: {buttons: 'toolbar_buttons'}
-                    },
-                },
                 page: {
                     current: 1,
                     size: 20,
@@ -265,9 +220,6 @@
                 isEdit: false,
                 showDialog: false,
                 isDetail: false,
-                isLevel: false,
-                isLevelEdit: false,
-                showLevelDialog: false,
                 editForm: {
                     id: '',
                     code: '',
@@ -290,10 +242,6 @@
                     avatar: '',
                     cityName:'',
                 },
-                levelForm:{
-                    levelName: '',
-                    discountRate: ''
-                },
                 rules: {
                     code: [{required: true, message: '请输入账号'}],
                     name: [{required: true, message: '请输入名称'}],
@@ -313,10 +261,6 @@
                             trigger: 'blur'
                         }
                     ],
-                },
-                levelRules: {
-                    levelName: [{required: true, message: '请输入会员名称'}],
-                    discountRate: [{required: true, message: '请输入会员折扣'}]
                 },
                 districts:[],
             }
@@ -486,39 +430,6 @@
                 } else {
                     // this.detailForm.cityName = '';
                 }
-            },
-            onLevel(){
-                this.isLevel = true;
-                this.levelGetList();
-            },
-            editLevel(level){
-                this.showLevelDialog = true;
-                this.isLevelEdit = true;
-                this.levelForm = {...level};
-            },
-            levelAdd() {
-                this.showLevelDialog = true;
-                this.isLevelEdit = false;
-                this.levelForm = {};
-            },
-            async onRemoveLevel(id){
-                await axios.post('/level/remove', {id});
-                await this.levelGetList();
-            },
-            async levelGetList(){
-                const response = await axios.post('/level/getList')
-                this.levelOptions.data = response.data.records;
-                console.log(this.levelOptions.data);
-            },
-            async onLevelSubmit(){
-                this.$refs.levelForm.validate(async valid => {
-                        if (valid) {
-                            await axios.post(this.isLevelEdit ? '/level/edit' : '/level/add', this.levelForm);
-                            await this.levelGetList();
-                            this.showLevelDialog = false;
-                        }
-                    }
-                );
             }
         },
         watch: {
