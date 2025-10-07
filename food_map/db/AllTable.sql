@@ -172,23 +172,34 @@ comment on column product_sku.update_time is '更新时间';
 -- 购物车表
 create table shopping_cart
 (
-    cart_id     bigint primary key,
-    user_id     bigint not null,
-    spu_id      bigint not null,
-    quantity    int    not null default 1,
-    specs_price jsonb not null ,
-    is_selected boolean         default true, -- 是否选中
-    create_time timestamp       default current_timestamp,
-    update_time timestamp
+    cart_id     bigint                  not null
+        primary key,
+    user_id     bigint                  not null,
+    spu_id      bigint                  not null,
+    quantity    integer   default 1     not null,
+    specs_price jsonb                   not null,
+    is_selected boolean   default false not null,
+    create_time timestamp default CURRENT_TIMESTAMP,
+    update_time timestamp,
+    total_price numeric(7, 2)
 );
+
 comment on table shopping_cart is '购物车表';
+
 comment on column shopping_cart.cart_id is '购物车ID';
+
 comment on column shopping_cart.user_id is '所属用户ID';
+
 comment on column shopping_cart.spu_id is '商品SKU ID';
+
 comment on column shopping_cart.quantity is '购买数量';
+
 comment on column shopping_cart.specs_price is '规格:价钱';
+
 comment on column shopping_cart.is_selected is '是否选中';
+
 comment on column shopping_cart.create_time is '添加时间';
+
 comment on column shopping_cart.update_time is '更新时间';
 
 -- 普通商品订单表
