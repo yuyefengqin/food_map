@@ -127,6 +127,17 @@
                     </el-upload>
                 </el-form-item>
 
+                <!--                多图片-->
+                <el-form-item label="多图片" prop="image">
+                    <el-upload v-model:file-list="fileList"
+                                list-type="picture-card"
+                               :auto-upload="false"
+                               multiple>
+                        <i class="el-icon-plus"></i>
+                    </el-upload>
+                </el-form-item>
+                <el-button @click="Submit(fileList)">提交</el-button>
+
                 <!--                上架状态-->
                 <el-form-item v-if="isEdit" label="上架状态">
                     <el-select v-model="editForm.shelfStatus" placeholder="请选择" style="width: 240px">
@@ -143,7 +154,7 @@
             </el-form>
 
             <template #footer>
-                <el-button type="primary" @click="onSubmit">提交</el-button>
+                <el-button type="primary" @click="onSubmit()">提交</el-button>
                 <el-button @click="showDialog = false">取消</el-button>
             </template>
 
@@ -185,11 +196,12 @@
 </body>
 <script>
 
-
     const app =  Vue.createApp({
         data() {
             return {
-                districts: [],
+                fileList: [],
+                dialogImageUrl: '',
+                dialogVisible: false,
                 // 查询界面
                 form: {
                     spuId: '',
@@ -298,6 +310,7 @@
                     spuDesc: '',
                     productCategory: '',
                     sales: '',
+                    image: [],
                     merchantId: '',
                     mainImage: '',
                     shelfStatus: '',
@@ -325,6 +338,20 @@
             await this.getList();
         },
         methods: {
+            async Submit(fileList) {
+                console.log(fileList);
+                debugger;
+                const data = new FormData();
+                fileList.forEach(file => {
+                    data.append('files', file.raw);
+                });
+                 const response = await axios.post('/MFile/uploadList', data, {
+                     headers: {
+                         'Content-Type': 'multipart/form-data'
+                     }
+                 });
+                 console.log(response);
+            },
             //查询
             async getList() {
                 const form= this.form;
@@ -382,11 +409,10 @@
                     // 添加错误提示
                 }
             },
-
             onSubmit() {
                 this.$refs.editForm.validate(async valid =>{
                         if(valid) {
-                            await axios.post(this.isEdit? '/MGoods/edit': '/MGoods/add', this.editForm);
+                            await axios.post(this.isEdit? '/merchant/edit': '/merchant/add', this.editForm);
                             await this.getList();
                             this.showDialog= false;
                         }

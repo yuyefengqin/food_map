@@ -46,8 +46,7 @@ public class FileService extends ServiceImpl<MFileMapper, MFile> {
 
     //上传
     @Transactional
-    public FileUploadVO upload(FileUploadDTO dto) {
-        MultipartFile multipartFile = dto.getFile();
+    public FileUploadVO upload(MultipartFile multipartFile) {
         //插入数据库
         MFile mFile = new MFile(null, multipartFile.getOriginalFilename(), false, null);
         Long id = DefaultIdentifierGenerator.getInstance().nextId(mFile);

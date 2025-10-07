@@ -2,6 +2,7 @@ package com.gok.food_map.file.controller;
 
 import com.gok.food_map.file.dto.FileRemoveDTO;
 import com.gok.food_map.file.dto.FileUploadDTO;
+import com.gok.food_map.file.dto.FileUploadListDto;
 import com.gok.food_map.file.service.FileService;
 import com.gok.food_map.file.vo.FileUploadVO;
 import jakarta.annotation.Resource;
@@ -25,8 +26,18 @@ public class FileController{
 
     @PostMapping("/upload")
     public Map<String,String> upload(FileUploadDTO dto) {
-        String id = service.upload(dto).getId();
+        String id = service.upload(dto.getFile()).getId();
         return Collections.singletonMap("id", id);
+    }
+
+    @PostMapping("/uploadList")
+    public List<Map<String,String>> uploadList(@RequestParam(value = "files") List<MultipartFile> fileList) {
+        List<Map<String,String>> list = new ArrayList<>();
+        for(MultipartFile d : fileList) {
+            String id = service.upload(d).getId();
+            list.add(Collections.singletonMap("id", id));
+        }
+        return list;
     }
 
     @GetMapping("/download")
