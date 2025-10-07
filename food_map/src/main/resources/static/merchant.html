@@ -72,8 +72,8 @@
                     </el-row>
 
                     <!--    表格-->
-                    <el-row>
-                        <vxe-grid v-bind="gridOptions" style="width: 100%">
+                    <el-row style="height: 80vh;">
+                        <vxe-grid v-bind="gridOptions" style="width: 100%" height="100%" >
 
                             <!--            查询按钮（1.类型 2.点击后触发方法 3.按钮显示内容）-->
                             <template #toolbar_buttons><el-button type="primary" @click="add">新增</el-button>
