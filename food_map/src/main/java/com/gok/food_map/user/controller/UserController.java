@@ -82,4 +82,17 @@ public class UserController {
     public UserLoginVO getUserInfo(HttpServletRequest request) {
         return userService.getUserInfo(request);
     }
+    @Auth
+    @PostMapping("/editPassword")
+    public void editPassword( @RequestBody UserEditPasswordDto dto,HttpServletRequest request) {
+        userService.editPassword(dto,request);
+    }
+    @PostMapping("/logout")
+    public void logout(HttpServletRequest request) {
+        userService.logout(request);
+    }
+    @PostMapping("/autoLogin")
+    public UserLoginVO autoLogin(HttpServletRequest request) {
+        return userService.autoLogin(request);
+    }
 }

@@ -29,21 +29,7 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
     @Resource
     private ShoppingCartMapper shoppingCartMapper;
     public List<ShoppingCartGetVO> getShoppingCart(HttpServletRequest request) {
-        if(request == null){
-            ServiceException.build("request is null");
-        }
-        Object o = request.getSession().getAttribute("token");
-        if(o == null){
-            ServiceException.build("token is null");
-        }
-        String string = o.toString();
-        if (string.isEmpty() || string.isBlank()) {
-            ServiceException.build("无效请求");
-        }
-        if (TokenUtil.checkToken(string)) {
-            ServiceException.build("登录过期");
-        }
-        Map<String, String> map = TokenUtil.getToken(string);
+        Map<String, String> map = TokenUtil.getIdByTokenSafe(request);
         List<ShoppingCartGetVO> id = shoppingCartMapper.selectByUserId(map.get("id"));
         System.out.println(id);
         return id;
