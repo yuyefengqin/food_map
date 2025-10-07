@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+import java.util.Map;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,10 +16,12 @@ public class ProductsSpuDto {
     private String spuName;
     private String spuDesc;
     private String productCategory;
-    private String sales;
     private String merchantId;
     private Long mainImage;
     private String shelfStatus;
     private String approvalStatus;
-    private String createTime;
+    private Map<String,String> elementSpecs;
+    private Map<String,String> specsPrice;
+    private List<String> imageUrl;
+    private Integer stock;
 }

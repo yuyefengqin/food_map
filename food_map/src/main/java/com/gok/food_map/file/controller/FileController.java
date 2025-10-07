@@ -31,11 +31,11 @@ public class FileController{
     }
 
     @PostMapping("/uploadList")
-    public List<Map<String,String>> uploadList(@RequestParam(value = "files") List<MultipartFile> fileList) {
-        List<Map<String,String>> list = new ArrayList<>();
+    public List<String> uploadList(@RequestParam(value = "files") List<MultipartFile> fileList) {
+        List<String> list = new ArrayList<>();
         for(MultipartFile d : fileList) {
             String id = service.upload(d).getId();
-            list.add(Collections.singletonMap("id", id));
+            list.add((id));
         }
         return list;
     }

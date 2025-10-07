@@ -1,21 +1,28 @@
 package com.gok.food_map.product.service;
 
+import cn.hutool.core.lang.UUID;
+import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gok.food_map.exception.ResponseEnum;
+import com.gok.food_map.exception.ServiceException;
 import com.gok.food_map.file.service.FileService;
 import com.gok.food_map.product.dto.MerchantGetGoodsDto;
 import com.gok.food_map.product.dto.ProductGetListDto;
 import com.gok.food_map.product.dto.ProductsSpuDto;
+import com.gok.food_map.product.entity.ProductSku;
 import com.gok.food_map.product.entity.ProductSpu;
 
+import com.gok.food_map.product.mapper.ProductSkuMapper;
 import com.gok.food_map.product.mapper.ProductSpuMapper;
 import com.gok.food_map.product.vo.ProductSpuGetListVO;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +40,8 @@ import java.util.List;
 public class ProductSpuServiceImpl extends ServiceImpl<ProductSpuMapper, ProductSpu> implements IService<ProductSpu> {
     @Resource
     private ProductSpuMapper productSpuMapper;
+    @Resource
+    private ProductSkuMapper productSkuMapper;
     @Autowired
     private FileService fileService;
 
@@ -102,13 +111,32 @@ public class ProductSpuServiceImpl extends ServiceImpl<ProductSpuMapper, Product
     //新增
     @Transactional
     public void add(ProductsSpuDto dto) {
-        ProductSpu productSpu = new ProductSpu();
-        BeanUtils.copyProperties(dto,productSpu);
-        productSpu.setMerchantId(Long.valueOf(dto.getMerchantId()));
-        productSpu.setSales(Integer.valueOf(dto.getSales()));
-        productSpu.setCreateTime(LocalDateTime.now());
-        productSpuMapper.insert(productSpu);
-        fileService.enable(productSpu.getMainImage());
+
+        try {
+            long spuId = IdUtil.createSnowflake(1, 1).nextId();
+
+            ProductSpu productSpu = new ProductSpu();
+            BeanUtils.copyProperties(dto,productSpu);
+            productSpu.setSpuId(spuId);
+            productSpu.setMerchantId(Long.valueOf(dto.getMerchantId()));
+            productSpu.setCreateTime(LocalDateTime.now());
+            productSpuMapper.insert(productSpu);
+
+            ProductSku productSku = new ProductSku();
+            productSku.setSpuId(spuId);
+            productSku.setElementSpecs(dto.getElementSpecs());
+            productSku.setSpecsPrice(dto.getSpecsPrice());
+            productSku.setStock(dto.getStock());
+            productSku.setImageUrl(dto.getImageUrl());
+            productSku.setCreateTime(LocalDateTime.now());
+            productSkuMapper.insert(productSku);
+
+            System.out.println();
+        } catch (BeansException | NumberFormatException e) {
+            throw new RuntimeException(e.getMessage());
+//            throw new ServiceException("添加商品失败" + e.getMessage());
+        }
+//        fileService.enable(productSpu.getMainImage());
     }
     //编辑
     @Transactional

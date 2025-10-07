@@ -19,118 +19,155 @@
 </head>
 <body>
 <div id="app">
-        <strong>商家列表</strong>
-    <el-row>
-        <el-form :inline="true" :model="form">
-            <el-form-item label="商户编号"><el-input v-model="form.merchantId" clearable /></el-form-item>
-            <el-form-item label="商户名称"> <el-input v-model="form.merchantName" clearable /> </el-form-item>
-            <el-form-item label="创建时间"><el-date-picker v-model="form.createTime" type="date" placeholder="Pick a day" :size="form.size"/></el-form-item>
-        </el-form>
-        <el-form :inline="true" :model="form">
-            <el-form-item label="状态">
-                <el-select v-model="form.status" placeholder="请选择" style="width: 240px">
-                    <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"/>
-                </el-select>
-            </el-form-item>
-            <el-form-item label="商户管理账号"> <el-input v-model="form.manageAccount" clearable /> </el-form-item>
-            <el-form-item> <el-button type="primary" @click="onSearch">查询</el-button> </el-form-item>
-            <el-form-item> <el-button type="primary" @click="onDelete">重置</el-button> </el-form-item>
-        </el-form>
-    </el-row>
+    <div class="common-layout">
+        <el-container>
+            <el-header>
+                <div class="header-container" style="display: flex; align-items: center; justify-content: start;">
+                    <el-avatar :src="`../img/默认头像.png`"></el-avatar>
+                    <h3 class="user-name">管理员</h3>
+                </div>
+            </el-header>
+            <el-container hidden="1080px">
+                <el-aside width="200px">
+                    <el-menu
+                            v-model:default-active="itemNumber"
+                            class="el-menu-vertical-demo"
+                    >
+                        <el-menu-item index="1" @click="toUserManage">
+                            <el-icon><document /></el-icon>
+                            <span>用户管理</span>
+                        </el-menu-item>
+                        <el-menu-item index="2" @click="toMerchantManage">
+                            <el-icon><document /></el-icon>
+                            <span>商户管理</span>
+                        </el-menu-item>
+                        <el-menu-item index="3" @click="toProductManage">
+                            <el-icon><document /></el-icon>
+                            <span>商品管理</span>
+                        </el-menu-item>
+                        <el-menu-item index="4" @click="toOrderManage">
+                            <el-icon><setting /></el-icon>
+                            <span>订单管理</span>
+                        </el-menu-item>
+                    </el-menu>
+                </el-aside>
+                <el-main>
+                    <strong>商家列表</strong>
+                    <el-row>
+                        <el-form :inline="true" :model="form">
+                            <el-form-item label="商户编号"><el-input v-model="form.merchantId" clearable /></el-form-item>
+                            <el-form-item label="商户名称"> <el-input v-model="form.merchantName" clearable /> </el-form-item>
+                            <el-form-item label="创建时间"><el-date-picker v-model="form.createTime" type="date" placeholder="Pick a day" :size="form.size"/></el-form-item>
+                        </el-form>
+                        <el-form :inline="true" :model="form">
+                            <el-form-item label="状态">
+                                <el-select v-model="form.status" placeholder="请选择" style="width: 240px">
+                                    <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"/>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label="商户管理账号"> <el-input v-model="form.manageAccount" clearable /> </el-form-item>
+                            <el-form-item> <el-button type="primary" @click="onSearch">查询</el-button> </el-form-item>
+                            <el-form-item> <el-button type="primary" @click="onDelete">重置</el-button> </el-form-item>
+                        </el-form>
+                    </el-row>
 
-<!--    表格-->
-    <el-row>
-        <vxe-grid v-bind="gridOptions" style="width: 100%">
+                    <!--    表格-->
+                    <el-row>
+                        <vxe-grid v-bind="gridOptions" style="width: 100%">
 
-            <!--            查询按钮（1.类型 2.点击后触发方法 3.按钮显示内容）-->
-            <template #toolbar_buttons><el-button type="primary" @click="add">新增</el-button>
-            </template>
+                            <!--            查询按钮（1.类型 2.点击后触发方法 3.按钮显示内容）-->
+                            <template #toolbar_buttons><el-button type="primary" @click="add">新增</el-button>
+                            </template>
 
-            <!--            有效-->
-            <template #valid="{ row }">
-                <el-switch v-model="row.status" :active-value="1" :inactive-value="0" disabled />
-            </template>
+                            <!--            有效-->
+                            <template #valid="{ row }">
+                                <el-switch v-model="row.status" :active-value="1" :inactive-value="0" disabled />
+                            </template>
 
 
-            <!--            操作-->
-            <template #operate="{ row }">
-                <el-button size="small" type="primary" @click="edit(row)">编辑</el-button>
-                <el-button size="small" type="danger" @click="onRemove(row.merchantId)">删除</el-button>
-            </template>
+                            <!--            操作-->
+                            <template #operate="{ row }">
+                                <el-button size="small" type="primary" @click="edit(row)">编辑</el-button>
+                                <el-button size="small" type="danger" @click="onRemove(row.merchantId)">删除</el-button>
+                            </template>
 
-            <!--            换页-->
-            <template #pager>
-                <vxe-pager :layouts="['Sizes', 'PrevPage', 'Number', 'NextPage', 'Total']" v-model:current-page="page.current" v-model:page-size="page.size" :total="page.total" @page-change="onPageChange">
-                </vxe-pager>
-            </template>
-        </vxe-grid>
-<!--       编辑和新增页面-->
-        <el-dialog v-model="showDialog" :title="isEdit ? '编辑' : '新增'" width="400">
-            <el-form ref="editForm" :model="editForm" :rules="rules" label-width="auto">
+                            <!--            换页-->
+                            <template #pager>
+                                <vxe-pager :layouts="['Sizes', 'PrevPage', 'Number', 'NextPage', 'Total']" v-model:current-page="page.current" v-model:page-size="page.size" :total="page.total" @page-change="onPageChange">
+                                </vxe-pager>
+                            </template>
+                        </vxe-grid>
+                        <!--       编辑和新增页面-->
+                        <el-dialog v-model="showDialog" :title="isEdit ? '编辑' : '新增'" width="400">
+                            <el-form ref="editForm" :model="editForm" :rules="rules" label-width="auto">
 
-<!--                商户管理账号-->
-                <el-form-item label="商户管理账号" prop="manageAccount">
-                    <el-input v-model="editForm.manageAccount" :disabled="isEdit" maxlength="20" />
-                </el-form-item>
+                                <!--                商户管理账号-->
+                                <el-form-item label="商户管理账号" prop="manageAccount">
+                                    <el-input v-model="editForm.manageAccount" :disabled="isEdit" maxlength="20" />
+                                </el-form-item>
 
-<!--                商户管理密码-->
-                <el-form-item v-if="!isEdit" label="商户管理密码" prop="managePassword">
-                    <el-input v-model="editForm.managePassword" />
-                </el-form-item>
+                                <!--                商户管理密码-->
+                                <el-form-item v-if="!isEdit" label="商户管理密码" prop="managePassword">
+                                    <el-input v-model="editForm.managePassword" />
+                                </el-form-item>
 
-<!--                商户名称-->
-                <el-form-item label="商户名称" prop="merchantName">
-                    <el-input v-model="editForm.merchantName" maxlength="20" />
-                </el-form-item>
+                                <!--                商户名称-->
+                                <el-form-item label="商户名称" prop="merchantName">
+                                    <el-input v-model="editForm.merchantName" maxlength="20" />
+                                </el-form-item>
 
-<!--                商户地址-->
-                <el-form-item label="商户地址" prop="merchantAddress">
-                    <el-input v-model="editForm.merchantAddress" maxlength="20" />
-                </el-form-item>
+                                <!--                商户地址-->
+                                <el-form-item label="商户地址" prop="merchantAddress">
+                                    <el-input v-model="editForm.merchantAddress" maxlength="20" />
+                                </el-form-item>
 
-<!--                商户联系方式-->
-                <el-form-item label="商户联系方式" prop="contactPhone">
-                    <el-input v-model="editForm.contactPhone" maxlength="20" />
-                </el-form-item>
+                                <!--                商户联系方式-->
+                                <el-form-item label="商户联系方式" prop="contactPhone">
+                                    <el-input v-model="editForm.contactPhone" maxlength="20" />
+                                </el-form-item>
 
-<!--                上传营业执照-->
-                <el-form-item label="上传营业执照" prop="businessLicense">
-                    <el-upload :show-MFile-list="false" :before-upload="uploadLicense"  >
-                        <img v-if="editForm.businessLicense" :src="`/MFile/download?id=${editForm.businessLicense}`" style="width: 100px; height: 100px" />
-                        <el-icon v-else><Plus /></el-icon>
-                    </el-upload>
-                </el-form-item>
+                                <!--                上传营业执照-->
+                                <el-form-item label="上传营业执照" prop="businessLicense">
+                                    <el-upload :show-MFile-list="false" :before-upload="uploadLicense"  >
+                                        <img v-if="editForm.businessLicense" :src="`/MFile/download?id=${editForm.businessLicense}`" style="width: 100px; height: 100px" />
+                                        <el-icon v-else><Plus /></el-icon>
+                                    </el-upload>
+                                </el-form-item>
 
-<!--                上传logo-->
-                <el-form-item label="上传Logo" prop="logoUrl">
-                    <el-upload :show-MFile-list="false" :before-upload="uploadLogo"  >
-                        <img v-if="editForm.logoUrl" :src="`/MFile/download?id=${editForm.logoUrl}`" style="width: 100px; height: 100px" />
-                        <el-icon v-else><Plus /></el-icon>
-                    </el-upload>
-                </el-form-item>
+                                <!--                上传logo-->
+                                <el-form-item label="上传Logo" prop="logoUrl">
+                                    <el-upload :show-MFile-list="false" :before-upload="uploadLogo"  >
+                                        <img v-if="editForm.logoUrl" :src="`/MFile/download?id=${editForm.logoUrl}`" style="width: 100px; height: 100px" />
+                                        <el-icon v-else><Plus /></el-icon>
+                                    </el-upload>
+                                </el-form-item>
 
-<!--                企业类型-->
-                <el-form-item label="企业类型" prop="enterpriseType">
-                    <el-input v-model="editForm.enterpriseType" />
-                </el-form-item>
+                                <!--                企业类型-->
+                                <el-form-item label="企业类型" prop="enterpriseType">
+                                    <el-input v-model="editForm.enterpriseType" />
+                                </el-form-item>
 
-<!--                备注-->
-                <el-form-item label="备注" prop="notes">
-                    <el-input v-model="editForm.notes" maxlength="50" />
-                </el-form-item>
-<!--                有效-->
-                <el-form-item v-if="isEdit" label="有效" prop="status">
-                    <el-switch v-model="editForm.status" :active-value="1" :inactive-value="0" />
-                </el-form-item>
+                                <!--                备注-->
+                                <el-form-item label="备注" prop="notes">
+                                    <el-input v-model="editForm.notes" maxlength="50" />
+                                </el-form-item>
+                                <!--                有效-->
+                                <el-form-item v-if="isEdit" label="有效" prop="status">
+                                    <el-switch v-model="editForm.status" :active-value="1" :inactive-value="0" />
+                                </el-form-item>
 
-            </el-form>
+                            </el-form>
 
-            <template #footer>
-                <el-button type="primary" @click="onSubmit">提交</el-button>
-                <el-button @click="showDialog = false">取消</el-button>
-            </template>
-        </el-dialog>
-    </el-row>
+                            <template #footer>
+                                <el-button type="primary" @click="onSubmit">提交</el-button>
+                                <el-button @click="showDialog = false">取消</el-button>
+                            </template>
+                        </el-dialog>
+                    </el-row>
+                </el-main>
+            </el-container>
+        </el-container>
+    </div>
 
 </div>
 </body>
@@ -138,6 +175,7 @@
     const app = Vue.createApp({
         data() {
             return {
+                itemNumber:'2',
                 districts: [],
                 // 查询界面
                 form: {
@@ -338,6 +376,18 @@
                     }
                 );
             },
+            toUserManage(){
+                window.location.href = 'http://localhost:8080/user.html';
+            },
+            toMerchantManage(){
+                window.location.href = 'http://localhost:8080/merchant.html';
+            },
+            toProductManage(){
+                window.location.href = 'http://localhost:8080/product.html';
+            },
+            toOrderManage(){
+                window.location.href = 'http://localhost:8080/order.html';
+            }
         }
     });
     for(const[key, component] of Object.entries(ElementPlusIconsVue)) {app.component(key, component)}

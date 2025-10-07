@@ -20,167 +20,205 @@
 </head>
 <body>
 <div id="app" >
-    <template v-if='!isDetail && !isLevel' >
-        <el-row>
-            <el-form :inline="true" :model="form">
-                <el-form-item label="用户账号:"><el-input v-model="form.code" /></el-form-item>
-                <el-form-item label="用户名:"><el-input v-model="form.name" /></el-form-item>
-                <el-form-item label="注册时间:">
-                    <el-date-picker
-                            v-model="this.form.createTime"
-                            type="date"
-                            placeholder="请选择时间"
-                            :size="size"
-                            value-format="YYYY-MM-DD"
-                    />
-                </el-form-item>
-                <el-form-item ><el-button type="primary" @click="onSearch()">查询</el-button></el-form-item>
-                <el-form-item ><el-button  @click="onReset">重置</el-button></el-form-item>
-            </el-form>
-        </el-row>
-        <el-row>
-            <vxe-grid v-bind="gridOptions" style="width: 100%">
-                <template #toolbar ><el-button type="primary" @click="add">新增</el-button>
-                    <el-button type="warning" @click="onExport">导出</el-button>
-                    <el-button type="danger" @click="onLevel">会员管理</el-button>
-                </template>
-                <template #valid="{ row }">
-                    <el-switch v-model="row.valid" :active-value=true :inactive-value=false disabled />
-                </template>
-                <template #avatar="{ row }">
-                    <el-image v-if="row.avatar" style="width: 80px; height: 80px" :src="`/MFile/download?id=${row.avatar}`" fit="fill" />
-                </template>
-                <template #operate="{ row }">
-                    <el-button size="small" type="primary" @click="edit(row)">编辑</el-button>
-                    <el-button size="small" type="danger" @click="onRemove(row.id)">删除</el-button>
-                    <el-button size="small" @click="showDetailDialog(row)">详细</el-button>
-                </template>
-                <template #pager>
-                    <vxe-pager :layouts="['Sizes', 'PrevPage', 'Number', 'NextPage', 'Total']" v-model:current-page="page.current" v-model:page-size="page.size" :total="page.total" @page-change="onPageChange">
-                    </vxe-pager>
-                </template>
-            </vxe-grid>
-        </el-row>
-        <el-dialog v-model="showDialog" :title="isEdit ? '编辑' : '新增'" width="400">
-            <el-form ref="editForm" :model="editForm" :rules="rules" label-width="auto">
-                <el-form-item label="头像" prop="avatar">
-                    <!--                    :http-request="uploadAvatar"-->
-                    <el-upload :show-MFile-list="false" :before-upload="uploadAvatar"  >
-                        <img v-if="editForm.avatar" :src="`/MFile/download?id=${editForm.avatar}`" style="width: 100px; height: 100px" />
-                        <el-icon v-else><Plus></Plus></el-icon>
-                    </el-upload>
-                </el-form-item>
-                <el-form-item label="账号" prop="code">
-                    <el-input v-model="editForm.code" :disabled="isEdit" maxlength="20" />
-                </el-form-item>
-                <el-form-item label="名称" prop="name">
-                    <el-input v-model="editForm.name" maxlength="20" />
-                </el-form-item>
-                <el-form-item label="注册城市" prop="city">
-                    <el-cascader v-model="editForm.city" :options="districts" :show-all-levels="true" placeholder="请选择地址" clearable />
-                </el-form-item>
-                <el-form-item label="性别" prop="gender">
-                    <el-radio-group v-model="editForm.gender">
-                        <el-radio :value="'男'">男</el-radio>
-                        <el-radio :value="'女'">女</el-radio>
-                    </el-radio-group>
-                </el-form-item>
-                <el-form-item label="会员等级" prop="level">
-                    <el-radio-group v-model="editForm.levelId">
-                        <template v-for="level in levels">
-                            <el-radio
-                                    :value= "level.levelId"
-                            >
-                                {{ level.levelName }}
-                            </el-radio>
-                        </template>
-                    </el-radio-group>
-                </el-form-item>
-                <el-form-item label="创建时间" prop="createTime">
-                    <el-date-picker
-                            v-model="editForm.createTime"
-                            type="date"
-                            placeholder="请选择时间"
-                            :size="size"
-                            value-format="YYYY-MM-DD"
-                    />
-                </el-form-item>
-                <el-form-item v-if="isEdit"  label="有效" prop="valid">
-                    <el-switch v-model="editForm.valid" :active-value=true :inactive-value=false />
-                </el-form-item>
-                <el-form-item  label="密码" prop="password">
-                    <el-input v-model="editForm.password" />
-                </el-form-item>
-            </el-form>
-            <template #footer>
-                <el-button @click="showDialog = false">取消</el-button>
-                <el-button type="primary"  @click="onSubmit">确定</el-button>
-            </template>
-        </el-dialog>
-    </template>
-    <template v-else-if='isDetail'>
-        <el-button text="plain" @click="isDetail = false"> < 返回</el-button>
-        <el-descriptions
-                title="📖用户详细"
-                direction="vertical"
-                border
-                style="margin-top: 20px"
-        >
-            <el-descriptions-item
-                    :rowspan="3"
-                    :width="140"
-                    label="头像"
-                    align="center"
-            >
-                <div>
-                    <img v-if="detailForm.avatar" :src="`/MFile/download?id=${detailForm.avatar}`" style="width: 100px; height: 100px" />
-                    <el-icon v-else><Plus /></el-icon>
+    <div class="common-layout">
+        <el-container>
+            <el-header>
+                <div class="header-container" style="display: flex; align-items: center; justify-content: start;">
+                    <el-avatar :src="`../img/默认头像.png`"></el-avatar>
+                    <h3 class="user-name">管理员</h3>
                 </div>
-            </el-descriptions-item>
-            <el-descriptions-item label="用户ID">{{detailForm.id}}</el-descriptions-item>
-            <el-descriptions-item label="用户账号">{{detailForm.code}}</el-descriptions-item>
-            <el-descriptions-item label="用户名">{{detailForm.code}}</el-descriptions-item>
-            <el-descriptions-item label="注册时间">{{detailForm.createTime}}</el-descriptions-item>
-            <el-descriptions-item label="性别">{{detailForm.gender}}</el-descriptions-item>
-            <el-descriptions-item label="城市">{{detailForm.cityName}}</el-descriptions-item>
-        </el-descriptions>
-        <div class="addressTable">
-            <vxe-grid v-bind="addressOptions" style="width: 100%" disabled="false">
-                <template #toolbar >
-                    <h3>📱收货地址</h3>
-                </template>
-            </vxe-grid>
-        </div>
-    </template>
+            </el-header>
+            <el-container hidden="1080px">
+                <el-aside width="200px">
+                    <el-menu
+                            v-model:default-active="itemNumber"
+                            class="el-menu-vertical-demo"
+                    >
+                        <el-menu-item index="1" @click="toUserManage">
+                            <el-icon><document /></el-icon>
+                            <span>用户管理</span>
+                        </el-menu-item>
+                        <el-menu-item index="2" @click="toMerchantManage">
+                            <el-icon><document /></el-icon>
+                            <span>商户管理</span>
+                        </el-menu-item>
+                        <el-menu-item index="3" @click="toProductManage">
+                            <el-icon><document /></el-icon>
+                            <span>商品管理</span>
+                        </el-menu-item>
+                        <el-menu-item index="4" @click="toOrderManage">
+                            <el-icon><setting /></el-icon>
+                            <span>订单管理</span>
+                        </el-menu-item>
+                    </el-menu>
+                </el-aside>
+                <el-main style="border-top: 1px solid rgb(227, 223, 223);border-left: 1px solid rgb(227, 223, 223);">
 
-    <template v-else-if='isLevel'>
-        <el-button  text="plain" @click=" isLevel = false"> < 返回</el-button>
-        <h3>📱角色管理</h3>
-        <hr>
-        <vxe-grid v-bind="levelOptions" style="width: 100%">
-            <template #toolbar >
-                <el-button type="danger" @click="levelAdd">+ 新增</el-button>
-            </template>
-            <template #operate="{ row }">
-                <el-button size="small" type="primary" @click="editLevel(row)">编辑</el-button>
-                <el-button size="small" type="danger" @click="onRemoveLevel(row.id)">删除</el-button>
-            </template>
-        </vxe-grid>
-        <el-dialog v-model="showLevelDialog" :title="isLevelEdit ? '编辑' : '新增'" width="400">
-            <el-form ref="levelForm" :model="levelForm" :rules="levelRules" label-width="auto">
-                <el-form-item label="会员等级名称" prop="levelName">
-                    <el-input v-model="levelForm.levelName" maxlength="20" />
-                </el-form-item>
-                <el-form-item label="折扣" prop="discountRate">
-                    <el-input v-model="levelForm.discountRate" maxlength="20" />
-                </el-form-item>
-            </el-form>
-            <template #footer>
-                <el-button @click="showLevelDialog = false">取消</el-button>
-                <el-button type="primary"  @click="onLevelSubmit">确定</el-button>
-            </template>
-        </el-dialog>
-    </template>
+                    <template v-if='!isDetail && !isLevel' >
+                        <el-row>
+                            <el-form :inline="true" :model="form">
+                                <el-form-item label="用户账号:"><el-input v-model="form.code" /></el-form-item>
+                                <el-form-item label="用户名:"><el-input v-model="form.name" /></el-form-item>
+                                <el-form-item label="注册时间:">
+                                    <el-date-picker
+                                            v-model="this.form.createTime"
+                                            type="date"
+                                            placeholder="请选择时间"
+                                            :size="size"
+                                            value-format="YYYY-MM-DD"
+                                    />
+                                </el-form-item>
+                                <el-form-item ><el-button type="primary" @click="onSearch()">查询</el-button></el-form-item>
+                                <el-form-item ><el-button  @click="onReset">重置</el-button></el-form-item>
+                            </el-form>
+                        </el-row>
+                        <el-row>
+                            <vxe-grid v-bind="gridOptions" style="width: 100%">
+                                <template #toolbar ><el-button type="primary" @click="add">新增</el-button>
+                                    <el-button type="warning" @click="onExport">导出</el-button>
+                                    <el-button type="danger" @click="onLevel">会员管理</el-button>
+                                </template>
+                                <template #valid="{ row }">
+                                    <el-switch v-model="row.valid" :active-value=true :inactive-value=false disabled />
+                                </template>
+                                <template #avatar="{ row }">
+                                    <el-image v-if="row.avatar" style="width: 80px; height: 80px" :src="`/MFile/download?id=${row.avatar}`" fit="fill" />
+                                </template>
+                                <template #operate="{ row }">
+                                    <el-button size="small" type="primary" @click="edit(row)">编辑</el-button>
+                                    <el-button size="small" type="danger" @click="onRemove(row.id)">删除</el-button>
+                                    <el-button size="small" @click="showDetailDialog(row)">详细</el-button>
+                                </template>
+                                <template #pager>
+                                    <vxe-pager :layouts="['Sizes', 'PrevPage', 'Number', 'NextPage', 'Total']" v-model:current-page="page.current" v-model:page-size="page.size" :total="page.total" @page-change="onPageChange">
+                                    </vxe-pager>
+                                </template>
+                            </vxe-grid>
+                        </el-row>
+                        <el-dialog v-model="showDialog" :title="isEdit ? '编辑' : '新增'" width="400">
+                            <el-form ref="editForm" :model="editForm" :rules="rules" label-width="auto">
+                                <el-form-item label="头像" prop="avatar">
+                                    <!--                    :http-request="uploadAvatar"-->
+                                    <el-upload :show-MFile-list="false" :before-upload="uploadAvatar"  >
+                                        <img v-if="editForm.avatar" :src="`/MFile/download?id=${editForm.avatar}`" style="width: 100px; height: 100px" />
+                                        <el-icon v-else><Plus></Plus></el-icon>
+                                    </el-upload>
+                                </el-form-item>
+                                <el-form-item label="账号" prop="code">
+                                    <el-input v-model="editForm.code" :disabled="isEdit" maxlength="20" />
+                                </el-form-item>
+                                <el-form-item label="名称" prop="name">
+                                    <el-input v-model="editForm.name" maxlength="20" />
+                                </el-form-item>
+                                <el-form-item label="注册城市" prop="city">
+                                    <el-cascader v-model="editForm.city" :options="districts" :show-all-levels="true" placeholder="请选择地址" clearable />
+                                </el-form-item>
+                                <el-form-item label="性别" prop="gender">
+                                    <el-radio-group v-model="editForm.gender">
+                                        <el-radio :value="'男'">男</el-radio>
+                                        <el-radio :value="'女'">女</el-radio>
+                                    </el-radio-group>
+                                </el-form-item>
+                                <el-form-item label="会员等级" prop="level">
+                                    <el-radio-group v-model="editForm.levelId">
+                                        <template v-for="level in levels">
+                                            <el-radio
+                                                    :value= "level.levelId"
+                                            >
+                                                {{ level.levelName }}
+                                            </el-radio>
+                                        </template>
+                                    </el-radio-group>
+                                </el-form-item>
+                                <el-form-item label="创建时间" prop="createTime">
+                                    <el-date-picker
+                                            v-model="editForm.createTime"
+                                            type="date"
+                                            placeholder="请选择时间"
+                                            :size="size"
+                                            value-format="YYYY-MM-DD"
+                                    />
+                                </el-form-item>
+                                <el-form-item v-if="isEdit"  label="有效" prop="valid">
+                                    <el-switch v-model="editForm.valid" :active-value=true :inactive-value=false />
+                                </el-form-item>
+                                <el-form-item  label="密码" prop="password">
+                                    <el-input v-model="editForm.password" />
+                                </el-form-item>
+                            </el-form>
+                            <template #footer>
+                                <el-button @click="showDialog = false">取消</el-button>
+                                <el-button type="primary"  @click="onSubmit">确定</el-button>
+                            </template>
+                        </el-dialog>
+                    </template>
+                    <template v-else-if='isDetail'>
+                        <el-button text="plain" @click="isDetail = false"> < 返回</el-button>
+                        <el-descriptions
+                                title="📖用户详细"
+                                direction="vertical"
+                                border
+                                style="margin-top: 20px"
+                        >
+                            <el-descriptions-item
+                                    :rowspan="3"
+                                    :width="140"
+                                    label="头像"
+                                    align="center"
+                            >
+                                <div>
+                                    <img v-if="detailForm.avatar" :src="`/MFile/download?id=${detailForm.avatar}`" style="width: 100px; height: 100px" />
+                                    <el-icon v-else><Plus /></el-icon>
+                                </div>
+                            </el-descriptions-item>
+                            <el-descriptions-item label="用户ID">{{detailForm.id}}</el-descriptions-item>
+                            <el-descriptions-item label="用户账号">{{detailForm.code}}</el-descriptions-item>
+                            <el-descriptions-item label="用户名">{{detailForm.code}}</el-descriptions-item>
+                            <el-descriptions-item label="注册时间">{{detailForm.createTime}}</el-descriptions-item>
+                            <el-descriptions-item label="性别">{{detailForm.gender}}</el-descriptions-item>
+                            <el-descriptions-item label="城市">{{detailForm.cityName}}</el-descriptions-item>
+                        </el-descriptions>
+                        <div class="addressTable">
+                            <vxe-grid v-bind="addressOptions" style="width: 100%" disabled="false">
+                                <template #toolbar >
+                                    <h3>📱收货地址</h3>
+                                </template>
+                            </vxe-grid>
+                        </div>
+                    </template>
+
+                    <template v-else-if='isLevel'>
+                        <el-button  text="plain" @click=" isLevel = false"> < 返回</el-button>
+                        <h3>📱角色管理</h3>
+                        <hr>
+                        <vxe-grid v-bind="levelOptions" style="width: 100%">
+                            <template #toolbar >
+                                <el-button type="danger" @click="levelAdd">+ 新增</el-button>
+                            </template>
+                            <template #operate="{ row }">
+                                <el-button size="small" type="primary" @click="editLevel(row)">编辑</el-button>
+                                <el-button size="small" type="danger" @click="onRemoveLevel(row.id)">删除</el-button>
+                            </template>
+                        </vxe-grid>
+                        <el-dialog v-model="showLevelDialog" :title="isLevelEdit ? '编辑' : '新增'" width="400">
+                            <el-form ref="levelForm" :model="levelForm" :rules="levelRules" label-width="auto">
+                                <el-form-item label="会员等级名称" prop="levelName">
+                                    <el-input v-model="levelForm.levelName" maxlength="20" />
+                                </el-form-item>
+                                <el-form-item label="折扣" prop="discountRate">
+                                    <el-input v-model="levelForm.discountRate" maxlength="20" />
+                                </el-form-item>
+                            </el-form>
+                            <template #footer>
+                                <el-button @click="showLevelDialog = false">取消</el-button>
+                                <el-button type="primary"  @click="onLevelSubmit">确定</el-button>
+                            </template>
+                        </el-dialog>
+                    </template>
+                </el-main>
+            </el-container>
+        </el-container>
+    </div>
 </div>
 
 </body>
@@ -188,6 +226,7 @@
     const app = Vue.createApp({
         data(){
             return {
+                itemNumber: '1',
                 size:'default',
                 addressOptions: {
                     border: true,
@@ -524,6 +563,18 @@
                         }
                     }
                 );
+            },
+            toUserManage(){
+                window.location.href = 'http://localhost:8080/user.html';
+            },
+            toMerchantManage(){
+                window.location.href = 'http://localhost:8080/merchant.html';
+            },
+            toProductManage(){
+                window.location.href = 'http://localhost:8080/product.html';
+            },
+            toOrderManage(){
+                window.location.href = 'http://localhost:8080/order.html';
             }
         },
         watch: {
