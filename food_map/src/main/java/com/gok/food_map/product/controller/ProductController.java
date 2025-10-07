@@ -66,4 +66,10 @@ public class ProductController {
     public void edit(@RequestBody ProductsSpuDto dto) {
         productSpuService.edit(dto);
     }
+
+    //跳转
+    @RequestMapping("/detail")
+    public String detail() {
+        return "product_detail";
+    }
 }

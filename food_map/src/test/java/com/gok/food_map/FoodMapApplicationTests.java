@@ -45,12 +45,12 @@ class FoodMapApplicationTests {
         System.out.println(productSkuService.getById(1973389343000000000L));
         System.out.println();
     }
-    @Test
-    void testToken(){
-        Map<String,String> token = TokenUtil.getToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ7XCJpZFwiOjE5NzM3OTA5NTA4Nzg3NjA5NjJ9IiwiaXNzIjoiQ2hlblpoaUhhbyIsImV4cCI6MTc1OTYzMTA2OH0.sOifhA4Pdt340iauRtNarAw8oBBjOHX_dP9XCz9sRUY");
-        System.out.println(token.get("id"));
-        System.out.println();
-    }
+    //@Test
+//    void testToken(){
+//        Map<String,String> token = TokenUtil.getToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ7XCJpZFwiOjE5NzM3OTA5NTA4Nzg3NjA5NjJ9IiwiaXNzIjoiQ2hlblpoaUhhbyIsImV4cCI6MTc1OTYzMTA2OH0.sOifhA4Pdt340iauRtNarAw8oBBjOHX_dP9XCz9sRUY");
+//        System.out.println(token.get("id"));
+//        System.out.println();
+//    }
     @Test
     void testPrintSku(){
         IPage<ProductSkuGetListVO> sku = productSkuService.getProductSkuBySpuId("1973389343917604865");
