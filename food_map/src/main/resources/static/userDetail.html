@@ -544,6 +544,7 @@
                     })
                 },
                 calculateTotal() {
+                    this.calculateCartItemsPrice();
                     let total = 0;
                     this.userShoppingCarts.forEach(item => {
                         if (item.isSelected) {
