@@ -222,8 +222,8 @@
                     <el-input-number v-model="bugNumber" :min="1" label="购买数量"></el-input-number>
                 </div>
                 <div style="display: flex;justify-content: space-between;">
-                    <el-button type="primary" plain @click="addShoppingCart()">加入购物车</el-button>
-                    <el-button type="danger" plain>立即购买</el-button>
+                    <el-button type="primary" plain @click="addShoppingCart">加入购物车</el-button>
+                    <el-button type="danger" plain  @click="directBuy">立即购买</el-button>
                 </div>
             </div>
         </el-drawer>
@@ -880,6 +880,37 @@
                     }
                 }
             },
+            directBuy(){
+                let utilPrice = this.calculateUnitPrice();
+                axios.post('http://localhost:8080/order/directBuy',{
+                    userId:this.loginedUSerData.id,
+                    spuId:this.onCkeckGoodsDetailId.spuId,
+                    merchantId:this.merchantInfo.merchantId,
+                    specs:this.selectedSpecs,
+                    unitPrice:utilPrice.toFixed(2),
+                    quantity:this.bugNumber,
+                    totalPrice:this.totalPrice.toFixed(2),
+                }).then(response => {
+                    if (response.status === 200) {
+                        this.$message({
+                            message:'购买成功',
+                            type: 'success'
+                        })
+
+                    }
+                }).catch(error => {
+
+                })
+            },
+            calculateUnitPrice(){
+                let unitPrice = 0;
+                this.selectedSpecsPrice = new Map();
+                this.selectedSpecs.forEach(specValue => {
+                    this.selectedSpecsPrice.set(specValue,this.findPriceBySpecs(specValue));
+                    unitPrice += this.findPriceBySpecs(specValue);
+                });
+                return unitPrice;
+            }
         },
         watch: {
             'isLogin':function(newValue,OldValue){

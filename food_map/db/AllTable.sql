@@ -216,7 +216,7 @@ create table product_order
     address_id        bigint         not null,
     pay_method        varchar(20) default null, -- 后续考虑微信/支付宝等方式
     trade_no          bigint      default null,
-    logistics_company varchar(50) default null  default '顺丰公司',
+    logistics_company varchar(50)  default '顺丰公司',
     logistics_no      bigint      default null,
     order_status      smallint    not null,-- 1待付款、2待发货、3待收货、4已完成、5已取消、6交易完成、7交易关闭、8未开始
     create_time       timestamp   default current_timestamp,
@@ -234,10 +234,10 @@ comment on column product_order.order_amount is '订单总金额（商品+配送
 comment on column product_order.product_amount is '商品金额';
 comment on column product_order.delivery_fee is '配送费';
 comment on column product_order.delivery_method is '配送方式（如顺丰速递）'; -- 统一先用顺风
-comment on column product_order.delivery_time is '配送时间（用户选择）';
+comment on column product_order.delivery_time is '配送时间（用户选择）';--功能未实现，默认实现代替
 comment on column product_order.address_id is '收货地址ID（关联user_address）';
 comment on column product_order.pay_method is '支付方式'; -- 默认统一填网页端
-comment on column product_order.trade_no is '交易流水号（支付成功后生成）';--
+comment on column product_order.trade_no is '交易流水号（支付成功后生成）';--默认
 comment on column product_order.logistics_company is '物流公司'; -- 统一先用顺丰
 comment on column product_order.logistics_no is '物流单号'; -- 随机生成
 comment on column product_order.order_status is '订单状态'; -- 1待付款、2待发货、3待收货、4已完成、5已取消、6交易完成、7交易关闭、8未开始
@@ -254,9 +254,8 @@ create table order_item
     item_id       bigint primary key,
     order_id      bigint         not null,
     spu_id        bigint         not null,
-    sku_id        bigint         not null,
     product_name  text           not null,
-    specs         jsonb          not null,
+    specs         text[]          not null,
     unit_price    numeric(10, 2) not null,
     quantity      int            not null,
     sub_amount    numeric(10, 2) not null,                                                                                     -- 单价*数量
@@ -267,7 +266,6 @@ comment on table order_item is '订单明细表';
 comment on column order_item.item_id is '明细ID';
 comment on column order_item.order_id is '关联订单ID';
 comment on column order_item.spu_id is '商品SPU ID';
-comment on column order_item.sku_id is '商品SKU ID';
 comment on column order_item.product_name is '商品名称';
 comment on column order_item.specs is '规格';
 comment on column order_item.unit_price is '单价';

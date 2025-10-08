@@ -135,6 +135,127 @@
                         <div v-if="isOrderPage">
                             <!-- 订单 -->
                             <h2>订单</h2>
+                            <div class="order-card">
+                                <template v-for="item in userOrderInfo" :key="item.orderId">
+                                    <el-card style="width: 960px; margin: 15px 0" shadow="hover" @click="onOrderDetail(item)">
+                                        <template #header>
+                                            <div class="order-card-header">
+                                                <h3>{{item.merchantName}}</h3>
+                                                <span>{{item.orderStatus}}</span>
+                                            </div>
+                                        </template>
+                                        <template v-for="buyProduct in item.buyProducts" :key="buyProduct">
+                                            <div class="order-card-item">
+                                                <div class="order-card-image">
+                                                    <img title="order-card-img"
+                                                         :src="`/MFile/download?id=${buyProduct.mainImage}`"
+                                                         class="order-card-img"
+                                                    />
+                                                    <div class="order-goods-detail-item">
+                                                        <div>
+                                                            <h1 class="card-goods-name">{{buyProduct.spuName}}</h1>
+                                                            <span v-for=" spec in buyProduct.specs" class="selected-spec"> {{ spec }}</span>
+                                                            <h3 class="order-goods-util-price">￥{{buyProduct.unitPrice}}</h3>
+                                                        </div>
+                                                        <div>
+                                                            <span class="order-goods-quantity">×{{buyProduct.quantity}}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <template #footer>
+                                            <div class="delivery-info">
+                                                <span class="delivery-method">配送方式&nbsp;{{item.deliveryMethod}}</span>
+                                                <span class="delivery-fee">快递&nbsp;{{item.deliveryFee}}元</span>
+                                            </div>
+                                            <div class="order-card-footer">
+                                                <span class="order-total-quantity">共{{item.totalQuantity}}件，小计￥</span>
+                                                <h3 class="order-total-price">{{item.orderAmount}}</h3>
+                                            </div>
+                                        </template>
+                                    </el-card>
+                                </template>
+                            </div>
+                            <template v-if="isCheckOrderDetail">
+                                <el-dialog v-model="isCheckOrderDetail" width="500" style="">
+                                    <div class="order-detail-dialog">
+                                        <div class="order-detail-dialog-header">
+                                            <div>
+                                                <span class="user-receiver">{{OrderDetailInfo.receiver}}&nbsp;&nbsp;</span>
+                                                <span class="user-telephone">{{OrderDetailInfo.telephone}}</span>
+                                            </div>
+                                            <div>
+                                                <h3 class="user-address">{{OrderDetailInfo.detailAddress}}</h3>
+                                            </div>
+                                        </div>
+                                        <div class="order-detail-dialog-body">
+                                            <template v-for="buyProduct in OrderDetailInfo.buyProducts" :key="buyProduct">
+                                                <div class="order-card-item">
+                                                    <div class="order-card-image">
+                                                        <img title="order-card-img"
+                                                             :src="`/MFile/download?id=${buyProduct.mainImage}`"
+                                                             class="order-card-img"
+                                                        />
+                                                        <div class="order-goods-detail-item">
+                                                            <div>
+                                                                <h1 class="card-goods-name">{{buyProduct.spuName}}</h1>
+                                                                <span v-for=" spec in buyProduct.specs" class="selected-spec"> {{ spec }}</span>
+                                                                <h3 class="order-goods-util-price">￥{{buyProduct.unitPrice}}</h3>
+                                                            </div>
+                                                            <div>
+                                                                <span class="order-goods-quantity">×{{buyProduct.quantity}}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                            <div class="delivery-info">
+                                                <span class="delivery-method">配送方式&nbsp;{{OrderDetailInfo.deliveryMethod}}</span>
+                                                <span class="delivery-fee">快递&nbsp;{{OrderDetailInfo.deliveryFee}}元</span>
+                                            </div>
+                                            <div class="order-card-footer">
+                                                <span class="order-total-quantity">共{{OrderDetailInfo.totalQuantity}}件，小计￥</span>
+                                                <h3 class="order-total-price">{{OrderDetailInfo.orderAmount}}</h3>
+                                            </div>
+                                        </div>
+                                        <div class="order-detail-dialog-footer">
+                                            <h3 class="title">订单信息</h3>
+                                            <div class="order-detail-dialog-footer-time">
+                                                <div class="time">
+                                                    <span>订单编号</span>
+                                                    <span>{{OrderDetailInfo.orderId}}</span>
+                                                </div>
+                                                <div class="time">
+                                                    <span>支付交易号</span>
+                                                    <span>{{OrderDetailInfo.tradeNo}}</span>
+                                                </div>
+                                                <div class="time">
+                                                    <span>创建时间</span>
+                                                    <span>{{OrderDetailInfo.createTime}}</span>
+                                                </div>
+                                                <div class="time">
+                                                    <span>付款时间</span>
+                                                    <span>{{OrderDetailInfo.payTime}}</span>
+                                                </div>
+                                                <div class="time">
+                                                    <span>发货时间</span>
+                                                    <span>{{OrderDetailInfo.shipTime}}</span>
+                                                </div>
+                                                <div class="time">
+                                                    <span>收货时间</span>
+                                                    <span>{{OrderDetailInfo.receiveTime}}</span>
+                                                </div>
+                                                <div class="time">
+                                                    <span>完成时间</span>
+                                                    <span>{{OrderDetailInfo.completeTime}}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </el-dialog>
+                            </template>
+
                         </div>
                         <div v-if="isSettingPage">
                             <!-- 设置 -->
@@ -181,7 +302,7 @@
                 </template>
             </el-dialog>
         </template>
-        <template v-if="isEditPasswrod" class="editPasswordDialog">
+        <template v-if="isEditPassword" class="editPasswordDialog">
             <el-dialog v-model="showDialogPassword" :title="isEdit ? '编辑' : ''" width="400">
                 <el-form ref="editForm" :model="editForm" :rules="rules" label-width="auto">
                     <el-form-item label="旧密码" prop="password" >
@@ -202,9 +323,39 @@
         const app =  Vue.createApp({
             data(){
                 return{
+                    OrderDetailInfo:{},
+                    isCheckOrderDetail: false,
                     finalBuyPrice:'0.00',
+                    userOrderInfo:[
+                    //     {
+                    //     orderId:'436543564563413641',
+                    //     tradeNo:'3678434443651367',
+                    //     createTime:'2017-05-11',
+                    //     payTime:'2017-05-11',
+                    //     shipTime:'2017-05-11',
+                    //     receiveTime:'2017-05-15',
+                    //     completeTime:'2017-05-15',
+                    //     merchantName:'水产店',
+                    //     orderAmount:'332.00',
+                    //     deliveryFee:'10.00',
+                    //     totalQuantity:'2',
+                    //     deliveryMethod:'顺丰速递',
+                    //     receiver:'张三',
+                    //     telephone:'12345678987',
+                    //     detailAddress:'awgdagdkagdagd',
+                    //     logisticsNo:'64653453643644434',
+                    //     orderStatus:'已完成',
+                    //     buyProducts:[{
+                    //         mainImage:'1973384655986180097',
+                    //         spuName:'三文鱼',
+                    //         specs:["十三香","中","一区"],
+                    //         unitPrice:'166.00',
+                    //         quantity:'2'
+                    //     }]
+                    // }
+                    ],
                     userShoppingCarts:[],
-                    isEditPasswrod:false,
+                    isEditPassword:false,
                     showDialogPassword:false,
                     districts: [],
                     isEdit:false,
@@ -261,14 +412,15 @@
             async created(){
                 this.getUserInfo();
                 await this.initDistricts();
-                this.initItem();
                 this.activateDefaultItem();
                 // this.getUserInfo();
                 this.initDistricts();
             },
             methods:{
-                initItem(){
-
+                onOrderDetail(item){
+                    this.isCheckOrderDetail = true;
+                    this.OrderDetailInfo = item;
+                    console.log(item);
                 },
                 backStore(){
                     // window.location.href = 'http://localhost:8080/app.html';
@@ -343,7 +495,7 @@
                     })
                 },
                 editPassword(){
-                    this.isEditPasswrod = true;
+                    this.isEditPassword = true;
                     this.showDialogPassword = true;
                 },
                 onSubmitPassword(){
@@ -461,6 +613,26 @@
                     this.isShoppingPage = false;
                     this.isSettingPage = false;
                     this.updateUrlItemNumber('3');
+                    axios.post('http://localhost:8080/order/getOrders'
+                    ).then(response =>{
+                        if(response.status === 200 || response.data() !== null){
+                            this.$message({
+                                message:'获取订单成功',
+                                type: 'success'
+                            })
+                            this.userOrderInfo = response.data;
+                        }else {
+                            this.$message({
+                                message:'获取订单失败',
+                                type: 'warning'
+                            })
+                        }
+                    }).catch((err) =>{
+                        this.$message({
+                            message:'获取订单失败'+ err.message,
+                            type: 'error'
+                        })
+                    })
                     console.log('订单')
                 },
                 toSetting(){
@@ -580,6 +752,7 @@
             },
 
             watch: {
+
             },
             computed: {
 

@@ -36,7 +36,7 @@ public class MAddressService extends ServiceImpl<MAddressMapper, MAddress> imple
                 .map(iPage ->{
                     AddressGetVO addressGetVO = new AddressGetVO();
                     BeanUtils.copyProperties(iPage,addressGetVO);
-                    addressGetVO.setDefault(iPage.getIsDefault());
+                    addressGetVO.setDefault(iPage.getisDefault());
                     return addressGetVO;
                 })
                 .toList());

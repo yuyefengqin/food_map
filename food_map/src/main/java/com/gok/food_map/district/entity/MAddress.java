@@ -11,7 +11,6 @@ import lombok.Data;
  * @TableName m_address
  */
 @TableName(value ="m_address")
-@Data
 public class MAddress {
     /**
      * 地址ID
@@ -48,4 +47,73 @@ public class MAddress {
      * 是否默认地址
      */
     private Boolean isDefault;
+
+    public MAddress() {
+    }
+
+    public MAddress(Long addressId, Long userId, String receiver, String telephone, String detailAddress, String zipCode, Boolean isDefault) {
+        this.addressId = addressId;
+        this.userId = userId;
+        this.receiver = receiver;
+        this.telephone = telephone;
+        this.detailAddress = detailAddress;
+        this.zipCode = zipCode;
+        this.isDefault = isDefault;
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getReceiver() {
+        return receiver;
+    }
+
+    public void setReceiver(String receiver) {
+        this.receiver = receiver;
+    }
+
+    public String getTelephone() {
+        return telephone;
+    }
+
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
+    }
+
+    public String getDetailAddress() {
+        return detailAddress;
+    }
+
+    public void setDetailAddress(String detailAddress) {
+        this.detailAddress = detailAddress;
+    }
+
+    public String getZipCode() {
+        return zipCode;
+    }
+
+    public void setZipCode(String zipCode) {
+        this.zipCode = zipCode;
+    }
+
+    public Boolean getisDefault() {
+        return isDefault;
+    }
+
+    public void setisDefault(Boolean aDefault) {
+        isDefault = aDefault;
+    }
 }

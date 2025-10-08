@@ -1,7 +1,11 @@
 package com.gok.food_map;
 
+import cn.hutool.core.lang.Snowflake;
+import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.gok.food_map.order.service.ProductOrderService;
+import com.gok.food_map.order.vo.UserOrderInfoVO;
 import com.gok.food_map.product.entity.ProductSku;
 import com.gok.food_map.product.service.ProductSkuServiceImpl;
 import com.gok.food_map.product.vo.ProductSkuGetListVO;
@@ -45,12 +49,7 @@ class FoodMapApplicationTests {
         System.out.println(productSkuService.getById(1973389343000000000L));
         System.out.println();
     }
-    //@Test
-//    void testToken(){
-//        Map<String,String> token = TokenUtil.getToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ7XCJpZFwiOjE5NzM3OTA5NTA4Nzg3NjA5NjJ9IiwiaXNzIjoiQ2hlblpoaUhhbyIsImV4cCI6MTc1OTYzMTA2OH0.sOifhA4Pdt340iauRtNarAw8oBBjOHX_dP9XCz9sRUY");
-//        System.out.println(token.get("id"));
-//        System.out.println();
-//    }
+
     @Test
     void testPrintSku(){
         IPage<ProductSkuGetListVO> sku = productSkuService.getProductSkuBySpuId("1973389343917604865");
@@ -64,5 +63,18 @@ class FoodMapApplicationTests {
     void testShoppingCard(){
         List<ShoppingCartGetVO> carts = shoppingCartMapper.selectByUserId("1974135586684014593");
         carts.forEach(System.out::println);
+    }
+    @Test
+    void testID(){
+        Snowflake snowflake = IdUtil.createSnowflake(1, 1);
+        System.out.println(snowflake.nextId());
+    }
+    @Resource
+    private ProductOrderService productOrderService;
+    @Test
+    void testProductSku(){
+//        List<UserOrderInfoVO> userOrderInfos = productOrderService.getUserOrderInfos(1973790950878760962L);
+//        userOrderInfos.forEach(System.out::println);
+//        System.out.println();
     }
 }

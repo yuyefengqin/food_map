@@ -5,8 +5,15 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
+
+import com.gok.food_map.definetypehandler.JsonbTypeHandler;
+import com.gok.food_map.definetypehandler.ListStrToArrayTypeHandler;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 订单明细表
@@ -14,11 +21,13 @@ import lombok.Data;
  */
 @TableName(value ="order_item")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrderItem {
     /**
      * 明细ID
      */
-    @TableId
+    @TableId(type = IdType.ASSIGN_ID)
     private Long itemId;
 
     /**
@@ -31,10 +40,6 @@ public class OrderItem {
      */
     private Long spuId;
 
-    /**
-     * 商品SKU ID
-     */
-    private Long skuId;
 
     /**
      * 商品名称
@@ -44,7 +49,8 @@ public class OrderItem {
     /**
      * 规格
      */
-    private String specs;
+    @TableField(typeHandler = ListStrToArrayTypeHandler.class)
+    private List<String> specs;
 
     /**
      * 单价
@@ -69,5 +75,5 @@ public class OrderItem {
     /**
      * 创建时间
      */
-    private Date createTime;
+    private LocalDateTime createTime;
 }

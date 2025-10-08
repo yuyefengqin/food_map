@@ -20,4 +20,4 @@ server:
       enabled: false
   servlet:
     session:
-      timeout: 30m
+      timeout: 1800s

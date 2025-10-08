@@ -1,9 +1,14 @@
 package com.gok.food_map.order.service;
 
+import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gok.food_map.district.entity.MAddress;
+import com.gok.food_map.district.mapper.MAddressMapper;
+import com.gok.food_map.merchant.entity.MMerchant;
+import com.gok.food_map.merchant.mapper.MMerchantMapper;
+import com.gok.food_map.order.dto.OrderDirectBuyDto;
 import com.gok.food_map.order.dto.OrderGetListDTO;
 import com.gok.food_map.order.dto.OrderRemoveDTO;
 import com.gok.food_map.order.dto.OrderSaveDTO;
@@ -11,21 +16,28 @@ import com.gok.food_map.order.entity.OrderItem;
 import com.gok.food_map.order.entity.ProductOrder;
 import com.gok.food_map.order.mapper.OrderItemMapper;
 import com.gok.food_map.order.mapper.ProductOrderMapper;
+import com.gok.food_map.order.vo.BuyProduct;
 import com.gok.food_map.order.vo.OrderGetListVO;
+import com.gok.food_map.order.vo.UserOrderInfoVO;
+import com.gok.food_map.product.entity.ProductSpu;
+import com.gok.food_map.product.mapper.ProductSpuMapper;
 import com.gok.food_map.user.entity.MUser;
 import com.gok.food_map.user.mapper.MUserMapper;
+import com.gok.food_map.util.TokenUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
 * @author 32741
@@ -36,25 +48,28 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor_ = @Lazy)
 public class ProductOrderService{
     private static volatile long state = 0L;
-    private final ProductOrderMapper mapper;
+    private final ProductOrderMapper productOrderMapper;
     private final OrderItemMapper orderItemMapper;
     private final OrderItemService orderItemService;
     private final MUserMapper mUserMapper;
+    private final MAddressMapper mAddressMapper;
+    private final ProductSpuMapper productSpuMapper;
+    private final MMerchantMapper mMerchantMapper;
 
     public void remove(OrderRemoveDTO dto) {
-        ProductOrder productOrder = mapper.selectById(dto.getOrderId());
+        ProductOrder productOrder = productOrderMapper.selectById(dto.getOrderId());
 
         if(productOrder == null){
             throw new RuntimeException("该订单不存在");
         }
         orderItemService.remove(dto.getOrderId());
-        mapper.deleteById(dto.getOrderId());
+        productOrderMapper.deleteById(dto.getOrderId());
 
     }
 
     public void edit(OrderSaveDTO dto) {
         Long orderId = dto.getOrderId();
-        ProductOrder productOrder = mapper.selectById(orderId);
+        ProductOrder productOrder = productOrderMapper.selectById(orderId);
         if(productOrder == null){
             throw new RuntimeException("改订单不存在");
         }
@@ -96,7 +111,7 @@ public class ProductOrderService{
         dto.setShipTime(LocalDateTime.now());
         //以上为简单版的检查
         BeanUtils.copyProperties(dto,productOrder);
-        mapper.updateById(productOrder);//更新数据
+        productOrderMapper.updateById(productOrder);//更新数据
     }
     //简单的雪花算法
     public static synchronized long nextId() {
@@ -128,7 +143,7 @@ public class ProductOrderService{
 
     public IPage<OrderGetListVO> getList(OrderGetListDTO dto) {
         IPage<ProductOrder> page = new Page<>(dto.getCurrent() == null ? 1 : Integer.parseInt(dto.getCurrent()), dto.getSize() == null ? 20 : Integer.parseInt(dto.getSize()));
-        List<OrderGetListVO> orders = mapper.selectBy(
+        List<OrderGetListVO> orders = productOrderMapper.selectBy(
                 dto.getOrderId()==null? null:dto.getOrderId(),
                 dto.getOrderStatus(),
                 dto.getMerchantId()==null? null:dto.getMerchantId(),
@@ -145,6 +160,121 @@ public class ProductOrderService{
             return vo;
         }).toList());
         return res;
+    }
+    @Transactional(rollbackFor = Exception.class)
+    public void directBuy(OrderDirectBuyDto dto) {
+        System.out.println(dto);
+
+        long orderId = IdUtil.createSnowflake(1, 1).nextId();
+
+        ProductOrder productOrder = new ProductOrder();
+        productOrder.setOrderId(orderId);
+        productOrder.setUserId(dto.getUserId());
+        productOrder.setMerchantId(dto.getMerchantId());
+        productOrder.setOrderAmount(new BigDecimal(dto.getTotalPrice()));
+        productOrder.setProductAmount(new BigDecimal(dto.getTotalPrice()));
+        productOrder.setDeliveryFee(BigDecimal.ONE);
+        productOrder.setDeliveryMethod("顺丰快递");
+        productOrder.setDeliveryTime(null);
+        productOrder.setAddressId(checkUserAddress(dto.getUserId()).getAddressId());
+        productOrder.setPayMethod("网页支付");
+        productOrder.setTradeNo(nextId()+10L);
+        productOrder.setLogisticsCompany("顺丰公司");
+        productOrder.setLogisticsNo(nextId()+20L);
+        productOrder.setOrderStatus(4);
+        productOrder.setCreateTime(LocalDateTime.now());
+        productOrder.setPayTime(LocalDateTime.now());
+        productOrder.setShipTime(LocalDateTime.now());
+        productOrder.setReceiveTime(LocalDateTime.now().plusDays(3));
+        productOrder.setCompleteTime(LocalDateTime.now());
+        productOrder.setCloseTime(LocalDateTime.now());
+
+        OrderItem orderItem = new OrderItem();
+        orderItem.setOrderId(orderId);
+        orderItem.setSpuId(dto.getSpuId());
+        orderItem.setProductName(checkProduct(dto.getSpuId()).getSpuName());
+        orderItem.setSpecs(dto.getSpecs());
+        orderItem.setUnitPrice(new BigDecimal(dto.getUnitPrice()));
+        orderItem.setQuantity(dto.getQuantity());
+        orderItem.setCreateTime(LocalDateTime.now());
+        orderItem.setSubAmount(new BigDecimal(dto.getTotalPrice()));
+        productOrderMapper.insert(productOrder);
+        orderItemMapper.insert(orderItem);
+    }
+    private MAddress checkUserAddress(Long userId){
+        LambdaQueryWrapper<MAddress> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq((userId != null ),MAddress::getUserId,userId);
+        wrapper.eq(MAddress::getisDefault,true);
+        return mAddressMapper.selectOne(wrapper);
+    }
+    private ProductSpu checkProduct(Long productId){
+        return productSpuMapper.selectById(productId);
+    }
+    private MMerchant checkMerchant(Long merchantId){
+        return mMerchantMapper.selectById(merchantId);
+    }
+    @Transactional(rollbackFor = Exception.class)
+    public List<UserOrderInfoVO> getUserOrderInfos(HttpServletRequest request) {
+        List<UserOrderInfoVO> userOrderInfoVOS = new ArrayList<>();
+
+        Map<String, String> idMap = TokenUtil.getIdByTokenUnsafe(request);
+        long id = Long.parseLong(idMap.get("id"));
+        LambdaQueryWrapper<ProductOrder> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ProductOrder::getUserId,id);
+        List<ProductOrder> productOrders = productOrderMapper.selectList(wrapper);
+        productOrders.forEach(pO -> {
+            UserOrderInfoVO VO = new UserOrderInfoVO();
+            List<BuyProduct> buyProducts = new ArrayList<>();
+            MAddress mAddress = checkUserAddress(pO.getUserId());
+            VO.setOrderId(pO.getOrderId().toString());
+            VO.setTradeNo(pO.getTradeNo().toString());
+            VO.setMerchantName(checkMerchant(pO.getMerchantId()).getMerchantName());
+            VO.setOrderAmount(pO.getOrderAmount().add(pO.getDeliveryFee()).toString());
+            VO.setDeliveryFee(pO.getDeliveryFee().toString());
+            VO.setDeliveryMethod(pO.getDeliveryMethod());
+            VO.setLogisticsNo(pO.getLogisticsNo().toString());
+            VO.setReceiver(mAddress.getReceiver());
+            VO.setTelephone(mAddress.getTelephone());
+            VO.setDetailAddress(mAddress.getDetailAddress());
+            VO.setOrderStatus(checkOrderStatus(pO.getOrderStatus()));
+            VO.setCreateTime(pO.getCreateTime().toString());
+            VO.setPayTime(pO.getPayTime().toString());
+            VO.setShipTime(pO.getShipTime().toString());
+            VO.setReceiveTime(pO.getReceiveTime().toString());
+            VO.setCompleteTime(pO.getCompleteTime().toString());
+
+            LambdaQueryWrapper<OrderItem> oIWrapper = new LambdaQueryWrapper<>();
+            oIWrapper.eq(OrderItem::getOrderId,pO.getOrderId());
+            List<OrderItem> orderItems = orderItemMapper.selectList(oIWrapper);
+            orderItems.forEach(oI ->{
+                BuyProduct buyProduct = new BuyProduct();
+                ProductSpu productSpu = checkProduct(oI.getSpuId());
+                buyProduct.setSpuName(oI.getProductName());
+                buyProduct.setMainImage(productSpu.getMainImage().toString());
+                buyProduct.setSpecs(oI.getSpecs());
+                buyProduct.setQuantity(oI.getQuantity());
+                buyProduct.setUnitPrice(oI.getUnitPrice().toString());
+                VO.setTotalQuantity(+buyProduct.getQuantity());
+                buyProducts.add(buyProduct);
+            });
+            VO.setBuyProducts(buyProducts);
+            userOrderInfoVOS.add(VO);
+        });
+        return userOrderInfoVOS;
+    }
+
+    private String checkOrderStatus(Integer orderStatus) {
+        return switch (orderStatus) {
+            case 1 -> "待付款";
+            case 2 -> "待发货";
+            case 3 -> "待收货";
+            case 4 -> "已完成";
+            case 5 -> "已取消";
+            case 6 -> "交易完成";
+            case 7 -> "交易关闭";
+            case 8 -> "未开始";
+            default -> null;
+        };
     }
 }
 
