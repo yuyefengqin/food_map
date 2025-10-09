@@ -40,10 +40,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
-* @author 32741
-* @description 针对表【product_order(普通商品订单表)】的数据库操作Service实现
-* @createDate 2025-10-05 01:07:19
-*/
+ * @author 32741
+ * @description 针对表【product_order(普通商品订单表)】的数据库操作Service实现
+ * @createDate 2025-10-05 01:07:19
+ */
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Lazy)
 public class ProductOrderService{
@@ -56,7 +56,7 @@ public class ProductOrderService{
     private final ProductSpuMapper productSpuMapper;
     private final MMerchantMapper mMerchantMapper;
 
-//    public void remove(OrderRemoveDTO dto) {
+    //    public void remove(OrderRemoveDTO dto) {
 //        ProductOrder productOrder = productOrderMapper.selectById(dto.getOrderId());
 //
 //        if(productOrder == null){

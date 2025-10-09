@@ -9,16 +9,20 @@ import java.time.LocalDateTime;
 public class OrderGetListVO {
 
     private String orderId;//
-
     /**
-     * 用户ID
+     * 用户账号
      */
     private String userCode;//
 
     /**
-     * 商户ID
+     * 商户编号
      */
-    private String merchantId;//
+    private String merchantId;
+
+    /**
+     * 商户名
+     */
+    private String merchantName;//
 
     /**
      * 订单总金额（商品+配送费）
@@ -38,7 +42,6 @@ public class OrderGetListVO {
      * 配送方式（如顺丰速递）
      */
     private String deliveryMethod;//
-
     /**
      * 收货地址ID（关联user_address）
      */

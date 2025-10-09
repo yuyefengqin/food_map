@@ -3,6 +3,7 @@ package com.gok.food_map.order.dto;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class OrderGetListDTO {
@@ -10,9 +11,8 @@ public class OrderGetListDTO {
     private String size;
     private Long orderId;
     private Integer orderStatus;
-    private Long merchantId;
+    private String merchantName;
     private String userCode;
-    private String BeginTime;
-    private String EndTime;
+    private List<String> time;
     private String payMethod;
 }

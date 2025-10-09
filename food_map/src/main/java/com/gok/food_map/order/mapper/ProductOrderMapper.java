@@ -19,7 +19,7 @@ import java.util.List;
 public interface ProductOrderMapper extends BaseMapper<ProductOrder> {
     List<OrderGetListVO> selectBy(@Param("orderId") Long orderId,
                                   @Param("orderStatus") Integer orderStatus,
-                                  @Param("merchantId") Long merchantId,
+                                  @Param("merchantName") String merchantName,
                                   @Param("userCode") String  userCode,
                                   @Param("beginTime") LocalDateTime beginTime,
                                   @Param("endTime") LocalDateTime endTime,
