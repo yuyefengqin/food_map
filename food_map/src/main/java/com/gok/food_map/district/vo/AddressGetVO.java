@@ -1,12 +1,15 @@
 package com.gok.food_map.district.vo;
 
 public class AddressGetVO {
+    private String addressId;
     private String receiver;
     private String telephone;
     private String detailAddress;
     private String zipCode;
     private Boolean isDefault;
-    public AddressGetVO(String receiver, String telephone, String detailAddress, String zipCode, Boolean isDefault) {
+
+    public AddressGetVO(String addressId, String receiver, String telephone, String detailAddress, String zipCode, Boolean isDefault) {
+        this.addressId = addressId;
         this.receiver = receiver;
         this.telephone = telephone;
         this.detailAddress = detailAddress;
@@ -15,6 +18,12 @@ public class AddressGetVO {
     }
 
     public AddressGetVO() {
+    }
+    public String getAddressId() {
+        return addressId;
+    }
+    public void setAddressId(String addressId) {
+        this.addressId = addressId;
     }
 
     public String getReceiver() {
@@ -49,11 +58,11 @@ public class AddressGetVO {
         this.zipCode = zipCode;
     }
 
-    public Boolean getDefault() {
+    public Boolean getIsDefault() {
         return isDefault;
     }
 
-    public void setDefault(Boolean aDefault) {
-        isDefault = aDefault;
+    public void setIsDefault(Boolean isDefault) {
+        this.isDefault = isDefault;
     }
 }

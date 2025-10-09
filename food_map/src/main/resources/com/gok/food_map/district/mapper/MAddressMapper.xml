@@ -3,4 +3,14 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.gok.food_map.district.mapper.MAddressMapper">
+    <!-- 更新所有非默认地址为非默认 -->
+    <update id="updateAllNonDefault" parameterType="java.lang.Long">
+        UPDATE m_address
+        SET is_default = false
+        WHERE user_id = #{userId}
+    </update>
+    <select id="getAddressId" resultType="java.lang.String">
+        SELECT address_id FROM m_address WHERE user_id = #{userId}
+    </select>
 </mapper>
+
