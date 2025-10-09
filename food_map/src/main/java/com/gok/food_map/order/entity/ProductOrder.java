@@ -8,14 +8,18 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
-import lombok.Data;
+
+import lombok.*;
 
 /**
  * 普通商品订单表
  * @TableName product_order
  */
 @TableName(value ="product_order")
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Builder
 public class ProductOrder {
     /**
      * 订单ID/订单编号

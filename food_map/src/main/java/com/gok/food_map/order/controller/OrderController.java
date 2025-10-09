@@ -29,18 +29,18 @@ public class OrderController {
     public void directBuy(@RequestBody OrderDirectBuyDto dto) {
         service.directBuy(dto);
     }
-    @PostMapping("/remove")
-    public void removeOrder(@RequestBody OrderRemoveDTO dto) {
-        service.remove(dto);
-    }
-    @PostMapping("/edit")
-    public void editOrder(@RequestBody OrderSaveDTO dto) {
-        service.edit(dto);
-    }
-    @PostMapping("/getList")
-    public IPage<OrderGetListVO> getList(@RequestBody OrderGetListDTO dto){
-        return service.getList(dto);
-    }
+//    @PostMapping("/remove")
+//    public void removeOrder(@RequestBody OrderRemoveDTO dto) {
+//        service.remove(dto);
+//    }
+//    @PostMapping("/edit")
+//    public void editOrder(@RequestBody OrderSaveDTO dto) {
+//        service.edit(dto);
+//    }
+//    @PostMapping("/getList")
+//    public IPage<OrderGetListVO> getList(@RequestBody OrderGetListDTO dto){
+//        return service.getList(dto);
+//    }
 
    @Auth
    @PostMapping("/getOrders")

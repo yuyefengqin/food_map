@@ -11,18 +11,17 @@ import java.util.List;
 
 import com.gok.food_map.definetypehandler.JsonbTypeHandler;
 import com.gok.food_map.definetypehandler.ListStrToArrayTypeHandler;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * 订单明细表
  * @TableName order_item
  */
 @TableName(value ="order_item")
-@Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Builder
 public class OrderItem {
     /**
      * 明细ID
