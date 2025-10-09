@@ -67,6 +67,12 @@ public class ProductController {
         productSpuService.edit(dto);
     }
 
+//    删除
+    @PostMapping("/remove")
+    public void remove(@RequestBody ProductRemoveDto dto) {
+        productService.remove(dto);
+    }
+
     //跳转
     @RequestMapping("/detail")
     public String detail() {

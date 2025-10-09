@@ -7,7 +7,9 @@ import com.gok.food_map.product.entity.ProductSku;
 import com.gok.food_map.product.mapper.ProductSkuMapper;
 import com.gok.food_map.product.vo.ProductSkuGetListVO;
 import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,10 +20,10 @@ import java.util.List;
 * @createDate 2025-10-01 22:04:55
 */
 @Service
+@RequiredArgsConstructor(onConstructor_ = @Lazy)
 public class ProductSkuServiceImpl extends ServiceImpl<ProductSkuMapper, ProductSku> implements IService<ProductSku> {
     @Resource
     private ProductSkuMapper productSkuMapper;
-
     public IPage<ProductSkuGetListVO> getProductSkuBySpuId(String spuId) {
 
         List<ProductSku> productSkus = productSkuMapper.selectById(spuId);

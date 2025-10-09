@@ -12,6 +12,7 @@
     <script src="/static_resources/vxe-table@4.6.25.js"></script>
     <script src="/static_resources/axios.min.js"></script>
     <script src="/static_resources/element-plus_icons-vue.js"></script>
+    <script src="/static_resources/zh-cn.js"></script>
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon_logosc/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon_logosc/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon_logosc/favicon-16x16.png">
@@ -34,136 +35,217 @@
                             class="el-menu-vertical-demo"
                     >
                         <el-menu-item index="1" @click="toUserManage">
-                            <el-icon><document /></el-icon>
+                            <el-icon>
+                                <document/>
+                            </el-icon>
                             <span>用户管理</span>
                         </el-menu-item>
                         <el-menu-item index="2" @click="toMerchantManage">
-                            <el-icon><document /></el-icon>
+                            <el-icon>
+                                <document/>
+                            </el-icon>
                             <span>商户管理</span>
                         </el-menu-item>
                         <el-menu-item index="3" @click="toProductManage">
-                            <el-icon><document /></el-icon>
+                            <el-icon>
+                                <document/>
+                            </el-icon>
                             <span>商品管理</span>
                         </el-menu-item>
                         <el-menu-item index="4" @click="toOrderManage">
-                            <el-icon><setting /></el-icon>
+                            <el-icon>
+                                <setting/>
+                            </el-icon>
                             <span>订单管理</span>
                         </el-menu-item>
                     </el-menu>
                 </el-aside>
                 <el-main>
                     <strong>商家列表</strong>
-                    <el-row>
-                        <el-form :inline="true" :model="form">
-                            <el-form-item label="商户编号"><el-input v-model="form.merchantId" clearable /></el-form-item>
-                            <el-form-item label="商户名称"> <el-input v-model="form.merchantName" clearable /> </el-form-item>
-                            <el-form-item label="创建时间"><el-date-picker v-model="form.createTime" type="date" placeholder="Pick a day" :size="form.size"/></el-form-item>
-                        </el-form>
-                        <el-form :inline="true" :model="form">
-                            <el-form-item label="状态">
-                                <el-select v-model="form.status" placeholder="请选择" style="width: 240px">
-                                    <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"/>
-                                </el-select>
-                            </el-form-item>
-                            <el-form-item label="商户管理账号"> <el-input v-model="form.manageAccount" clearable /> </el-form-item>
-                            <el-form-item> <el-button type="primary" @click="onSearch">查询</el-button> </el-form-item>
-                            <el-form-item> <el-button type="primary" @click="onDelete">重置</el-button> </el-form-item>
-                        </el-form>
-                    </el-row>
 
-                    <!--    表格-->
-                    <el-row style="height: 80vh;">
-                        <vxe-grid v-bind="gridOptions" style="width: 100%" height="100%" >
-
-                            <!--            查询按钮（1.类型 2.点击后触发方法 3.按钮显示内容）-->
-                            <template #toolbar_buttons><el-button type="primary" @click="add">新增</el-button>
-                            </template>
-
-                            <!--            有效-->
-                            <template #valid="{ row }">
-                                <el-switch v-model="row.status" :active-value="1" :inactive-value="0" disabled />
-                            </template>
-
-
-                            <!--            操作-->
-                            <template #operate="{ row }">
-                                <el-button size="small" type="primary" @click="edit(row)">编辑</el-button>
-                                <el-button size="small" type="danger" @click="onRemove(row.merchantId)">删除</el-button>
-                            </template>
-
-                            <!--            换页-->
-                            <template #pager>
-                                <vxe-pager :layouts="['Sizes', 'PrevPage', 'Number', 'NextPage', 'Total']" v-model:current-page="page.current" v-model:page-size="page.size" :total="page.total" @page-change="onPageChange">
-                                </vxe-pager>
-                            </template>
-                        </vxe-grid>
-                        <!--       编辑和新增页面-->
-                        <el-dialog v-model="showDialog" :title="isEdit ? '编辑' : '新增'" width="400">
-                            <el-form ref="editForm" :model="editForm" :rules="rules" label-width="auto">
-
-                                <!--                商户管理账号-->
-                                <el-form-item label="商户管理账号" prop="manageAccount">
-                                    <el-input v-model="editForm.manageAccount" :disabled="isEdit" maxlength="20" />
+                    <template v-if=!isDetail>
+                        <el-row>
+                            <el-form :inline="true" :model="form">
+                                <el-form-item label="商户编号">
+                                    <el-input v-model="form.merchantId" clearable/>
                                 </el-form-item>
-
-                                <!--                商户管理密码-->
-                                <el-form-item v-if="!isEdit" label="商户管理密码" prop="managePassword">
-                                    <el-input v-model="editForm.managePassword" />
+                                <el-form-item label="商户名称">
+                                    <el-input v-model="form.merchantName" clearable/>
                                 </el-form-item>
-
-                                <!--                商户名称-->
-                                <el-form-item label="商户名称" prop="merchantName">
-                                    <el-input v-model="editForm.merchantName" maxlength="20" />
+                                <el-form-item label="创建时间">
+                                    <el-date-picker v-model="form.createTime" type="date" placeholder="Pick a day"
+                                                    :size="form.size"/>
                                 </el-form-item>
-
-                                <!--                商户地址-->
-                                <el-form-item label="商户地址" prop="merchantAddress">
-                                    <el-input v-model="editForm.merchantAddress" maxlength="20" />
-                                </el-form-item>
-
-                                <!--                商户联系方式-->
-                                <el-form-item label="商户联系方式" prop="contactPhone">
-                                    <el-input v-model="editForm.contactPhone" maxlength="20" />
-                                </el-form-item>
-
-                                <!--                上传营业执照-->
-                                <el-form-item label="上传营业执照" prop="businessLicense">
-                                    <el-upload :show-MFile-list="false" :before-upload="uploadLicense"  >
-                                        <img v-if="editForm.businessLicense" :src="`/MFile/download?id=${editForm.businessLicense}`" style="width: 100px; height: 100px" />
-                                        <el-icon v-else><Plus /></el-icon>
-                                    </el-upload>
-                                </el-form-item>
-
-                                <!--                上传logo-->
-                                <el-form-item label="上传Logo" prop="logoUrl">
-                                    <el-upload :show-MFile-list="false" :before-upload="uploadLogo"  >
-                                        <img v-if="editForm.logoUrl" :src="`/MFile/download?id=${editForm.logoUrl}`" style="width: 100px; height: 100px" />
-                                        <el-icon v-else><Plus /></el-icon>
-                                    </el-upload>
-                                </el-form-item>
-
-                                <!--                企业类型-->
-                                <el-form-item label="企业类型" prop="enterpriseType">
-                                    <el-input v-model="editForm.enterpriseType" />
-                                </el-form-item>
-
-                                <!--                备注-->
-                                <el-form-item label="备注" prop="notes">
-                                    <el-input v-model="editForm.notes" maxlength="50" />
-                                </el-form-item>
-                                <!--                有效-->
-                                <el-form-item v-if="isEdit" label="有效" prop="status">
-                                    <el-switch v-model="editForm.status" :active-value="1" :inactive-value="0" />
-                                </el-form-item>
-
                             </el-form>
+                            <el-form :inline="true" :model="form">
+                                <el-form-item label="状态">
+                                    <el-select v-model="form.status" placeholder="请选择" style="width: 240px">
+                                        <el-option v-for="item in options" :key="item.value" :label="item.label"
+                                                   :value="item.value"/>
+                                    </el-select>
+                                </el-form-item>
+                                <el-form-item label="商户管理账号">
+                                    <el-input v-model="form.manageAccount" clearable/>
+                                </el-form-item>
+                                <el-form-item>
+                                    <el-button type="primary" @click="onSearch">查询</el-button>
+                                </el-form-item>
+                                <el-form-item>
+                                    <el-button type="primary" @click="onDelete">重置</el-button>
+                                </el-form-item>
+                            </el-form>
+                        </el-row>
 
-                            <template #footer>
-                                <el-button type="primary" @click="onSubmit">提交</el-button>
-                                <el-button @click="showDialog = false">取消</el-button>
-                            </template>
-                        </el-dialog>
-                    </el-row>
+                        <!--    表格-->
+                        <el-row style="height: 80vh;">
+                            <vxe-grid v-bind="gridOptions" style="width: 100%" height="100%">
+
+                                <!--            查询按钮（1.类型 2.点击后触发方法 3.按钮显示内容）-->
+                                <template #toolbar_buttons>
+                                    <el-button type="primary" @click="add">新增</el-button>
+                                </template>
+
+                                <!--            有效-->
+                                <template #valid="{ row }">
+                                    <el-switch v-model="row.status" :active-value="1" :inactive-value="0" disabled/>
+                                </template>
+
+
+                                <!--            操作-->
+                                <template #operate="{ row }">
+                                    <el-button size="small" type="primary" @click="showDetailDialog(row)">查看</el-button>
+                                    <el-button size="small" type="primary" @click="edit(row)">编辑</el-button>
+                                    <el-button size="small" type="danger" @click="onRemove(row.merchantId)">删除
+                                    </el-button>
+                                </template>
+
+                                <!--            换页-->
+                                <template #pager>
+                                    <vxe-pager :layouts="['Sizes', 'PrevPage', 'Number', 'NextPage', 'Total']"
+                                               v-model:current-page="page.current" v-model:page-size="page.size"
+                                               :total="page.total" @page-change="onPageChange">
+                                    </vxe-pager>
+                                </template>
+                            </vxe-grid>
+                            <!--       编辑和新增页面-->
+                            <el-dialog v-model="showDialog" :title="isEdit ? '编辑' : '新增'" width="400">
+                                <el-form ref="editForm" :model="editForm" :rules="rules" label-width="auto">
+
+                                    <!--                商户管理账号-->
+                                    <el-form-item label="商户管理账号" prop="manageAccount">
+                                        <el-input v-model="editForm.manageAccount" :disabled="isEdit" maxlength="20"/>
+                                    </el-form-item>
+
+                                    <!--                商户管理密码-->
+                                    <el-form-item v-if="!isEdit" label="商户管理密码" prop="managePassword">
+                                        <el-input v-model="editForm.managePassword"/>
+                                    </el-form-item>
+
+                                    <!--                商户名称-->
+                                    <el-form-item label="商户名称" prop="merchantName">
+                                        <el-input v-model="editForm.merchantName" maxlength="20"/>
+                                    </el-form-item>
+
+                                    <!--                商户地址-->
+                                    <el-form-item label="商户地址" prop="merchantAddress">
+                                        <el-input v-model="editForm.merchantAddress" maxlength="20"/>
+                                    </el-form-item>
+
+                                    <!--                商户联系方式-->
+                                    <el-form-item label="商户联系方式" prop="contactPhone">
+                                        <el-input v-model="editForm.contactPhone" maxlength="20"/>
+                                    </el-form-item>
+
+                                    <!--                上传营业执照-->
+                                    <el-form-item label="上传营业执照" prop="businessLicense">
+                                        <el-upload :show-MFile-list="false" :before-upload="uploadLicense">
+                                            <img v-if="editForm.businessLicense"
+                                                 :src="`/MFile/download?id=${editForm.businessLicense}`"
+                                                 style="width: 100px; height: 100px"/>
+                                            <el-icon v-else>
+                                                <Plus/>
+                                            </el-icon>
+                                        </el-upload>
+                                    </el-form-item>
+
+                                    <!--                上传logo-->
+                                    <el-form-item label="上传Logo" prop="logoUrl">
+                                        <el-upload :show-MFile-list="false" :before-upload="uploadLogo">
+                                            <img v-if="editForm.logoUrl" :src="`/MFile/download?id=${editForm.logoUrl}`"
+                                                 style="width: 100px; height: 100px"/>
+                                            <el-icon v-else>
+                                                <Plus/>
+                                            </el-icon>
+                                        </el-upload>
+                                    </el-form-item>
+
+                                    <!--                企业类型-->
+                                    <el-form-item label="企业类型" prop="enterpriseType">
+                                        <el-input v-model="editForm.enterpriseType"/>
+                                    </el-form-item>
+
+                                    <!--                备注-->
+                                    <el-form-item label="备注" prop="notes">
+                                        <el-input v-model="editForm.notes" maxlength="50"/>
+                                    </el-form-item>
+                                    <!--                有效-->
+                                    <el-form-item v-if="isEdit" label="有效" prop="status">
+                                        <el-switch v-model="editForm.status" :active-value="1" :inactive-value="0"/>
+                                    </el-form-item>
+
+                                </el-form>
+
+                                <template #footer>
+                                    <el-button type="primary" @click="onSubmit">提交</el-button>
+                                    <el-button @click="showDialog = false">取消</el-button>
+                                </template>
+                            </el-dialog>
+                        </el-row>
+                    </template>
+                    <!--    详细表（商户）-->
+                    <template v-else-if='isDetail'>
+                        <el-button text="plain" @click="isDetail = false"> < 返回</el-button>
+                        <el-descriptions
+                                title="📖商品详细"
+                                direction="vertical"
+                                border
+                                style="margin-top: 20px"
+                        >
+                            <el-descriptions-item
+                                    :rowspan="3"
+                                    :width="140"
+                                    label="LOGO"
+                                    align="center"
+                            >
+                                <div>
+                                    <img v-if="detailForm.logoUrl" :src="`/MFile/download?id=${detailForm.logoUrl}`" style="width: 100px; height: 100px" />
+                                    <el-icon v-else><Plus /></el-icon>
+                                </div>
+                            </el-descriptions-item>
+                            <el-descriptions-item label="商户编号">{{detailForm.merchantId}}</el-descriptions-item>
+                            <el-descriptions-item label="商户名称">{{detailForm.merchantName}}</el-descriptions-item>
+                            <el-descriptions-item label="商户备注">{{detailForm.notes}}</el-descriptions-item>
+                            <el-descriptions-item label="所在城市">{{detailForm.merchantAddress}}</el-descriptions-item>
+                            <el-descriptions-item label="联系人电话">{{detailForm.contactPhone}}</el-descriptions-item>
+                            <el-descriptions-item label="企业类型">{{detailForm.enterpriseType}}</el-descriptions-item>
+                            <el-descriptions-item label="商户管理账号">{{detailForm.manageAccount}}</el-descriptions-item>
+                            <el-descriptions-item label="管理账号密码">{{detailForm.managePassword}}</el-descriptions-item>
+                            <el-descriptions-item label="商户状态">{{detailForm.status}}</el-descriptions-item>
+                            <el-descriptions-item label="创建时间">{{detailForm.createTime}}</el-descriptions-item>
+                            <el-descriptions-item
+                                    :rowspan="3"
+                                    :width="140"
+                                    label="营业执照"
+                                    align="center"
+                            >
+                                <div>
+                                    <img v-if="detailForm.businessLicense" :src="`/MFile/download?id=${detailForm.businessLicense}`" style="width: 100px; height: 100px" />
+                                    <el-icon v-else><Plus /></el-icon>
+                                </div>
+                            </el-descriptions-item>
+                        </el-descriptions>
+                    </template>
+
                 </el-main>
             </el-container>
         </el-container>
@@ -175,7 +257,7 @@
     const app = Vue.createApp({
         data() {
             return {
-                itemNumber:'2',
+                itemNumber: '2',
                 districts: [],
                 // 查询界面
                 form: {
@@ -241,6 +323,22 @@
                     managePassword: '',
                     notes: ''
                 },
+                // 详细内容
+                isDetail: false,
+                detailForm: {
+                    logoUrl: '',
+                    merchantId: '',
+                    merchantName: '',
+                    notes: '',
+                    merchantAddress: '',
+                    contactPhone: '',
+                    enterpriseType: '',
+                    manageAccount: '',
+                    managePassword: '',
+                    status: '',
+                    createTime: '',
+                    businessLicense: '',
+                },
                 rules: {
                     merchantId: [{required: true, message: '请输入账号'}],
                     merchantName: [{required: true, message: '请输入名称'}],
@@ -283,7 +381,7 @@
         methods: {
             //初始化方法
             async init() {
-                const response= await axios.post('/merchant/init');
+                const response = await axios.post('/merchant/init');
                 // 转换所有value为字符串
                 // const convertValues = (nodes) => {
                 //     return nodes.map(node => ({
@@ -302,25 +400,33 @@
             },
 
             async getList() {
-                const form= this.form;
-                const response= await axios.post('/merchant/getList', { merchantId: form.merchantId, merchantName: form.merchantName, createTime: form.createTime, status: form.status, manageAccount: form.manageAccount, current: this.page.current, size: this.page.size});
-                this.gridOptions.data= response.data.records;
-                this.page.current= response.data.current;
-                this.page.size= response.data.size;
-                this.page.total= response.data.total;
+                const form = this.form;
+                const response = await axios.post('/merchant/getList', {
+                    merchantId: form.merchantId,
+                    merchantName: form.merchantName,
+                    createTime: form.createTime,
+                    status: form.status,
+                    manageAccount: form.manageAccount,
+                    current: this.page.current,
+                    size: this.page.size
+                });
+                this.gridOptions.data = response.data.records;
+                this.page.current = response.data.current;
+                this.page.size = response.data.size;
+                this.page.total = response.data.total;
                 console.log(this.gridOptions.data);
             },
             //编辑按钮
             edit(merchant) {
-                this.showDialog= true;
-                this.isEdit= true;
-                this.editForm= {...merchant};
+                this.showDialog = true;
+                this.isEdit = true;
+                this.editForm = {...merchant};
             },
             //新增按钮
             add() {
-                this.showDialog= true;
-                this.isEdit= false;
-                this.editForm= {};
+                this.showDialog = true;
+                this.isEdit = false;
+                this.editForm = {};
                 this.editForm.status = 1;
             },
             //查询按钮
@@ -341,8 +447,8 @@
             },
             async uploadLogo(f) {
                 try {
-                    const response = await axios.post('/MFile/upload', { MFile: f}, {
-                        headers: { 'Content-Type': 'multipart/form-data' }
+                    const response = await axios.post('/MFile/upload', {MFile: f}, {
+                        headers: {'Content-Type': 'multipart/form-data'}
                     });
 
                     this.editForm.logoUrl = response.data.id;
@@ -353,10 +459,10 @@
                 }
             },
 
-            async uploadLicense(f){
+            async uploadLicense(f) {
                 try {
-                    const response2 = await axios.post('/MFile/upload', { MFile: f}, {
-                        headers: { 'Content-Type': 'multipart/form-data' }
+                    const response2 = await axios.post('/MFile/upload', {MFile: f}, {
+                        headers: {'Content-Type': 'multipart/form-data'}
                     });
 
                     this.editForm.businessLicense = response2.data.id;
@@ -367,30 +473,47 @@
                 }
             },
             onSubmit() {
-                this.$refs.editForm.validate(async valid =>{
-                        if(valid) {
-                            await axios.post(this.isEdit? '/merchant/edit': '/merchant/add', this.editForm);
+                this.$refs.editForm.validate(async valid => {
+                        if (valid) {
+                            await axios.post(this.isEdit ? '/merchant/edit' : '/merchant/add', this.editForm);
                             await this.getList();
-                            this.showDialog= false;
+                            this.showDialog = false;
                         }
                     }
                 );
             },
-            toUserManage(){
+            showDetailDialog(merchant) {
+                this.isDetail = true;
+                this.detailForm.merchantId = merchant.merchantId;
+                this.detailForm.merchantName = merchant.merchantName;
+                this.detailForm.notes = merchant.notes;
+                this.detailForm.merchantAddress = merchant.merchantAddress;
+                this.detailForm.contactPhone = merchant.contactPhone;
+                this.detailForm.enterpriseType = merchant.enterpriseType;
+                this.detailForm.logoUrl = merchant.logoUrl;
+                this.detailForm.businessLicense = merchant.businessLicense;
+                this.detailForm.manageAccount = merchant.manageAccount;
+                this.detailForm.managePassword = merchant.managePassword;
+                this.detailForm.status = merchant.status;
+                this.detailForm.createTime = merchant.createTime;
+            },
+            toUserManage() {
                 window.location.href = 'http://localhost:8080/user.html';
             },
-            toMerchantManage(){
+            toMerchantManage() {
                 window.location.href = 'http://localhost:8080/merchant.html';
             },
-            toProductManage(){
+            toProductManage() {
                 window.location.href = 'http://localhost:8080/product.html';
             },
-            toOrderManage(){
+            toOrderManage() {
                 window.location.href = 'http://localhost:8080/order.html';
             }
         }
     });
-    for(const[key, component] of Object.entries(ElementPlusIconsVue)) {app.component(key, component)}
+    for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+        app.component(key, component)
+    }
     app.use(ElementPlus).use(VxeUITable).mount('#app');
 </script>
 </html>

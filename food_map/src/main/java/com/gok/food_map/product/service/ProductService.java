@@ -2,14 +2,20 @@ package com.gok.food_map.product.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.gok.food_map.file.service.FileService;
-import com.gok.food_map.merchant.vo.MerchantGetListVO;
+import com.gok.food_map.product.dto.ProductRemoveDto;
 import com.gok.food_map.product.dto.ProductsGetListDto;
+import com.gok.food_map.product.entity.ProductSku;
+import com.gok.food_map.product.entity.ProductSpu;
 import com.gok.food_map.product.mapper.ProductMapper;
+import com.gok.food_map.product.mapper.ProductSkuMapper;
+import com.gok.food_map.product.mapper.ProductSpuMapper;
 import com.gok.food_map.product.vo.ProductsGetListVO;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,6 +29,10 @@ public class ProductService {
     //商品管理系统
     private final ProductMapper productMapper;
     private final FileService fileService;
+    @Resource
+    private ProductSkuMapper productSkuMapper;
+    @Resource
+    private ProductSpuMapper productSpuMapper;
     public IPage<ProductsGetListVO> getList(ProductsGetListDto dto) {
         LocalDateTime time = null;
         if (!dto.getCreateTime().isEmpty()) {
@@ -57,5 +67,24 @@ public class ProductService {
             return vo;
         }).toList());
         return res;
+    }
+
+    @Transactional
+    public void remove(ProductRemoveDto dto) {
+        List<ProductSku> productsSku = productSkuMapper.selectById(dto.getSpuId().toString());
+        ProductSpu productSpu = productSpuMapper.selectById(dto.getSpuId());
+        List<List<String>> imageUrls = productsSku.stream().map(ProductSku::getImageUrl).toList();
+        productSpuMapper.deleteById(dto.getSpuId());
+        fileService.remove(productSpu.getMainImage());
+        //删除sku表
+        for (ProductSku  productSku : productsSku) {
+            productSkuMapper.deleteById(productSku.getSkuId());
+        }
+        //删除多图片
+        for(List<String> imageUrl : imageUrls) {
+            for(String image : imageUrl) {
+                fileService.remove(Long.valueOf(image));
+            }
+        }
     }
 }
