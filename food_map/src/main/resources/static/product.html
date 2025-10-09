@@ -859,7 +859,7 @@
             },
             async uploadMainImage(f) {
                 try {
-                    const response = await axios.post('/MFile/upload', { file: f}, {
+                    const response = await axios.post('/MFile/upload', { MFile: f}, {
                         headers: { 'Content-Type': 'multipart/form-data' }
                     });
                     this.editForm.mainImage = response.data.id;
