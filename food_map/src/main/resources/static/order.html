@@ -67,7 +67,10 @@
             </vxe-grid>
         </el-row>
     </template>
-        </el-main>
+        <template v-if="isDetail">
+
+        </template>
+    </el-main>
 </div>
 
 
@@ -76,6 +79,7 @@
     const app =Vue.createApp({
         data(){
             return {
+                orderStatusMap:[],
                 isDetail: false,
                 form: {
                     orderId: '',
@@ -87,31 +91,31 @@
                 },
                 options: [
                     {
-                        value: '',
+                        value: null,
                         label: "无"
                     }, {
-                        value: '1',
+                        value: 1,
                         label: '待付款'
                     }, {
-                        value: '2',
+                        value: 2,
                         label: '待发货'
                     }, {
-                        value: '3',
+                        value: 3,
                         label: '待收货'
                     }, {
-                        value: '4',
+                        value: 4,
                         label: '已完成'
                     }, {
-                        value: '5',
+                        value: 5,
                         label: '已取消'
                     }, {
-                        value: '6',
+                        value: 6,
                         label: '交易完成'
                     }, {
-                        value: '7',
+                        value: 7,
                         label: '交易关闭'
                     }, {
-                        value: '8',
+                        value: 8,
                         label: '未开始'
                     }
                 ],
@@ -129,7 +133,9 @@
                         {field: 'userCode', title: '用户账号'},
                         {field: 'orderAmount', title: '订单金额'},
                         {field: 'payMethod', title: '支付方式'},
-                        {field: 'orderStatus', title: '订单状态'},
+                        {field: 'orderStatus', title: '订单状态',formatter: ({cellValue}) => {
+                            return this.orderStatusMap[cellValue] || `未知等级(${cellValue})`;}
+                        },
                         {title: '操作', slots: {default: 'operate'}, width: 220}
                     ],
                     toolbarConfig: {
@@ -145,7 +151,16 @@
 
             }
         },
+        async created(){
+            this.init();
+            this.getList();
+        },
         methods:{
+            init(){
+                this.orderStatusMap = Object.fromEntries(
+                    this.options.map(option => [option.value, option.label])
+                );
+            },
             async getList() {
                 console.log(this.form.createTime)
                 const form = this.form;
@@ -180,7 +195,13 @@
                 this.form.payMethod = '';
                 this.form.orderStatus = '';
                 this.getList();
-            }
+            },
+            async onExport() {
+                const form = this.form;
+                window.location.href = `/order/export?orderId=${this.form.orderId}&orderStatus=${this.form.orderStatus}
+                &merchantName=${this.form.merchantName}&userCode=${this.form.userCode}&time=${this.form.time}&payMethod=${this.form.payMethod}&current=${this.page.current}&size=${this.page.size}`;
+            },
+
         }
     });
     for(const[key, component] of Object.entries(ElementPlusIconsVue)) {app.component(key, component)}

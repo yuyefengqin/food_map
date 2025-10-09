@@ -10,6 +10,7 @@ import com.gok.food_map.order.service.ProductOrderService;
 import com.gok.food_map.order.vo.OrderGetListVO;
 import com.gok.food_map.order.vo.UserOrderInfoVO;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -37,10 +39,30 @@ public class OrderController {
 //    public void editOrder(@RequestBody OrderSaveDTO dto) {
 //        service.edit(dto);
 //    }
-//    @PostMapping("/getList")
-//    public IPage<OrderGetListVO> getList(@RequestBody OrderGetListDTO dto){
-//        return service.getList(dto);
-//    }
+    @PostMapping("/getList")
+    public IPage<OrderGetListVO> getList(@RequestBody OrderGetListDTO dto){
+        return service.getList(dto);
+    }
+    @RequestMapping("/export")
+    public void export( Long orderId,
+                        Integer orderStatus,
+                        String merchantName,
+                        String userCode,
+                        String[] time,
+                        String payMethod,
+                        String current,
+                        String size, HttpServletResponse response) {
+        List<String> timeList = new ArrayList<>();
+        if (time == null || time.length == 0) {
+            timeList.add(null);
+            timeList.add(null);
+        }else {
+            timeList.add(time[0]);
+            timeList.add(time[1]);
+        }
+        OrderGetListDTO dto  = new OrderGetListDTO(current,size,orderId,orderStatus,merchantName,userCode,timeList,payMethod);
+        service.export(dto,response);
+    }
 
    @Auth
    @PostMapping("/getOrders")
