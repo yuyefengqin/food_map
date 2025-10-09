@@ -212,13 +212,14 @@
                     <el-row style="height: 80vh;" >
                         <vxe-grid v-bind="gridOptions" style="width: 100%;" stripe height="100%">
                             <!--            查询按钮（1.类型 2.点击后触发方法 3.按钮显示内容）-->
-                            <template #toolbar_buttons><el-button type="primary" @click="add">新增</el-button>
+                            <template #toolbar_buttons>
+                                <el-button type="primary" @click="add">新增</el-button>
                             </template>
                             <!--            操作-->
                             <template #operate="{ row }">
                                 <el-button size="small" type="primary" @click="showDetailDialog(row)">查看</el-button>
                                 <el-button size="small" type="primary" @click="edit(row)">审核</el-button>
-                                <el-button size="small" type="danger" @click="onRemove(row.merchantId)">删除</el-button>
+                                <el-button size="small" type="danger" @click="onRemove(row.spuId)">删除</el-button>
                             </template>
                             <!--            换页-->
                             <template #pager>
@@ -441,18 +442,18 @@
                 inputVisible: false,
                 inputValue: "",
                 itemList: [
-                    {
-                        specificationname: '包装',
-                        specificationvalue: [{ value: "纸质", price: 18 }],
-                    },
-                    {
-                        specificationname: '口味',
-                        specificationvalue: [{ value: "辣", price: 18 }],
-                    },
-                    {
-                        specificationname: '尺寸',
-                        specificationvalue: [{ value: "大", price: 18 }],
-                    },
+                    // {
+                    //     specificationname: '包装',
+                    //     specificationvalue: [{ value: "纸质", price: 18 }],
+                    // },
+                    // {
+                    //     specificationname: '口味',
+                    //     specificationvalue: [{ value: "辣", price: 18 }],
+                    // },
+                    // {
+                    //     specificationname: '尺寸',
+                    //     specificationvalue: [{ value: "大", price: 18 }],
+                    // },
                 ],
                 inpurIndex: 0,
                 mapList: [],
@@ -607,7 +608,7 @@
             SubmitFileList() {
                 let fileListId = [];
                 const data = new FormData();
-                if (fileListId.length <= 0) {
+                if (this.fileList.length <= 0) {
                     return fileListId;
                 }
                 this.fileList.forEach(file => {
@@ -806,10 +807,30 @@
                 this.getList();
             },
             //编辑按钮
-            edit(product) {
+            async edit(product) {
                 this.showDialog= true;
                 this.isEdit= true;
-                this.editForm= {...product};
+                this.editForm.spuId= product.spuId;
+                this.editForm.spuName= product.spuName;
+                this.editForm.shelfStatus= product.shelfStatus;
+                this.editForm.merchantId= product.merchantId;
+                this.editForm.productCategory= product.productCategory;
+                this.editForm.createTime= product.createTime;
+                this.editForm.sales= product.sales;
+                this.editForm.approvalStatus= product.approvalStatus;
+                const response= await axios.post('/MGoods/getSkuBySpuId',{spuId: this.editForm.spuId});
+                const elementSpecsArray = Object.keys(response.data.records[0].elementSpecs);
+                const specsPriceArray = Object.keys(response.data.records[0].specsPrice);
+                for (let i = 0; i < elementSpecsArray.length; i++) {
+                    this.itemList.push({
+                        specificationname: elementSpecsArray[i],
+                        specificationvalue: [{
+                            value: response.data.records[0].elementSpecs[elementSpecsArray[i]],
+                            price: parseInt(response.data.records[0].specsPrice[specsPriceArray[i]])
+                        }]
+                    });
+                }
+                this.generateMapList();
             },
             //新增按钮
             add() {
@@ -898,10 +919,10 @@
                 window.location.href = 'http://localhost:8080/order.html';
             }
         },
-        mounted() {
-            // 初始化时生成规格组合
-            this.generateMapList();
-        },
+        // mounted() {
+        //     // 初始化时生成规格组合 ---tzl：我数据都没你进的快
+        //     this.generateMapList();
+        // },
     });
     for(const[key, component] of Object.entries(ElementPlusIconsVue)) {app.component(key, component)}
     app.use(ElementPlus).use(VxeUITable).mount('#app');
