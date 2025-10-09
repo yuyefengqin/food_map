@@ -881,6 +881,13 @@
                 }
             },
             directBuy(){
+                if(this.loginedUSerData.id === ''){
+                    this.$message({
+                        message: '请先登录',
+                        type: 'warning'
+                    });
+                    return false;
+                }
                 let utilPrice = this.calculateUnitPrice();
                 axios.post('http://localhost:8080/order/directBuy',{
                     userId:this.loginedUSerData.id,
@@ -896,10 +903,14 @@
                             message:'购买成功',
                             type: 'success'
                         })
-
+                        this.drawer = false;
+                        this.clearData();
                     }
                 }).catch(error => {
-
+                        this.$message({
+                            message:error.message,
+                            type:'error'
+                        })
                 })
             },
             calculateUnitPrice(){
