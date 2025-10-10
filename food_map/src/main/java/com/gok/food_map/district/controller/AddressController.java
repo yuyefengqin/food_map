@@ -52,4 +52,8 @@ public class AddressController {
     public IPage<AddressGetVO> getUserAddress(@RequestBody AddressGetDto dto) {
         return addressService.selectPage(dto.getId());
     }
+    @PostMapping("/getAddress")
+    public IPage<AddressGetVO> getAddress(@RequestBody Long addressId) {
+        return addressService.selectPageByAddressId(addressId);
+    }
 }
