@@ -20,62 +20,97 @@
 </head>
 <body>
 <div id="app">
-    <el-main style="border-top: 1px solid rgb(227, 223, 223);border-left: 1px solid rgb(227, 223, 223);">
-    <template v-if="!isDetail">
-        <el-row>
-            <el-form :inline="true" :model="form">
-                <el-form-item label="订单编号:"><el-input v-model="form.orderId" /></el-form-item>
-                <el-form-item label="订单状态">
-                    <el-select v-model="form.orderStatus" placeholder="请选择" style="width: 240px">
-                        <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"/>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="商户名:"><el-input v-model="form.userCode" /></el-form-item>
-                <el-form-item ><el-button type="primary" @click="onSearch()">查询</el-button></el-form-item>
-                <el-form-item ><el-button  @click="onReset">重置</el-button></el-form-item>
-            </el-form>
-        </el-row>
-        <el-row>
-            <el-form-item label="用户账号:"><el-input v-model="form.merchantName" /></el-form-item>
-            <el-form-item label="  "></el-form-item>
-            <el-form-item label="创建时间:" >
-                <span class="demonstration"></span>
-                <el-date-picker
-                        v-model="form.time"
-                        type="daterange"
-                        range-separator="To"
-                        start-placeholder="Start date"
-                        end-placeholder="End date"
-                        :size="size"
-                />
-            </el-form-item>
-            <el-form-item label="  "></el-form-item>
-            <el-form-item label="支付方式:" ><el-input v-model="form.payMethod" style="width: 240px" /></el-form-item>
-        </el-row>
-        <el-row style="height: 80vh;">
-            <vxe-grid v-bind="gridOptions" style="width: 100%" height="100%">
-                <template #toolbar >
-                    <el-button type="warning" @click="onExport">导出</el-button>
+    <div class="common-layout">
+        <el-container>
+            <el-header>
+                <div class="header-container" style="display: flex; align-items: center; justify-content: start;">
+                    <el-avatar :src="`../img/默认头像.png`"></el-avatar>
+                    <h3 class="user-name">管理员</h3>
+                </div>
+            </el-header>
+            <el-container hidden="1080px">
+                <el-aside width="200px">
+                    <el-menu
+                            v-model:default-active="itemNumber"
+                            class="el-menu-vertical-demo"
+                    >
+                        <el-menu-item index="1" @click="toUserManage">
+                            <el-icon><document /></el-icon>
+                            <span>用户管理</span>
+                        </el-menu-item>
+                        <el-menu-item index="2" @click="toMerchantManage">
+                            <el-icon><document /></el-icon>
+                            <span>商户管理</span>
+                        </el-menu-item>
+                        <el-menu-item index="3" @click="toProductManage">
+                            <el-icon><document /></el-icon>
+                            <span>商品管理</span>
+                        </el-menu-item>
+                        <el-menu-item index="4" @click="toOrderManage">
+                            <el-icon><setting /></el-icon>
+                            <span>订单管理</span>
+                        </el-menu-item>
+                    </el-menu>
+                </el-aside>
+                <el-main style="border-top: 1px solid rgb(227, 223, 223);border-left: 1px solid rgb(227, 223, 223);">
+                <template v-if="!isDetail">
+                    <el-row>
+                        <el-form :inline="true" :model="form">
+                            <el-form-item label="订单编号:"><el-input v-model="form.orderId" /></el-form-item>
+                            <el-form-item label="订单状态">
+                                <el-select v-model="form.orderStatus" placeholder="请选择" style="width: 240px">
+                                    <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"/>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label="商户名:"><el-input v-model="form.userCode" /></el-form-item>
+                            <el-form-item ><el-button type="primary" @click="onSearch()">查询</el-button></el-form-item>
+                            <el-form-item ><el-button  @click="onReset">重置</el-button></el-form-item>
+                        </el-form>
+                    </el-row>
+                    <el-row>
+                        <el-form-item label="用户账号:"><el-input v-model="form.merchantName" /></el-form-item>
+                        <el-form-item label="  "></el-form-item>
+                        <el-form-item label="创建时间:" >
+                            <span class="demonstration"></span>
+                            <el-date-picker
+                                    v-model="form.time"
+                                    type="daterange"
+                                    range-separator="To"
+                                    start-placeholder="Start date"
+                                    end-placeholder="End date"
+                                    :size="size"
+                            />
+                        </el-form-item>
+                        <el-form-item label="  "></el-form-item>
+                        <el-form-item label="支付方式:" ><el-input v-model="form.payMethod" style="width: 240px" /></el-form-item>
+                    </el-row>
+                    <el-row style="height: 80vh;">
+                        <vxe-grid v-bind="gridOptions" style="width: 100%" height="100%">
+                            <template #toolbar >
+                                <el-button type="warning" @click="onExport">导出</el-button>
+                            </template>
+                            <template #operate="{ row }">
+                                <el-button size="small" @click="showDetailDialog(row)">详细</el-button>
+                            </template>
+                            <template #pager>
+                                <vxe-pager :layouts="['Sizes', 'PrevPage', 'Number', 'NextPage', 'Total']" v-model:current-page="page.current" v-model:page-size="page.size" :total="page.total" @page-change="onPageChange">
+                                </vxe-pager>
+                            </template>
+                        </vxe-grid>
+                    </el-row>
                 </template>
-                <template #operate="{ row }">
-                    <el-button size="small" @click="showDetailDialog(row)">详细</el-button>
-                </template>
-                <template #pager>
-                    <vxe-pager :layouts="['Sizes', 'PrevPage', 'Number', 'NextPage', 'Total']" v-model:current-page="page.current" v-model:page-size="page.size" :total="page.total" @page-change="onPageChange">
-                    </vxe-pager>
-                </template>
-            </vxe-grid>
-        </el-row>
-    </template>
-        <template v-if="isDetail">
-            <el-button  text="plain" @click=" isDetail = false"> < 返回</el-button>
-            <vxe-grid v-bind="OrderOptions" style="width: 100%" >
-                <template #toolbar >
-                    <h3>📕基本信息</h3>
-                </template>
-            </vxe-grid>
-        </template>
-    </el-main>
+                    <template v-if="isDetail">
+                        <el-button  text="plain" @click=" isDetail = false"> < 返回</el-button>
+                        <vxe-grid v-bind="OrderOptions" style="width: 100%" >
+                            <template #toolbar >
+                                <h3>📕基本信息</h3>
+                            </template>
+                        </vxe-grid>
+                    </template>
+                </el-main>
+            </el-container>
+        </el-container>
+    </div>
 </div>
 
 
@@ -226,6 +261,18 @@
             this.getList();
         },
         methods:{
+            toUserManage(){
+                window.location.href = 'http://localhost:8080/user.html';
+            },
+            toMerchantManage(){
+                window.location.href = 'http://localhost:8080/merchant.html';
+            },
+            toProductManage(){
+                window.location.href = 'http://localhost:8080/product.html';
+            },
+            toOrderManage(){
+                window.location.href = 'http://localhost:8080/order.html';
+            },
             init(){
                 this.orderStatusMap = Object.fromEntries(
                     this.options.map(option => [option.value, option.label])
