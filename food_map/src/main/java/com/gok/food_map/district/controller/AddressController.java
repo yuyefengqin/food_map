@@ -2,6 +2,7 @@ package com.gok.food_map.district.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gok.food_map.district.dto.AddressDeleteDTO;
+import com.gok.food_map.district.dto.AddressGetByAddressIdVO;
 import com.gok.food_map.district.dto.AddressGetDto;
 import com.gok.food_map.district.dto.AddressOperateDTO;
 import com.gok.food_map.district.entity.MAddress;
@@ -53,7 +54,7 @@ public class AddressController {
         return addressService.selectPage(dto.getId());
     }
     @PostMapping("/getAddress")
-    public IPage<AddressGetVO> getAddress(@RequestBody Long addressId) {
-        return addressService.selectPageByAddressId(addressId);
+    public IPage<AddressGetVO> getAddress(@RequestBody AddressGetByAddressIdVO dto) {
+        return addressService.selectPageByAddressId(dto.getAddressId());
     }
 }

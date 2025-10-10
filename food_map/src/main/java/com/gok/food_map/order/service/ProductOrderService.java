@@ -314,7 +314,7 @@ public class ProductOrderService{
     public IPage<OrderGetListVO> getList(OrderGetListDTO dto) {
         IPage<ProductOrder> page = new Page<>(dto.getCurrent() == null ? 1 : Integer.parseInt(dto.getCurrent()), dto.getSize() == null ? 20 : Integer.parseInt(dto.getSize()));
         List<String> timeList = dto.getTime();
-        if(timeList==null|| timeList.isEmpty()){
+        if(timeList.isEmpty()){
             timeList.add(null);
             timeList.add(null);
         }

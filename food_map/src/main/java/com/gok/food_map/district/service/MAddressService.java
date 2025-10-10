@@ -14,6 +14,7 @@ import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -81,10 +82,10 @@ public class MAddressService extends ServiceImpl<MAddressMapper, MAddress> imple
                 .toList());
         return voiPage;
     }
-    public IPage<AddressGetVO> selectPageByAddressId(Long addressId) {
+    public IPage<AddressGetVO> selectPageByAddressId(String addressId) {
         IPage<MAddress> page = new Page<>(1,10);
         QueryWrapper<MAddress> wrapper = new QueryWrapper<>();
-        wrapper.eq(addressId != null,"address_id", addressId);
+        wrapper.eq(StringUtils.hasText(addressId),"address_id", Long.valueOf(addressId));
         IPage<MAddress> iPages = mAddressMapper.selectPage(page, wrapper);
         IPage<AddressGetVO> voiPage = new Page<>();
         BeanUtils.copyProperties(iPages,voiPage);
