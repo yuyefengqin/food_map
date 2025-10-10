@@ -70,11 +70,12 @@
                     <el-main>
                         <div v-if="isAddressPage">
                             <div class="title-content">
+
                                 <h2>收货地址管理</h2>
                                 <el-button type="primary" @click="showAddDialog">+ 新增地址</el-button>
                             </div>
 
-                            <!-- 地址表格 -->
+                            <!-- 地址表格（使用vxe-grid保持与用户详情页风格一致） -->
                             <vxe-grid
                                     border
                                     height="400"
