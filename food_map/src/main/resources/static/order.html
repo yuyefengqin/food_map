@@ -68,7 +68,12 @@
         </el-row>
     </template>
         <template v-if="isDetail">
-
+            <el-button  text="plain" @click=" isDetail = false"> < 返回</el-button>
+            <vxe-grid v-bind="OrderOptions" style="width: 100%" >
+                <template #toolbar >
+                    <h3>📕基本信息</h3>
+                </template>
+            </vxe-grid>
         </template>
     </el-main>
 </div>
@@ -79,7 +84,7 @@
     const app =Vue.createApp({
         data(){
             return {
-                orderStatusMap:[],
+                orderStatusMap: [],
                 isDetail: false,
                 form: {
                     orderId: '',
@@ -133,8 +138,10 @@
                         {field: 'userCode', title: '用户账号'},
                         {field: 'orderAmount', title: '订单金额'},
                         {field: 'payMethod', title: '支付方式'},
-                        {field: 'orderStatus', title: '订单状态',formatter: ({cellValue}) => {
-                            return this.orderStatusMap[cellValue] || `未知等级(${cellValue})`;}
+                        {
+                            field: 'orderStatus', title: '订单状态', formatter: ({cellValue}) => {
+                                return this.orderStatusMap[cellValue] || `未知等级(${cellValue})`;
+                            }
                         },
                         {title: '操作', slots: {default: 'operate'}, width: 220}
                     ],
@@ -142,15 +149,78 @@
                         custom: true,
                         slots: {buttons: 'toolbar_buttons'}
                     },
-                },
-                page: {
-                    current: 1,
-                    size: 20,
-                    total: 0
-                },
-
-            }
-        },
+                    addressOptions: {
+                        border: true,
+                        height: 400,
+                        data: [],
+                        headerAlign: 'center',
+                        align: 'center',
+                        columns: [
+                            {type: 'seq', width: 60},
+                            {field: 'receiver', title: '名称'},
+                            {field: 'telephone', title: '电话'},
+                            {field: 'zipCode', title: '邮政编码'},
+                            {field: 'detailAddress', title: '收货地址'},
+                        ],
+                        toolbarConfig: {
+                            custom: true,
+                            slots: {buttons: 'toolbar_buttons'}
+                        },
+                    },
+                    OrderOptions: {
+                        border: true,
+                        height: 400,
+                        data: [],
+                        headerAlign: 'center',
+                        align: 'center',
+                        columns: [
+                            {field: 'orderId', title: '商品订单编号'},
+                            {field: 'orderAmount', title: '订单金额'},
+                            {field: 'userCode', title: '用户账号'},
+                            {field: 'payMethod', title: '支付方式'},
+                            {field: 'tradeNo', title: '交易流水号'},
+                            {field: 'logisticsCompany', title: '物流公司'},
+                            {field: 'logisticsNo', title: '物流单号'},
+                        ],
+                        toolbarConfig: {
+                            custom: true,
+                            slots: {buttons: 'toolbar_buttons'}
+                        },
+                    },
+                        OrderItemOptions: {
+                            border: true,
+                            height: 400,
+                            data: [],
+                            headerAlign: 'center',
+                            align: 'center',
+                            columns: [
+                                {type: 'seq', width: 50},
+                                {field: 'orderId', title: '订单编号'},
+                                {field: 'createTime', title: '创建时间'},
+                                {field: 'merchantName', title: '商户名'},
+                                {field: 'userCode', title: '用户账号'},
+                                {field: 'orderAmount', title: '订单金额'},
+                                {field: 'payMethod', title: '支付方式'},
+                                {
+                                    field: 'orderStatus', title: '订单状态', formatter: ({cellValue}) => {
+                                        return this.orderStatusMap[cellValue] || `未知等级(${cellValue})`;
+                                    }
+                                },
+                                {title: '操作', slots: {default: 'operate'}, width: 220}
+                            ],
+                            toolbarConfig: {
+                                custom: true,
+                                slots: {buttons: 'toolbar_buttons'}
+                            }
+                        }
+                    },
+                    page: {
+                        current: 1,
+                        size: 20,
+                        total: 0
+                    },
+                }
+            },
         async created(){
             this.init();
             this.getList();
@@ -201,7 +271,32 @@
                 window.location.href = `/order/export?orderId=${this.form.orderId}&orderStatus=${this.form.orderStatus}
                 &merchantName=${this.form.merchantName}&userCode=${this.form.userCode}&time=${this.form.time}&payMethod=${this.form.payMethod}&current=${this.page.current}&size=${this.page.size}`;
             },
-
+            showDetailDialog(row){
+                this.isDetail = true;
+                this.OrderOptions = {
+                    ...this.OrderOptions,
+                    data: row.records
+                }
+                // this.OrderOptions.data.orderId = row.data.orderId;
+                // this.OrderOptions.data.orderAmount = row.data.orderAmount;
+                // this.OrderOptions.data.userCode = row.data.userCode;
+                // this.OrderOptions.data.payMethod = row.data.payMethod;
+                // this.OrderOptions.data.tradeNo = row.data.tradeNo;
+                // this.OrderOptions.data.logisticsCompany = row.data.logisticsCompany;
+                // this.OrderOptions.data.logisticsNo = row.data.logisticsNo;
+                this.getUserAddress(row.addressId);
+            },
+            getUserAddress(id){
+                axios.post('/address/getAddress',
+                    {addressId: id}
+                ).then(response => {
+                    try{
+                        this.addressOptions.data = response.data.records;
+                    }catch(error){
+                        console.log(error);
+                    }
+                });
+            }
         }
     });
     for(const[key, component] of Object.entries(ElementPlusIconsVue)) {app.component(key, component)}

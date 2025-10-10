@@ -1,23 +1,36 @@
 package com.gok.food_map.shoppingCart.dto;
 
+import java.util.List;
 import java.util.Map;
 
 public class ShoppingCartGetDto {
     private String userId;
     private String spuId;
+    private String merchantId;
     private Integer quantity;
-    private Map<String,String> specsPrice;
+    private List<String> specs;
+    private String unitPrice;
     private String totalPrice;
 
     public ShoppingCartGetDto() {
     }
 
-    public ShoppingCartGetDto(String userId, String spuId, Integer quantity, Map<String,String> specsPrice, String totalPrice) {
+    public ShoppingCartGetDto(String userId, String spuId,String merchantId, Integer quantity, List<String> specs, String totalPrice, String unitPrice) {
         this.userId = userId;
         this.spuId = spuId;
+        this.merchantId = merchantId;
         this.quantity = quantity;
-        this.specsPrice = specsPrice;
+        this.specs = specs;
         this.totalPrice = totalPrice;
+        this.unitPrice = unitPrice;
+    }
+
+    public String getMerchantId() {
+        return merchantId;
+    }
+
+    public void setMerchantId(String merchantId) {
+        this.merchantId = merchantId;
     }
 
     public String getUserId() {
@@ -45,12 +58,12 @@ public class ShoppingCartGetDto {
     }
 
 
-    public Map<String,String> getSpecsPrice() {
-        return specsPrice;
+    public List<String> getSpecs() {
+        return specs;
     }
 
-    public void setSpecsPrice(Map<String,String> specsPrice) {
-        this.specsPrice = specsPrice;
+    public void setSpecs(List<String> specs) {
+        this.specs = specs;
     }
 
     public String getTotalPrice() {
@@ -59,5 +72,13 @@ public class ShoppingCartGetDto {
 
     public void setTotalPrice(String totalPrice) {
         this.totalPrice = totalPrice;
+    }
+
+    public String getUnitPrice() {
+        return unitPrice;
+    }
+
+    public void setUnitPrice(String unitPrice) {
+        this.unitPrice = unitPrice;
     }
 }

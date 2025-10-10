@@ -2,10 +2,7 @@ package com.gok.food_map.order.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gok.food_map.annotation.Auth;
-import com.gok.food_map.order.dto.OrderDirectBuyDto;
-import com.gok.food_map.order.dto.OrderGetListDTO;
-import com.gok.food_map.order.dto.OrderRemoveDTO;
-import com.gok.food_map.order.dto.OrderSaveDTO;
+import com.gok.food_map.order.dto.*;
 import com.gok.food_map.order.service.ProductOrderService;
 import com.gok.food_map.order.vo.OrderGetListVO;
 import com.gok.food_map.order.vo.UserOrderInfoVO;
@@ -20,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor(onConstructor_ = @Lazy)
@@ -68,5 +66,12 @@ public class OrderController {
    @PostMapping("/getOrders")
    public List<UserOrderInfoVO> getOrders(HttpServletRequest request){
         return service.getUserOrderInfos(request);
+   }
+
+   @Auth
+   @PostMapping("/buyByCart")
+   public Boolean  confirmBuy(@RequestBody Map<String,List<BuyByCartDto>> cartItems, HttpServletRequest request){
+       List<BuyByCartDto> buyByCartDtos = cartItems.get("cartItems");
+       return service.buyByCart(buyByCartDtos,request);
    }
 }

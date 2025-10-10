@@ -81,6 +81,26 @@ public class MAddressService extends ServiceImpl<MAddressMapper, MAddress> imple
                 .toList());
         return voiPage;
     }
+    public IPage<AddressGetVO> selectPageByAddressId(Long addressId) {
+        IPage<MAddress> page = new Page<>(1,10);
+        QueryWrapper<MAddress> wrapper = new QueryWrapper<>();
+        wrapper.eq(addressId != null,"address_id", addressId);
+        IPage<MAddress> iPages = mAddressMapper.selectPage(page, wrapper);
+        IPage<AddressGetVO> voiPage = new Page<>();
+        BeanUtils.copyProperties(iPages,voiPage);
+        voiPage.setRecords(iPages
+                .getRecords()
+                .stream()
+                .map(iPage ->{
+                    AddressGetVO addressGetVO = new AddressGetVO();
+                    BeanUtils.copyProperties(iPage,addressGetVO);
+                    addressGetVO.setAddressId(iPage.getAddressId().toString());
+                    addressGetVO.setIsDefault(iPage.getisDefault());
+                    return addressGetVO;
+                })
+                .toList());
+        return voiPage;
+    }
 }
 
 

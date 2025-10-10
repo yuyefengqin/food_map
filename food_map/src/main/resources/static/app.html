@@ -200,7 +200,7 @@
                 <h4>{{onCkeckGoodsDetailId.spuDesc}}</h4>
                 <span class="selected-spec">
                     已选择{{selectedSpecs}}
-                    {{selectedSpecsPrice}}
+<!--                    {{selectedSpecsPrice}}-->
                 </span>
                 <ul v-for="(skuValue, skuKey) in skuObj">
                     <li>{{skuKey}}</li>
@@ -494,8 +494,10 @@
                     axios.post('http://localhost:8080/shoppingCart/addShoppingCart', {
                         userId: this.loginedUSerData.id,
                         spuId:this.onCkeckGoodsDetailId.spuId ,
+                        merchantId: this.merchantInfo.merchantId,
                         quantity: this.bugNumber,
-                        specsPrice:toSendData,
+                        specs:this.selectedSpecs,
+                        unitPrice: this.calculateUnitPrice(),
                         totalPrice:this.totalPrice,
                     }).then(res => {
                         if (res.status === 200) {

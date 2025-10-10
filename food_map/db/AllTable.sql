@@ -177,7 +177,8 @@ create table shopping_cart
     user_id     bigint                  not null,
     spu_id      bigint                  not null,
     quantity    integer   default 1     not null,
-    specs_price jsonb                   not null,
+    specs_price text[]                  not null,
+    unit_price  numeric(7, 2)           not null,
     is_selected boolean   default false not null,
     create_time timestamp default CURRENT_TIMESTAMP,
     update_time timestamp,
@@ -194,7 +195,9 @@ comment on column shopping_cart.spu_id is '商品SKU ID';
 
 comment on column shopping_cart.quantity is '购买数量';
 
-comment on column shopping_cart.specs_price is '规格:价钱';
+comment on column shopping_cart.specs_price is '规格';
+
+comment on column shopping_cart.unit_price is '单价';
 
 comment on column shopping_cart.is_selected is '是否选中';
 

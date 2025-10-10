@@ -8,10 +8,7 @@ import com.gok.food_map.district.entity.MAddress;
 import com.gok.food_map.district.mapper.MAddressMapper;
 import com.gok.food_map.merchant.entity.MMerchant;
 import com.gok.food_map.merchant.mapper.MMerchantMapper;
-import com.gok.food_map.order.dto.OrderDirectBuyDto;
-import com.gok.food_map.order.dto.OrderGetListDTO;
-import com.gok.food_map.order.dto.OrderRemoveDTO;
-import com.gok.food_map.order.dto.OrderSaveDTO;
+import com.gok.food_map.order.dto.*;
 import com.gok.food_map.order.entity.OrderItem;
 import com.gok.food_map.order.entity.ProductOrder;
 import com.gok.food_map.order.mapper.OrderItemMapper;
@@ -21,11 +18,13 @@ import com.gok.food_map.order.vo.OrderGetListVO;
 import com.gok.food_map.order.vo.UserOrderInfoVO;
 import com.gok.food_map.product.entity.ProductSpu;
 import com.gok.food_map.product.mapper.ProductSpuMapper;
-import com.gok.food_map.user.entity.MUser;
+import com.gok.food_map.shoppingCart.entity.ShoppingCart;
+import com.gok.food_map.shoppingCart.mapper.ShoppingCartMapper;
 import com.gok.food_map.user.mapper.MUserMapper;
 import com.gok.food_map.util.TokenUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Lazy;
@@ -41,16 +40,16 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * @author 32741
- * @description 针对表【product_order(普通商品订单表)】的数据库操作Service实现
- * @createDate 2025-10-05 01:07:19
- */
+* @author 32741
+* @description 针对表【product_order(普通商品订单表)】的数据库操作Service实现
+* @createDate 2025-10-05 01:07:19
+*/
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Lazy)
 public class ProductOrderService{
@@ -62,8 +61,8 @@ public class ProductOrderService{
     private final MAddressMapper mAddressMapper;
     private final ProductSpuMapper productSpuMapper;
     private final MMerchantMapper mMerchantMapper;
-
-    //    public void remove(OrderRemoveDTO dto) {
+    private final ShoppingCartMapper shoppingCartMapper;
+//    public void remove(OrderRemoveDTO dto) {
 //        ProductOrder productOrder = productOrderMapper.selectById(dto.getOrderId());
 //
 //        if(productOrder == null){
@@ -148,62 +147,42 @@ public class ProductOrderService{
 //        return ((currentTime - 1704067200000L) << 22) | sequence;
 //    }
 //
-    public IPage<OrderGetListVO> getList(OrderGetListDTO dto) {
-        IPage<ProductOrder> page = new Page<>(dto.getCurrent() == null ? 1 : Integer.parseInt(dto.getCurrent()), dto.getSize() == null ? 20 : Integer.parseInt(dto.getSize()));
-        List<String> timeList = dto.getTime();
-        if(timeList==null|| timeList.isEmpty()){
-            timeList.add(null);
-            timeList.add(null);
-        }
-        List<OrderGetListVO> orders = productOrderMapper.selectBy(
-                dto.getOrderId()==null? null:dto.getOrderId(),
-                dto.getOrderStatus(),
-                (!StringUtils.hasText(dto.getMerchantName()))? null:dto.getMerchantName(),
-                (!StringUtils.hasText(dto.getUserCode()))? null:dto.getUserCode(),
-                dto.getTime().get(0) == null ? null : OffsetDateTime.parse(dto.getTime().get(0)).toLocalDateTime(),
-                dto.getTime().get(1) == null ? null : OffsetDateTime.parse(dto.getTime().get(1)).toLocalDateTime(),
-                (!StringUtils.hasText(dto.getPayMethod())) ? null:dto.getPayMethod()
-        );
-        IPage<OrderGetListVO> res = new Page<>();
-        BeanUtils.copyProperties(page, res);
-        res.setRecords(orders.stream().map(orderGetListVO->{
-            OrderGetListVO vo = new OrderGetListVO();
-            BeanUtils.copyProperties(orderGetListVO,vo);
-            return vo;
-        }).toList());
-        return res;
-    }
-
-
-
+//    public IPage<OrderGetListVO> getList(OrderGetListDTO dto) {
+//        IPage<ProductOrder> page = new Page<>(dto.getCurrent() == null ? 1 : Integer.parseInt(dto.getCurrent()), dto.getSize() == null ? 20 : Integer.parseInt(dto.getSize()));
+//        List<OrderGetListVO> orders = productOrderMapper.selectBy(
+//                dto.getOrderId()==null? null:dto.getOrderId(),
+//                dto.getOrderStatus(),
+//                dto.getMerchantId()==null? null:dto.getMerchantId(),
+//                dto.getUserCode()==null? null:dto.getUserCode(),
+//                dto.getBeginTime() == null? null: LocalDateTime.parse(dto.getBeginTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+//                dto.getEndTime() == null? null: LocalDateTime.parse(dto.getEndTime(),DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+//                (!StringUtils.hasText(dto.getPayMethod())) ? null:dto.getPayMethod()
+//        );
+//        IPage<OrderGetListVO> res = new Page<>();
+//        BeanUtils.copyProperties(page, res);
+//        res.setRecords(orders.stream().map(orderGetListVO->{
+//            OrderGetListVO vo = new OrderGetListVO();
+//            BeanUtils.copyProperties(orderGetListVO,vo);
+//            return vo;
+//        }).toList());
+//        return res;
+//    }
     @Transactional(rollbackFor = Exception.class)
     public void directBuy(OrderDirectBuyDto dto) {
         System.out.println(dto);
 
         long orderId = IdUtil.createSnowflake(1, 1).nextId();
-        ProductOrder productOrder = ProductOrder
-                .builder()
-                .orderId(orderId)
-                .userId(dto.getUserId())
-                .merchantId(dto.getMerchantId())
-                .orderAmount(new BigDecimal(dto.getTotalPrice()))
-                .productAmount(new BigDecimal(dto.getTotalPrice()))
-                .deliveryFee(BigDecimal.TEN)
-                .deliveryMethod("顺丰快递")
-                .deliveryTime(null)
-                .addressId(checkUserAddress(dto.getUserId()).getAddressId())
-                .payMethod("网页支付")
-                .tradeNo(orderId+10L)
-                .logisticsCompany("顺丰公司")
-                .logisticsNo(orderId+20L)
-                .orderStatus(4)
-                .createTime(LocalDateTime.now())
-                .payTime(LocalDateTime.now())
-                .shipTime(LocalDateTime.now())
-                .receiveTime(LocalDateTime.now().plusDays(3))
-                .completeTime(LocalDateTime.now())
-                .closeTime(LocalDateTime.now())
-                .build();
+
+        MAddress mAddress = checkUserAddress(dto.getUserId());
+        ProductOrder productOrder = setProductOrder(
+                orderId,
+                dto.getUserId(),
+                dto.getMerchantId(),
+                mAddress.getAddressId(),
+                new BigDecimal(dto.getTotalPrice()).add(BigDecimal.TEN),
+                new BigDecimal(dto.getTotalPrice())
+                );
+
         OrderItem orderItem = OrderItem
                 .builder()
                 .orderId(orderId)
@@ -227,8 +206,11 @@ public class ProductOrderService{
     private ProductSpu checkProduct(Long productId){
         return productSpuMapper.selectById(productId);
     }
-    private MMerchant checkMerchant(Long merchantId){
+    private MMerchant checkMerchantByID(Long merchantId){
         return mMerchantMapper.selectById(merchantId);
+    }
+    private MMerchant checkMerchantSpuId(Long SpuId){
+        return mMerchantMapper.selectById(SpuId);
     }
     @Transactional(rollbackFor = Exception.class)
     public List<UserOrderInfoVO> getUserOrderInfos(HttpServletRequest request) {
@@ -245,7 +227,7 @@ public class ProductOrderService{
             UserOrderInfoVO VO = UserOrderInfoVO.builder()
                     .orderId(pO.getOrderId().toString())
                     .tradeNo(pO.getTradeNo().toString())
-                    .merchantName(checkMerchant(pO.getMerchantId()).getMerchantName())
+                    .merchantName(checkMerchantByID(pO.getMerchantId()).getMerchantName())
                     .orderAmount(pO.getOrderAmount().add(pO.getDeliveryFee()).toString())
                     .deliveryFee(pO.getDeliveryFee().toString())
                     .deliveryMethod(pO.getDeliveryMethod())
@@ -294,7 +276,102 @@ public class ProductOrderService{
             default -> null;
         };
     }
+    @Transactional(rollbackFor = Exception.class)
+    public boolean buyByCart(List<BuyByCartDto> buyByCartDtos,HttpServletRequest request) {
+        try {
+            Map<String, String> idByTokenSafe = TokenUtil.getIdByTokenSafe(request);
+            Long id = Long.parseLong(idByTokenSafe.get("id"));
+            Long addressId = checkUserAddress(id).getAddressId();
+            HashMap<Long, List<BuyByCartDto>> map = new HashMap<>();
+            buyByCartDtos.forEach(dto ->
+                    map.computeIfAbsent(Long.valueOf(dto.getMerchantId()
+                    ), k -> new ArrayList<>()
+                    ).add(dto));
 
+            System.out.println();
+            map.forEach((key, value) -> {
+                Long orderId = IdUtil.createSnowflake(1, 1).nextId();
+                Price price = new Price();
+                value.forEach(v -> {
+                    OrderItem orderItem = setOrderItem(orderId, v);
+                    orderItemMapper.insert(orderItem);
+                    price.setProductAmount(v.getTotalPrice());
+                });
+                price.setOrderAmount(price.getProductAmount().add(BigDecimal.TEN));
+                ProductOrder productOrder = setProductOrder(orderId,id,key,addressId,price.getOrderAmount(),price.getProductAmount());
+
+                productOrderMapper.insert(productOrder);
+            });
+            return deleteShoppingCart(buyByCartDtos);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    @Transactional(rollbackFor = Exception.class)
+    protected boolean deleteShoppingCart(List<BuyByCartDto> buyByCartDtos) {
+        try {
+            buyByCartDtos.forEach(dto -> shoppingCartMapper.deleteById(Long.parseLong(dto.getCartId())));
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Data
+    static class Price{
+        private BigDecimal orderAmount = BigDecimal.ZERO;
+        private BigDecimal productAmount = BigDecimal.ZERO;
+
+        public void setOrderAmount(BigDecimal orderAmount) {
+            this.orderAmount = new BigDecimal(String.valueOf(this.productAmount)).add(orderAmount);
+        }
+
+        public void setProductAmount(BigDecimal productAmount) {
+            this.productAmount = new BigDecimal(String.valueOf(this.productAmount)).add(productAmount);
+        }
+    }
+    private OrderItem setOrderItem(Long orderId,BuyByCartDto buyByCartDto) {
+        return OrderItem.builder()
+                        .orderId(orderId)
+                        .spuId(Long.parseLong(buyByCartDto.getSpuId()))
+                        .productName(buyByCartDto.getSpuName())
+                        .specs(buyByCartDto.getSpecs())
+                        .unitPrice(buyByCartDto.getUnitPrice())
+                        .quantity(buyByCartDto.getQuantity())
+                        .subAmount(buyByCartDto.getTotalPrice())
+                        .createTime(LocalDateTime.now())
+                        .build();
+    }
+    private ProductOrder setProductOrder(Long orderId,
+                                         Long userId,
+                                         Long merchantId,
+                                         Long addressId,
+                                         BigDecimal orderAmount,
+                                         BigDecimal productAmount) {
+        return  ProductOrder.builder()
+                            .orderId(orderId)
+                            .userId(userId)
+                            .merchantId(merchantId)
+                            .orderAmount(orderAmount)
+                            .productAmount(productAmount)
+                            .deliveryFee(BigDecimal.TEN)
+                            .deliveryMethod("顺丰快递")
+                            .deliveryTime(null)
+                            .addressId(addressId)
+                            .payMethod("网页支付")
+                            .tradeNo(orderId+10L)
+                            .logisticsCompany("顺丰公司")
+                            .logisticsNo(orderId+20L)
+                            .orderStatus(4)
+                            .createTime(LocalDateTime.now())
+                            .payTime(LocalDateTime.now())
+                            .shipTime(LocalDateTime.now())
+                            .receiveTime(LocalDateTime.now().plusDays(3))
+                            .completeTime(LocalDateTime.now())
+                            .closeTime(LocalDateTime.now())
+                            .build();
+    }
+    //导入
     public void export(OrderGetListDTO dto, HttpServletResponse response) {
         File file= new File("./order.txt");
         String fileName= file.getName();
@@ -336,7 +413,32 @@ public class ProductOrderService{
         } catch(Exception e) {
             throw new RuntimeException("文件下载失败");
         }
-
+    }
+    //查
+    public IPage<OrderGetListVO> getList(OrderGetListDTO dto) {
+        IPage<ProductOrder> page = new Page<>(dto.getCurrent() == null ? 1 : Integer.parseInt(dto.getCurrent()), dto.getSize() == null ? 20 : Integer.parseInt(dto.getSize()));
+        List<String> timeList = dto.getTime();
+        if(timeList==null|| timeList.isEmpty()){
+            timeList.add(null);
+            timeList.add(null);
+        }
+        List<OrderGetListVO> orders = productOrderMapper.selectBy(
+                dto.getOrderId()==null? null:dto.getOrderId(),
+                dto.getOrderStatus(),
+                (!StringUtils.hasText(dto.getMerchantName()))? null:dto.getMerchantName(),
+                (!StringUtils.hasText(dto.getUserCode()))? null:dto.getUserCode(),
+                dto.getTime().get(0) == null ? null : OffsetDateTime.parse(dto.getTime().get(0)).toLocalDateTime(),
+                dto.getTime().get(1) == null ? null : OffsetDateTime.parse(dto.getTime().get(1)).toLocalDateTime(),
+                (!StringUtils.hasText(dto.getPayMethod())) ? null:dto.getPayMethod()
+        );
+        IPage<OrderGetListVO> res = new Page<>();
+        BeanUtils.copyProperties(page, res);
+        res.setRecords(orders.stream().map(orderGetListVO->{
+            OrderGetListVO vo = new OrderGetListVO();
+            BeanUtils.copyProperties(orderGetListVO,vo);
+            return vo;
+        }).toList());
+        return res;
     }
 }
 
