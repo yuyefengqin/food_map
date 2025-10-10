@@ -7,11 +7,11 @@
         <id property="cartId" column="cart_id"/>
         <result property="userId" column="user_id"/>
         <result property="spuId" column="spu_id" />
+        <result property="merchantId" column="merchant_id" />
         <result property="quantity" column="quantity" />
-        <result property="specsPrice" column="specs_price"
-                typeHandler="com.gok.food_map.definetypehandler.JsonbTypeHandler"/>
+        <result property="specs" column="specs"
+                typeHandler="com.gok.food_map.definetypehandler.ListStrToArrayTypeHandler"/>
         <result property="isSelected" column="is_selected" />
-        <result property="updateTime" column="update_time"/>
         <result property="mainImage" column="main_image" />
         <result property="spuName" column="spu_name" />
         <result property="totalPrice" column="total_price" />
@@ -21,10 +21,11 @@
             sc.cart_id as cart_id,
             sc.user_id as user_id,
             sc.spu_id as spu_id,
+            sc.merchant_id as merchant_id,
             sc.quantity as quantity,
-            sc.specs_price as specs_price,
+            sc.specs as specs,
+            sc.unit_price as unit_price,
             sc.is_selected as is_selected,
-            sc.update_time as update_time,
             sp.main_image as main_image,
             sp.spu_name as spu_name,
             sc.total_price as total_price

@@ -68,13 +68,16 @@ public class FileService extends ServiceImpl<MFileMapper, MFile> {
     //下载
     public void download(Long id, HttpServletResponse response) {
         MFile file = mFileMapper.selectById(id);
-        if (file == null) { throw new RuntimeException("文件不存在"); }
-        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
-        response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(file.getName(), StandardCharsets.UTF_8));
-        try (InputStream inputStream = new FileInputStream(DIR + file.getPath())) {
-            OutputStream outputStream = response.getOutputStream();
-            StreamUtils.copy(inputStream, outputStream);
-        } catch (IOException e) { throw new RuntimeException(e); }
+        if (file == null) {
+//            throw new RuntimeException("文件不存在");
+            System.out.println("文件不存在");
+        }
+//        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+//        response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(file.getName(), StandardCharsets.UTF_8));
+//        try (InputStream inputStream = new FileInputStream(DIR + file.getPath())) {
+//            OutputStream outputStream = response.getOutputStream();
+//            StreamUtils.copy(inputStream, outputStream);
+//        } catch (IOException e) { throw new RuntimeException(e); }
     }
 
     //删除

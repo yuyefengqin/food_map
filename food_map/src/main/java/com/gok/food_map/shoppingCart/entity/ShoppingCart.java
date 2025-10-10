@@ -8,9 +8,11 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 import com.gok.food_map.definetypehandler.JsonbTypeHandler;
+import com.gok.food_map.definetypehandler.ListStrToArrayTypeHandler;
 import lombok.Data;
 
 /**
@@ -37,15 +39,24 @@ public class ShoppingCart {
     private Long spuId;
 
     /**
+     * 商品SPU ID
+     */
+    private Long merchantId;
+    /**
      * 购买数量
      */
     private Integer quantity;
 
     /**
-     * 规格:价钱
+     * 规格
      */
-    @TableField(typeHandler = JsonbTypeHandler.class)
-    private Map<String,String> specsPrice;
+    @TableField(typeHandler = ListStrToArrayTypeHandler.class)
+    private List<String> specs;
+
+    /**
+     * 单价
+     */
+    private BigDecimal unitPrice;
 
     /**
      * 是否选中
@@ -69,12 +80,14 @@ public class ShoppingCart {
     public ShoppingCart() {
     }
 
-    public ShoppingCart(Long cartId, Long userId, Long spuId, Integer quantity, Map<String, String> specsPrice, Boolean isSelected, LocalDateTime createTime, LocalDateTime updateTime, BigDecimal totalPrice) {
+    public ShoppingCart(Long cartId, Long userId, Long spuId,Long merchantId, Integer quantity, List<String> specs, Boolean isSelected, LocalDateTime createTime, LocalDateTime updateTime, BigDecimal totalPrice ,BigDecimal unitPrice) {
         this.cartId = cartId;
         this.userId = userId;
         this.spuId = spuId;
+        this.merchantId = merchantId;
         this.quantity = quantity;
-        this.specsPrice = specsPrice;
+        this.specs = specs;
+        this.unitPrice = unitPrice;
         this.isSelected = isSelected;
         if (createTime != null) {
             this.createTime = Timestamp.valueOf(createTime);
