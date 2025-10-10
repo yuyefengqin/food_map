@@ -2,6 +2,8 @@ package com.gok.food_map.order.service;
 
 import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.gok.food_map.district.entity.MAddress;
 import com.gok.food_map.district.mapper.MAddressMapper;
 import com.gok.food_map.merchant.entity.MMerchant;
@@ -12,6 +14,7 @@ import com.gok.food_map.order.entity.ProductOrder;
 import com.gok.food_map.order.mapper.OrderItemMapper;
 import com.gok.food_map.order.mapper.ProductOrderMapper;
 import com.gok.food_map.order.vo.BuyProduct;
+import com.gok.food_map.order.vo.OrderGetListVO;
 import com.gok.food_map.order.vo.UserOrderInfoVO;
 import com.gok.food_map.product.entity.ProductSpu;
 import com.gok.food_map.product.mapper.ProductSpuMapper;
@@ -20,14 +23,23 @@ import com.gok.food_map.shoppingCart.mapper.ShoppingCartMapper;
 import com.gok.food_map.user.mapper.MUserMapper;
 import com.gok.food_map.util.TokenUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 
+import java.io.*;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -270,9 +282,7 @@ public class ProductOrderService{
             Map<String, String> idByTokenSafe = TokenUtil.getIdByTokenSafe(request);
             Long id = Long.parseLong(idByTokenSafe.get("id"));
             Long addressId = checkUserAddress(id).getAddressId();
-
             HashMap<Long, List<BuyByCartDto>> map = new HashMap<>();
-
             buyByCartDtos.forEach(dto ->
                     map.computeIfAbsent(Long.valueOf(dto.getMerchantId()
                     ), k -> new ArrayList<>()
@@ -360,6 +370,75 @@ public class ProductOrderService{
                             .completeTime(LocalDateTime.now())
                             .closeTime(LocalDateTime.now())
                             .build();
+    }
+    //导入
+    public void export(OrderGetListDTO dto, HttpServletResponse response) {
+        File file= new File("./order.txt");
+        String fileName= file.getName();
+        List<String> timeList = dto.getTime();
+        if(timeList==null|| timeList.isEmpty()){
+            timeList.add(null);
+            timeList.add(null);
+        }
+        List<OrderGetListVO> orders = productOrderMapper.selectBy(
+                dto.getOrderId()==null? null:dto.getOrderId(),
+                dto.getOrderStatus(),
+                (!StringUtils.hasText(dto.getMerchantName()))? null:dto.getMerchantName(),
+                (!StringUtils.hasText(dto.getUserCode()))? null:dto.getUserCode(),
+                dto.getTime().get(0) == null ? null : OffsetDateTime.parse(dto.getTime().get(0)).toLocalDateTime(),
+                dto.getTime().get(1) == null ? null : OffsetDateTime.parse(dto.getTime().get(1)).toLocalDateTime(),
+                (!StringUtils.hasText(dto.getPayMethod())) ? null:dto.getPayMethod()
+        );
+        if (orders==null || orders.isEmpty()){
+            throw new RuntimeException("没有订单");
+        }
+        try(BufferedWriter os = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)))) {
+//            ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(file));
+//            os.writeObject(users);
+            for (OrderGetListVO order : orders) {
+                os.write(order.toString());
+                os.newLine();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        //设置content-type: application/octet-stream（告知浏览器这是二进制文件）
+        response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+        //设置content-disposition（attachment用附加方式下载，filename指定文件名【中文名正确解析需要进行编码】）
+        response.addHeader("Content-Disposition", "attachment;filename="+ URLEncoder.encode(fileName, StandardCharsets.UTF_8));
+        //复制文件
+        try(InputStream inputStream= new FileInputStream(file)) {
+            OutputStream outputStream= response.getOutputStream();
+            StreamUtils.copy(inputStream, outputStream);
+        } catch(Exception e) {
+            throw new RuntimeException("文件下载失败");
+        }
+    }
+    //查
+    public IPage<OrderGetListVO> getList(OrderGetListDTO dto) {
+        IPage<ProductOrder> page = new Page<>(dto.getCurrent() == null ? 1 : Integer.parseInt(dto.getCurrent()), dto.getSize() == null ? 20 : Integer.parseInt(dto.getSize()));
+        List<String> timeList = dto.getTime();
+        if(timeList==null|| timeList.isEmpty()){
+            timeList.add(null);
+            timeList.add(null);
+        }
+        List<OrderGetListVO> orders = productOrderMapper.selectBy(
+                dto.getOrderId()==null? null:dto.getOrderId(),
+                dto.getOrderStatus(),
+                (!StringUtils.hasText(dto.getMerchantName()))? null:dto.getMerchantName(),
+                (!StringUtils.hasText(dto.getUserCode()))? null:dto.getUserCode(),
+                dto.getTime().get(0) == null ? null : OffsetDateTime.parse(dto.getTime().get(0)).toLocalDateTime(),
+                dto.getTime().get(1) == null ? null : OffsetDateTime.parse(dto.getTime().get(1)).toLocalDateTime(),
+                (!StringUtils.hasText(dto.getPayMethod())) ? null:dto.getPayMethod()
+        );
+        IPage<OrderGetListVO> res = new Page<>();
+        BeanUtils.copyProperties(page, res);
+        res.setRecords(orders.stream().map(orderGetListVO->{
+            OrderGetListVO vo = new OrderGetListVO();
+            BeanUtils.copyProperties(orderGetListVO,vo);
+            return vo;
+        }).toList());
+        return res;
     }
 }
 
