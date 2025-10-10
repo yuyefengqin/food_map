@@ -19,119 +19,57 @@
     <link rel="stylesheet" href="./static_resources/userDetail.css" />
 </head>
 <body>
-<div id="app">
-    <div class="top-nav">
-        <div class="container">
-            <div class="content">
-                <h2>美食地图欢迎你</h2>
-                <el-button type="primary" @click="backStore">返回</el-button>
+    <div id="app">
+        <div class="top-nav">
+            <div class="container">
+                <div class="content">
+                    <h2>美食地图欢迎你</h2>
+                    <el-button type="primary" @click="backStore">返回</el-button>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="container" >
-        <div class="common-layout">
-            <el-container>
-                <el-header>
-                    <div class="header">
-                        <el-avatar v-if="loginedUSerData.avatar" :size="50" :src="`http://localhost:8080/MFile/download?id=${loginedUSerData.avatar}`" ></el-avatar>
-                        <el-avatar v-else :size="50" ><Plus /></el-avatar>
-                        <h3 v-if="loginedUSerData.name">{{loginedUSerData.name}}</h3>
-                        <h3 v-else>用户名</h3>
-                    </div>
-                </el-header>
+        <div class="container" >
+            <div class="common-layout">
+                <el-container>
+                    <el-header>
+                        <div class="header">
+                            <el-avatar v-if="loginedUSerData.avatar" :size="50" :src="`http://localhost:8080/MFile/download?id=${loginedUSerData.avatar}`" ></el-avatar>
+                            <el-avatar v-else :size="50" ><Plus /></el-avatar>
+                            <h3 v-if="loginedUSerData.name">{{loginedUSerData.name}}</h3>
+                            <h3 v-else>用户名</h3>
+                        </div>
+                    </el-header>
                 <el-container>
                     <el-aside width="200px">
                         <el-menu
-                                v-model:default-active="itemNumber"
-                                class="el-menu-vertical-demo"
+                          v-model:default-active="itemNumber"
+                          class="el-menu-vertical-demo"
                         >
                             <el-menu-item index="1" @click="toUserDetail">
-                                <el-icon><document /></el-icon>
-                                <span>详细信息</span>
+                            <el-icon><document /></el-icon>
+                            <span>详细信息</span>
                             </el-menu-item>
                             <el-menu-item index="2" @click="toShoppingCart">
-                                <el-icon><document /></el-icon>
-                                <span>购物车</span>
+                            <el-icon><document /></el-icon>
+                            <span>购物车</span>
                             </el-menu-item>
                             <el-menu-item index="3" @click="toOrder">
-                                <el-icon><document /></el-icon>
-                                <span>我的订单</span>
+                            <el-icon><document /></el-icon>
+                            <span>我的订单</span>
                             </el-menu-item>
                             <el-menu-item index="4" @click="toSetting">
-                                <el-icon><setting /></el-icon>
-                                <span>设置</span>
-                            </el-menu-item>
-                            <el-menu-item index="5" @click="toAddressManage">
-                                <el-icon><Location /></el-icon>
-                                <span>地址管理</span>
+                            <el-icon><setting /></el-icon>
+                            <span>设置</span>
                             </el-menu-item>
                         </el-menu>
                     </el-aside>
                     <el-main>
-                        <div v-if="isAddressPage">
-                            <div class="title-content">
-                                <h2>收货地址管理</h2>
-                                <el-button type="primary" @click="showAddDialog">+ 新增地址</el-button>
-                            </div>
-
-                            <!-- 地址表格（使用vxe-grid保持与用户详情页风格一致） -->
-                            <vxe-grid
-                                    border
-                                    height="400"
-                                    :data="addressList"
-                                    :columns="addressColumns"
-                                    :toolbar-config="{ custom: true, slots: { buttons: 'address_toolbar' } }"
-                            >
-                                <template #address_toolbar>
-                                    <!-- 工具栏额外按钮可在此添加 -->
-                                </template>
-                                <template #default="{ row }">
-                                    <!-- 操作列自定义按钮 -->
-                                    <el-button size="small" @click="handleEdit(row)">编辑</el-button>
-                                    <el-button size="small" type="danger" @click="handleDelete(row.addressId)">删除</el-button>
-                                </template>
-                            </vxe-grid>
-
-                            <!-- 分页组件 -->
-                            <el-pagination
-                                    @current-change="handlePageChange"
-                                    :current-page="currentPage"
-                                    :page-size="pageSize"
-                                    :total="total"
-                                    style="margin-top: 10px; text-align: right;"
-                            ></el-pagination>
-
-                            <!-- 新增/编辑地址弹窗 -->
-                            <el-dialog :title="isEdit ? '编辑地址' : '新增地址'" v-model="dialogVisible">
-                                <el-form :model="addressForm" ref="addressForm" label-width="100px">
-                                    <el-form-item label="收件人" :rules="[{ required: true, message: '请输入收件人', trigger: 'blur' }]">
-                                        <el-input v-model="addressForm.receiver"></el-input>
-                                    </el-form-item>
-                                    <el-form-item label="电话" :rules="[{ required: true, message: '请输入电话', trigger: 'blur' }]">
-                                        <el-input v-model="addressForm.telephone"></el-input>
-                                    </el-form-item>
-                                    <el-form-item label="详细地址" :rules="[{ required: true, message: '请输入详细地址', trigger: 'blur' }]">
-                                        <el-input v-model="addressForm.detailAddress"></el-input>
-                                    </el-form-item>
-                                    <el-form-item label="邮政编码">
-                                        <el-input v-model="addressForm.zipCode"></el-input>
-                                    </el-form-item>
-                                    <el-form-item>
-                                        <el-checkbox v-model="addressForm.isDefault">设为默认地址</el-checkbox>
-                                    </el-form-item>
-                                </el-form>
-                                <template #footer>
-                                    <el-button @click="dialogVisible = false">取消</el-button>
-                                    <el-button type="primary" @click="submitAddress">确定</el-button>
-                                </template>
-                            </el-dialog>
-                        </div>
                         <div v-if="isUserDetailPage">
                             <!-- 用户详细信息 -->
                             <el-descriptions
-                                    title="📖用户详细"
-                                    direction="vertical"
-                                    border
+                                title="📖用户详细"
+                                direction="vertical"
+                                border
                             >
                                 <template #extra>
                                     <el-button type="primary" @click="editUserInfo">编辑</el-button>
@@ -171,8 +109,8 @@
                                             <div class="shopping-card-image">
                                                 <input type="checkbox" class="shopping-card-checkbox"  v-model="item.isSelected" @change="calculateTotal"/>
                                                 <img title="shopping-card-img"
-                                                     :src="`/MFile/download?id=${item.mainImage}`"
-                                                     class="shopping-card-img"
+                                                :src="`/MFile/download?id=${item.mainImage}`"
+                                                class="shopping-card-img"
                                                 />
                                                 <div class="card-goods-item">
                                                     <div>
@@ -333,78 +271,62 @@
                         </div>
                     </el-main>
                 </el-container>
-            </el-container>
-        </div>
+                </el-container>
+            </div> 
+        </div> 
+        <template v-if="isEdit" class="editDialog">
+            <el-dialog v-model="showDialog" :title="isEdit ? '编辑' : ''" width="400">
+                <el-form ref="editForm" :model="editForm" :rules="rules" label-width="auto">
+                    <el-form-item label="头像" prop="avatar">
+                        <el-upload :show-MFile-list="false" :before-upload="uploadAvatar"  >
+                            <img title="editAvatar" v-if="editForm.avatar" :src="`/MFile/download?id=${editForm.avatar}`" style="width: 100px; height: 100px" />
+                            <el-icon v-else><Plus></Plus></el-icon>
+                        </el-upload>
+                    </el-form-item>
+                    <el-form-item label="名称" prop="name">
+                        <el-input v-model="editForm.name" maxlength="20" />
+                    </el-form-item>
+                    <el-form-item label="注册城市" prop="city">
+                        <el-cascader v-model="editForm.city" :options="districts" :show-all-levels="true" placeholder="请选择地址" clearable />
+                    </el-form-item>
+                    <el-form-item label="性别" prop="gender">
+                        <el-radio-group v-model="editForm.gender">
+                            <el-radio :value="'男'">男</el-radio>
+                            <el-radio :value="'女'">女</el-radio>
+                        </el-radio-group>
+                    </el-form-item>
+                </el-form>
+                <template #footer>
+                    <el-button @click="showDialog = false">取消</el-button>
+                    <el-button type="primary"  @click="onSubmit">确定</el-button>
+                </template>
+            </el-dialog>
+        </template>
+        <template v-if="isEditPassword" class="editPasswordDialog">
+            <el-dialog v-model="showDialogPassword" :title="isEdit ? '编辑' : ''" width="400">
+                <el-form ref="editForm" :model="editForm" :rules="rules" label-width="auto">
+                    <el-form-item label="旧密码" prop="password" >
+                        <el-input v-model="editForm.password" maxlength="20" type="password"/>
+                    </el-form-item>
+                    <el-form-item label="新密码" prop="password" >
+                        <el-input v-model="editForm.newPassword" maxlength="20"  type='password' />
+                    </el-form-item>
+                </el-form>
+                <template #footer>
+                    <el-button @click="showDialogPassword = false">取消</el-button>
+                    <el-button type="primary"  @click="onSubmitPassword">确定</el-button>
+                </template>
+            </el-dialog>
+        </template>     
     </div>
-    <template v-if="isEdit" class="editDialog">
-        <el-dialog v-model="showDialog" :title="isEdit ? '编辑' : ''" width="400">
-            <el-form ref="editForm" :model="editForm" :rules="rules" label-width="auto">
-                <el-form-item label="头像" prop="avatar">
-                    <el-upload :show-MFile-list="false" :before-upload="uploadAvatar"  >
-                        <img title="editAvatar" v-if="editForm.avatar" :src="`/MFile/download?id=${editForm.avatar}`" style="width: 100px; height: 100px" />
-                        <el-icon v-else><Plus></Plus></el-icon>
-                    </el-upload>
-                </el-form-item>
-                <el-form-item label="名称" prop="name">
-                    <el-input v-model="editForm.name" maxlength="20" />
-                </el-form-item>
-                <el-form-item label="注册城市" prop="city">
-                    <el-cascader v-model="editForm.city" :options="districts" :show-all-levels="true" placeholder="请选择地址" clearable />
-                </el-form-item>
-                <el-form-item label="性别" prop="gender">
-                    <el-radio-group v-model="editForm.gender">
-                        <el-radio :value="'男'">男</el-radio>
-                        <el-radio :value="'女'">女</el-radio>
-                    </el-radio-group>
-                </el-form-item>
-            </el-form>
-            <template #footer>
-                <el-button @click="showDialog = false">取消</el-button>
-                <el-button type="primary"  @click="onSubmit">确定</el-button>
-            </template>
-        </el-dialog>
-    </template>
-    <template v-if="isEditPassword" class="editPasswordDialog">
-        <el-dialog v-model="showDialogPassword" :title="isEdit ? '编辑' : ''" width="400">
-            <el-form ref="editForm" :model="editForm" :rules="rules" label-width="auto">
-                <el-form-item label="旧密码" prop="password" >
-                    <el-input v-model="editForm.password" maxlength="20" type="password"/>
-                </el-form-item>
-                <el-form-item label="新密码" prop="password" >
-                    <el-input v-model="editForm.newPassword" maxlength="20"  type='password' />
-                </el-form-item>
-            </el-form>
-            <template #footer>
-                <el-button @click="showDialogPassword = false">取消</el-button>
-                <el-button type="primary"  @click="onSubmitPassword">确定</el-button>
-            </template>
-        </el-dialog>
-    </template>
-</div>
-<script>
-    const app =  Vue.createApp({
-        data(){
-            return{
-                isAddressPage: false, // 地址管理页面显示控制
-                addressList: [],      // 地址列表数据
-                total: 0,             // 地址总数
-                currentPage: 1,       // 当前页码
-                pageSize: 10,         // 每页条数
-                dialogVisible: false, // 新增/编辑弹窗显示
-                isEdit: false,        // 是否正在编辑
-                addressForm: {        // 地址表单的数据
-                    addressId: '',
-                    userId: '',
-                    receiver: '',
-                    telephone: '',
-                    detailAddress: '',
-                    zipCode: '',
-                    isDefault: false
-                },
-                OrderDetailInfo:{},
-                isCheckOrderDetail: false,
-                finalBuyPrice:'0.00',
-                userOrderInfo:[
+    <script>
+        const app =  Vue.createApp({
+            data(){
+                return{
+                    OrderDetailInfo:{},
+                    isCheckOrderDetail: false,
+                    finalBuyPrice:'0.00',
+                    userOrderInfo:[
                     //     {
                     //     orderId:'436543564563413641',
                     //     tradeNo:'3678434443651367',
@@ -431,458 +353,104 @@
                     //         quantity:'2'
                     //     }]
                     // }
-                ],
-                userShoppingCarts:[],
-                isEditPassword:false,
-                showDialogPassword:false,
-                districts: [],
-                isEdit:false,
-                isUserDetailPage:true,
-                isShoppingPage:false,
-                isOrderPage:false,
-                isSettingPage:false,
-                itemNumber:'',
-                urlItemNumber: null,
-                cartGoodsBugNumber:1,
-                loginedUSerData:{
-                    id:'',
-                    code:'',
-                    name:'',
-                    gender:'',
-                    avatar:'',
-                    city:'',
-                    levelId:'',
-                    createTime: '',
-                },
-                showDialog:false,
-                editForm: {
-                    id:'',
-                    name: '',
-                    city: '',
-                    gender: '',
-                    avatar: '',
-                    password:'',
-                    newPassword:''
-                },
-                rules: {
-                    name: [{required: true, message: '请输入名称'}],
-                    password: [{required: true, message: '请输入密码'},
-                        {
-                            validator(rule, value, callback) {
-                                if (value) {
-                                    if (/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z\W]{6,18}$/.test(value)) {
-                                        callback();
-                                    } else {
-                                        callback(new Error('请输入包含英文和数字，在6-18位之间'))
-                                    }
-                                } else {
-                                    callback();
-                                }
-                            },
-                            trigger: 'blur'
-                        }
                     ],
-                },
-                addressColumns: [
-                    { type: 'seq', width: 60 },
-                    { field: 'addressId', title: '地址ID' },
-                    { field: 'receiver', title: '收件人' },
-                    { field: 'telephone', title: '电话' },
-                    { field: 'detailAddress', title: '详细地址' },
-                    { field: 'zipCode', title: '邮政编码' },
-                    {
-                        field: 'isDefault',
-                        title: '默认地址',
-                        formatter: ({ cellValue }) => cellValue ? '✔' : '❌'
+                    userShoppingCarts:[],
+                    isEditPassword:false,
+                    showDialogPassword:false,
+                    districts: [],
+                    isEdit:false,
+                    isUserDetailPage:true,
+                    isShoppingPage:false,
+                    isOrderPage:false,
+                    isSettingPage:false,
+                    itemNumber:'',
+                    urlItemNumber: null,
+                    cartGoodsBugNumber:1,
+                    loginedUSerData:{
+                        id:'',
+                        code:'',
+                        name:'',
+                        gender:'',
+                        avatar:'',
+                        city:'',
+                        levelId:'',
+                        createTime: '',
                     },
-                    {
-                        field: 'operate',
-                        title: '操作',
-                        width: 160,
-                        slots: { default: 'default' } // 关联自定义操作按钮
-                    }
-                ]
-            }
-        },
-        async created(){
-            this.getUserInfo();
-            await this.initDistricts();
-            this.activateDefaultItem();
-            // this.getUserInfo();
-            this.initDistricts();
-        },
-        methods:{
-            // 分页切换
-            handlePageChange(val) {
-                this.currentPage = val;
-                this.getAddressList();
-            },
-            // 显示新增弹窗
-            showAddDialog() {
-                this.isEdit = false;
-                this.addressForm = {
-                    userId: this.loginedUSerData.id,
-                    receiver: '',
-                    telephone: '',
-                    detailAddress: '',
-                    zipCode: '',
-                    isDefault: false
-                };
-                this.dialogVisible = true;
-            },
-            // 编辑地址
-            handleEdit(row) {
-                this.isEdit = true;
-                this.addressForm = { ...row };
-                this.dialogVisible = true;
-            },
-            // 删除地址
-            async handleDelete(addressId) {
-                await axios.post('/address/delete', {addressId});
-                await this.getAddressList();
-            },
-            // 提交地址（新增/编辑）
-            submitAddress() {
-                debugger;
-                this.addressForm.userId = this.loginedUSerData.id; // 确保是数字
-                axios.post('/address/saveOrUpdate', this.addressForm)
-                    .then(() => {
-                        this.$message.success(this.isEdit ? '修改成功' : '新增成功');
-                        this.dialogVisible = false;
-                        this.getAddressList();
-                    });
-            },
-            toAddressManage() {
-                // 切换到地址管理页面
-                this.isUserDetailPage = false;
-                this.isShoppingPage = false;
-                this.isOrderPage = false;
-                this.isSettingPage = false;
-                this.isAddressPage = true;
-                this.updateUrlItemNumber('5'); // 更新URL参数
-                this.getAddressList(); // 加载地址列表
-            },
-            // 获取地址列表（分页）
-            getAddressList() {
-                // 检查用户ID是否存在
-                if (!this.loginedUSerData.id) {
-                    this.$message.error('请先登录');
-                    return;
+                    showDialog:false,
+                    editForm: {
+                        id:'',
+                        name: '',
+                        city: '',
+                        gender: '',
+                        avatar: '',
+                        password:'',
+                        newPassword:''
+                    },
+                    rules: {
+                        name: [{required: true, message: '请输入名称'}],
+                        password: [{required: true, message: '请输入密码'},
+                            {
+                                validator(rule, value, callback) {
+                                    if (value) {
+                                        if (/^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z\W]{6,18}$/.test(value)) {
+                                            callback();
+                                        } else {
+                                            callback(new Error('请输入包含英文和数字，在6-18位之间'))
+                                        }
+                                    } else {
+                                        callback();
+                                    }
+                                },
+                                trigger: 'blur'
+                            }
+                        ],
+                    },
+
+
                 }
-                axios.post('/address/getAll', {
-                    id: String(this.loginedUSerData.id), // 转字符串
-                    current: this.currentPage,
-                    size: this.pageSize
-                }).then(response => {
-                    this.addressList = response.data.records || [];
-                    this.total = response.data.total || 0;
-                }).catch(error => {
-                    this.$message.error('获取地址失败: ' + (error.response?.data?.message || error.message));
-                });
             },
-            onOrderDetail(item){
-                this.isCheckOrderDetail = true;
-                this.OrderDetailInfo = item;
-                console.log(item);
+            async created(){
+                this.getUserInfo();
+                await this.initDistricts();
+                this.activateDefaultItem();
+                // this.getUserInfo();
+                this.initDistricts();
             },
-            backStore(){
-                // window.location.href = 'http://localhost:8080/app.html';
-                window.open('http://localhost:8080/app.html','_self');
-            },
-            deleteShoppingCart(cartId){
-                axios.post('http://localhost:8080/shoppingCart/deleteShoppingCart', {
-                    cartId: cartId,
-                }).then((res) => {
-                    if (res.status === 200) {
+            methods:{
+                onOrderDetail(item){
+                    this.isCheckOrderDetail = true;
+                    this.OrderDetailInfo = item;
+                    console.log(item);
+                },
+                backStore(){
+                    // window.location.href = 'http://localhost:8080/app.html';
+                    window.open('http://localhost:8080/app.html','_self');
+                },
+                deleteShoppingCart(cartId){
+                    axios.post('http://localhost:8080/shoppingCart/deleteShoppingCart', {
+                        cartId: cartId,
+                    }).then((res) => {
+                        if (res.status === 200) {
+                            this.$message({
+                                message:'取消成功',
+                                type: 'success'
+                            });
+                            this.toShoppingCart();
+                        }else {
+                            this.$message({
+                                message:'取消失败',
+                                type: 'error'
+                            })
+                        }
+                    }).catch((err) => {
                         this.$message({
-                            message:'取消成功',
-                            type: 'success'
-                        });
-                        this.toShoppingCart();
-                    }else {
-                        this.$message({
-                            message:'取消失败',
+                            message:err.message,
                             type: 'error'
                         })
-                    }
-                }).catch((err) => {
-                    this.$message({
-                        message:err.message,
-                        type: 'error'
                     })
-                })
-            },
-            calculateCartItemsPrice() {
-                this.userShoppingCarts.forEach(item => {
-                    // 计算规格价格总和
-                    let unitPrice = 0;
-                    if (item.specsPrice && typeof item.specsPrice === 'object') {
-                        Object.values(item.specsPrice).forEach(price => {
-                            unitPrice += parseFloat(price) || 0;
-                        });
-                    }
-
-                    item.totalPrice = parseFloat(unitPrice * (item.quantity || 1).toFixed(2));
-                });
-            },
-            uploadAvatar(f) {
-                const response = axios.post('/MFile/upload', {MFile: f}, {
-                    headers: {'Content-Type': 'multipart/form-data'}
-                }).then((res) => {
-                    if(res.status === 200){
-                        this.editForm.avatar = response.data.id;
-                        return false;
-                    }
-                }).catch((err) =>{
-                    this.$message({
-                        message: '上传失败: ' + err.message,
-                        type:'error'
-                    })
-                })
-            },
-            deleteAccount(){
-                axios.post('http://localhost:8080/user/logout').then(response =>{
-                    if(response.status === 200){
-                        this.$message({
-                            message: '注销成功',
-                            type: 'success'
-                        });
-                        // 返回商城页
-                        this.backStore();
-                    }else{
-                        this.$message({
-                            message: '注销失败',
-                            type: 'warning'
-                        });
-                    }
-                })
-            },
-            editPassword(){
-                this.isEditPassword = true;
-                this.showDialogPassword = true;
-            },
-            onSubmitPassword(){
-                if(this.editForm.newPassword == null && this.editForm.password == null){
-                    this.$message({
-                        message:'密码不能为空',
-                        type: 'warning'
-                    });
-                    return false;
-                }
-                axios.post('http://localhost:8080/user/editPassword',{
-                    oldPassword:this.editForm.password.trim(),
-                    newPassword:this.editForm.newPassword.trim()
-                }).then(response =>{
-                    if(response.status === 200){
-                        this.$message({
-                            message: '修改密码成功',
-                            type: 'success'
-                        });
-                        this.showDialogPassword = false;
-                        this.editForm = {};
-                    }else{
-                        this.$message({
-                            message: '修改密码失败',
-                            type: 'warning'
-                        });
-                    }
-                })
-            },
-            //解析url参数
-            parseUrlParams() {
-                const query = window.location.search.substring(1);
-                const params = {};
-                query.split('&').forEach(pair => {
-                    const [key, value] = pair.split('=');
-                    params[key] = decodeURIComponent(value);
-                });
-                return params;
-            },
-            //根据选择激化菜单
-            activateDefaultItem() {
-                const params = this.parseUrlParams();
-                if(params.itemNumber) {
-                    this.urlItemNumber = params.itemNumber;
-                    // 根据itemNumber激活菜单
-                    this.itemNumber = params.itemNumber;
-                    switch(params.itemNumber) {
-                        case '1':
-                            this.toUserDetail();
-                            break;
-                        case '2':
-                            this.toShoppingCart();
-                            break;
-                        case '3':
-                            this.toOrder();
-                            break;
-                        case '4':
-                            this.toSetting();
-                            break;
-                        default:
-                            this.toUserDetail();
-                    }
-                } else {
-                    // 默认显示详细信息
-                    this.toUserDetail();
-                }
-            },
-            //更新参数
-            updateUrlItemNumber(number) {
-                const url = new URL(window.location);
-                url.searchParams.set('itemNumber', number);
-                window.history.replaceState(null, null, url.toString());
-            },
-            toUserDetail(){
-                this.isUserDetailPage = true;
-                this.isOrderPage = false;
-                this.isShoppingPage = false;
-                this.isSettingPage = false;
-                this.updateUrlItemNumber('1')
-                this.getUserInfo();
-                console.log('用户详细')
-            },
-            toShoppingCart(){
-                this.isUserDetailPage = false;
-                this.isOrderPage = false;
-                this.isShoppingPage = true;
-                this.isSettingPage = false;
-                axios.post('http://localhost:8080/shoppingCart/getShoppingCartById'
-                ).then(response =>{
-                    if(response.status === 200 || response.data() !== null){
-                        this.$message({
-                            message:'获取购物车成功',
-                            type: 'success'
-                        })
-                        this.userShoppingCarts = response.data;
-                        this.calculateCartItemsPrice();
-                    }else {
-                        this.$message({
-                            message:'获取购物车失败',
-                            type: 'warning'
-                        })
-                    }
-                }).catch((err) =>{
-                    this.$message({
-                        message:err.message,
-                        type: 'warning'
-                    })
-                })
-                this.updateUrlItemNumber('2');
-                console.log('购物车');
-            },
-            toOrder(){
-                this.isUserDetailPage = false;
-                this.isOrderPage = true;
-                this.isShoppingPage = false;
-                this.isSettingPage = false;
-                this.updateUrlItemNumber('3');
-                axios.post('http://localhost:8080/order/getOrders'
-                ).then(response =>{
-                    if(response.status === 200 || response.data() !== null){
-                        this.$message({
-                            message:'获取订单成功',
-                            type: 'success'
-                        })
-                        this.userOrderInfo = response.data;
-                    }else {
-                        this.$message({
-                            message:'获取订单失败',
-                            type: 'warning'
-                        })
-                    }
-                }).catch((err) =>{
-                    this.$message({
-                        message:'获取订单失败'+ err.message,
-                        type: 'error'
-                    })
-                })
-                console.log('订单')
-            },
-            toSetting(){
-                this.isUserDetailPage = false;
-                this.isOrderPage = false;
-                this.isShoppingPage = false;
-                this.isSettingPage = true;
-                this.updateUrlItemNumber('4');
-                console.log('设置')
-            },
-            async initDistricts() {
-                const response = await axios.post('http://localhost:8080/user/initDistricts');
-                // 转换所有value为字符串
-                const convertValues = (nodes) => {
-                    return nodes.map(node => ({
-                        ...node,
-                        value: String(node.value), // 强制转为字符串
-                        children: node.children ? convertValues(node.children) : []
-                    }));
-                };
-
-                this.districts = convertValues(response.data);
-                console.log(this.districts);
-            },
-            getUserInfo(){
-                axios.post('http://localhost:8080/user/getUserInfo',
-                ).then(response => {
-                    if (response.status === 200) {
-                        this.$message({
-                            message: '获取用户成功',
-                            type: 'success'
-                        });
-                        this.loginedUSerData = response.data;
-                    } else {
-                        this.$message({
-                            message: '获取用户失败',
-                            type: 'warning'
-                        });
-                        console.error('请求失败，状态码：', response.status);
-                    }
-                }).catch(error => {
-                    this.$message({
-                        message: '获取用户失败',
-                        type: 'warning'
-                    });
-                    console.error('请求出错：', error);
-                });
-            },
-            editUserInfo(){
-                this.showDialog = true;
-                this.isEdit = true;
-                // this.editForm = {
-                //     id: this.loginedUSerData.id,
-                //     name: this.loginedUSerData.name,
-                //     city: this.loginedUSerData.city,
-                //     avatar: this.loginedUSerData.avatar,
-                //     gender: this.loginedUSerData.gender,
-                // };
-                this.editForm = {...this.loginedUSerData}
-            },
-
-            onSubmit(){
-                if (Array.isArray(this.editForm.city)) {
-                    this.editForm.city = Number(this.editForm.city[this.editForm.city.length - 1]); // 转换为数字
-                }
-                if (this.editForm.gender === '' || this.editForm.name === '') {
-                    this.$message({
-                        message:'请完成先补全性别和姓名',
-                        type: 'warning'
-                    });
-                    return false;
-                }
-                axios.post('http://localhost:8080/user/edit',
-                    this.editForm
-                ).then(response=>{
-                    if(response.status === 200){
-                        this.getUserInfo();
-                        this.showDialog = false;
-                        this.isEdit = false;
-                    }
-                })
-            },
-            calculateTotal() {
-                this.calculateCartItemsPrice();
-                let total = 0;
-                this.userShoppingCarts.forEach(item => {
-                    if (item.isSelected) {
+                },
+                calculateCartItemsPrice() {
+                    this.userShoppingCarts.forEach(item => {
                         // 计算规格价格总和
                         let unitPrice = 0;
                         if (item.specsPrice && typeof item.specsPrice === 'object') {
@@ -890,40 +458,309 @@
                                 unitPrice += parseFloat(price) || 0;
                             });
                         }
-                        total += unitPrice * (item.quantity || 1);
+
+                        item.totalPrice = parseFloat(unitPrice * (item.quantity || 1).toFixed(2));
+                    });
+                },
+                uploadAvatar(f) {
+                    const response = axios.post('/MFile/upload', {MFile: f}, {
+                        headers: {'Content-Type': 'multipart/form-data'}
+                    }).then((res) => {
+                        if(res.status === 200){
+                            this.editForm.avatar = response.data.id;
+                            return false;
+                        }
+                    }).catch((err) =>{
+                        this.$message({
+                            message: '上传失败: ' + err.message,
+                            type:'error'
+                        })
+                    })
+                },
+                deleteAccount(){
+                    axios.post('http://localhost:8080/user/logout').then(response =>{
+                        if(response.status === 200){
+                            this.$message({
+                                message: '注销成功',
+                                type: 'success'
+                            });
+                            // 返回商城页
+                            this.backStore();
+                        }else{
+                            this.$message({
+                                message: '注销失败',
+                                type: 'warning'
+                            });
+                        }
+                    })
+                },
+                editPassword(){
+                    this.isEditPassword = true;
+                    this.showDialogPassword = true;
+                },
+                onSubmitPassword(){
+                    if(this.editForm.newPassword == null && this.editForm.password == null){
+                       this.$message({
+                           message:'密码不能为空',
+                           type: 'warning'
+                       });
+                       return false;
                     }
-                });
-                this.finalBuyPrice = parseFloat(total); // 保留两位小数
+                    axios.post('http://localhost:8080/user/editPassword',{
+                        oldPassword:this.editForm.password.trim(),
+                        newPassword:this.editForm.newPassword.trim()
+                    }).then(response =>{
+                        if(response.status === 200){
+                            this.$message({
+                                message: '修改密码成功',
+                                type: 'success'
+                            });
+                            this.showDialogPassword = false;
+                            this.editForm = {};
+                        }else{
+                            this.$message({
+                                message: '修改密码失败',
+                                type: 'warning'
+                            });
+                        }
+                    })
+                },
+                //解析url参数
+                parseUrlParams() {
+                    const query = window.location.search.substring(1);
+                    const params = {};
+                    query.split('&').forEach(pair => {
+                        const [key, value] = pair.split('=');
+                        params[key] = decodeURIComponent(value);
+                    });
+                    return params;
+                },
+                //根据选择激化菜单
+                activateDefaultItem() {
+                    const params = this.parseUrlParams();
+                    if(params.itemNumber) {
+                        this.urlItemNumber = params.itemNumber;
+                        // 根据itemNumber激活菜单
+                        this.itemNumber = params.itemNumber;
+                        switch(params.itemNumber) {
+                            case '1':
+                                this.toUserDetail();
+                                break;
+                            case '2':
+                                this.toShoppingCart();
+                                break;
+                            case '3':
+                                this.toOrder();
+                                break;
+                            case '4':
+                                this.toSetting();
+                                break;
+                            default:
+                                this.toUserDetail();
+                        }
+                    } else {
+                        // 默认显示详细信息
+                        this.toUserDetail();
+                    }
+                },
+               //更新参数
+                updateUrlItemNumber(number) {
+                    const url = new URL(window.location);
+                    url.searchParams.set('itemNumber', number);
+                    window.history.replaceState(null, null, url.toString());
+                },
+                toUserDetail(){
+                    this.isUserDetailPage = true;
+                    this.isOrderPage = false;
+                    this.isShoppingPage = false;
+                    this.isSettingPage = false;
+                    this.updateUrlItemNumber('1')
+                    this.getUserInfo();
+                    console.log('用户详细')
+                },
+                toShoppingCart(){
+                    this.isUserDetailPage = false;
+                    this.isOrderPage = false;
+                    this.isShoppingPage = true;
+                    this.isSettingPage = false;
+                    axios.post('http://localhost:8080/shoppingCart/getShoppingCartById'
+                    ).then(response =>{
+                        if(response.status === 200 || response.data() !== null){
+                            this.$message({
+                                message:'获取购物车成功',
+                                type: 'success'
+                            })
+                            this.userShoppingCarts = response.data;
+                            this.calculateCartItemsPrice();
+                        }else {
+                            this.$message({
+                                message:'获取购物车失败',
+                                type: 'warning'
+                            })
+                        }
+                    }).catch((err) =>{
+                        this.$message({
+                            message:err.message,
+                            type: 'warning'
+                        })
+                    })
+                    this.updateUrlItemNumber('2');
+                    console.log('购物车');
+                },
+                toOrder(){
+                    this.isUserDetailPage = false;
+                    this.isOrderPage = true;
+                    this.isShoppingPage = false;
+                    this.isSettingPage = false;
+                    this.updateUrlItemNumber('3');
+                    axios.post('http://localhost:8080/order/getOrders'
+                    ).then(response =>{
+                        if(response.status === 200 || response.data() !== null){
+                            this.$message({
+                                message:'获取订单成功',
+                                type: 'success'
+                            })
+                            this.userOrderInfo = response.data;
+                        }else {
+                            this.$message({
+                                message:'获取订单失败',
+                                type: 'warning'
+                            })
+                        }
+                    }).catch((err) =>{
+                        this.$message({
+                            message:'获取订单失败'+ err.message,
+                            type: 'error'
+                        })
+                    })
+                    console.log('订单')
+                },
+                toSetting(){
+                    this.isUserDetailPage = false;
+                    this.isOrderPage = false;
+                    this.isShoppingPage = false;
+                    this.isSettingPage = true;
+                    this.updateUrlItemNumber('4');
+                    console.log('设置')
+                },
+                async initDistricts() {
+                    const response = await axios.post('http://localhost:8080/user/initDistricts');
+                    // 转换所有value为字符串
+                    const convertValues = (nodes) => {
+                        return nodes.map(node => ({
+                            ...node,
+                            value: String(node.value), // 强制转为字符串
+                            children: node.children ? convertValues(node.children) : []
+                        }));
+                    };
+
+                    this.districts = convertValues(response.data);
+                    console.log(this.districts);
+                },
+                getUserInfo(){
+                    axios.post('http://localhost:8080/user/getUserInfo',
+                    ).then(response => {
+                        if (response.status === 200) {
+                            this.$message({
+                                message: '获取用户成功',
+                                type: 'success'
+                            });
+                            this.loginedUSerData = response.data;
+                        } else {
+                            this.$message({
+                                message: '获取用户失败',
+                                type: 'warning'
+                            });
+                            console.error('请求失败，状态码：', response.status);
+                        }
+                    }).catch(error => {
+                        this.$message({
+                            message: '获取用户失败',
+                            type: 'warning'
+                        });
+                        console.error('请求出错：', error);
+                    });
+                },
+                editUserInfo(){
+                    this.showDialog = true;
+                    this.isEdit = true;
+                    // this.editForm = {
+                    //     id: this.loginedUSerData.id,
+                    //     name: this.loginedUSerData.name,
+                    //     city: this.loginedUSerData.city,
+                    //     avatar: this.loginedUSerData.avatar,
+                    //     gender: this.loginedUSerData.gender,
+                    // };
+                    this.editForm = {...this.loginedUSerData}
+                },
+
+                onSubmit(){
+                    if (Array.isArray(this.editForm.city)) {
+                        this.editForm.city = Number(this.editForm.city[this.editForm.city.length - 1]); // 转换为数字
+                    }
+                    if (this.editForm.gender === '' || this.editForm.name === '') {
+                        this.$message({
+                           message:'请完成先补全性别和姓名',
+                           type: 'warning'
+                        });
+                        return false;
+                    }
+                    axios.post('http://localhost:8080/user/edit',
+                        this.editForm
+                    ).then(response=>{
+                        if(response.status === 200){
+                            this.getUserInfo();
+                            this.showDialog = false;
+                            this.isEdit = false;
+                        }
+                    })
+                },
+                calculateTotal() {
+                    this.calculateCartItemsPrice();
+                    let total = 0;
+                    this.userShoppingCarts.forEach(item => {
+                        if (item.isSelected) {
+                            // 计算规格价格总和
+                            let unitPrice = 0;
+                            if (item.specsPrice && typeof item.specsPrice === 'object') {
+                                Object.values(item.specsPrice).forEach(price => {
+                                    unitPrice += parseFloat(price) || 0;
+                                });
+                            }
+                            total += unitPrice * (item.quantity || 1);
+                        }
+                    });
+                    this.finalBuyPrice = parseFloat(total); // 保留两位小数
+                },
+
+                // 结算按钮处理函数
+                confirmBuy() {
+                    // 1. 检查是否有选中商品
+                    const selectedItems = this.userShoppingCarts.filter(item => item.isSelected);
+                    if (selectedItems.length === 0) {
+                        this.$message.warning('请至少选择一件商品进行结算');
+                        return;
+                    }
+
+                    // 2. 这里可添加结算逻辑（API调用等）
+                    console.log('结算的商品:', selectedItems);
+                    console.log('总金额:', this.finalBuyPrice);
+
+                    // 3. 提示用户
+                    this.$message.success(`结算成功！总金额：¥${this.finalBuyPrice}`);
+                }
             },
 
-            // 结算按钮处理函数
-            confirmBuy() {
-                // 1. 检查是否有选中商品
-                const selectedItems = this.userShoppingCarts.filter(item => item.isSelected);
-                if (selectedItems.length === 0) {
-                    this.$message.warning('请至少选择一件商品进行结算');
-                    return;
-                }
+            watch: {
 
-                // 2. 这里可添加结算逻辑（API调用等）
-                console.log('结算的商品:', selectedItems);
-                console.log('总金额:', this.finalBuyPrice);
+            },
+            computed: {
 
-                // 3. 提示用户
-                this.$message.success(`结算成功！总金额：¥${this.finalBuyPrice}`);
             }
-        },
 
-        watch: {
-
-        },
-        computed: {
-
-        }
-
-    });
-    for(const[key, component] of Object.entries(ElementPlusIconsVue)) {app.component(key, component)}
-    app.use(ElementPlus).use(VxeUITable).mount('#app');
-</script>
+        });
+        for(const[key, component] of Object.entries(ElementPlusIconsVue)) {app.component(key, component)}
+        app.use(ElementPlus).use(VxeUITable).mount('#app');
+    </script>
 </body>
 </html>

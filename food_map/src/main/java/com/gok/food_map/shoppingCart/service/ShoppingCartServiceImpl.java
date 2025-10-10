@@ -39,8 +39,10 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
         BeanUtils.copyProperties(cart, shoppingCart);
         shoppingCart.setCreateTime(LocalDateTime.now());
         shoppingCart.setIsSelected(false);
+        shoppingCart.setUnitPrice(new BigDecimal(cart.getUnitPrice()));
         shoppingCart.setSpuId(Long.parseLong(cart.getSpuId()));
         shoppingCart.setUserId(Long.parseLong(cart.getUserId()));
+        shoppingCart.setMerchantId(Long.parseLong(cart.getMerchantId()));
         shoppingCart.setTotalPrice(BigDecimal.valueOf(Long.parseLong(cart.getTotalPrice())));
         if (shoppingCartMapper.insert(shoppingCart) == 0) {
             ServiceException.build("添加失败");
