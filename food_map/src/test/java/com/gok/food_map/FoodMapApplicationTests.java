@@ -4,10 +4,13 @@ import cn.hutool.core.lang.Snowflake;
 import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.gok.food_map.merchant.entity.MMerchant;
 import com.gok.food_map.order.service.ProductOrderService;
 import com.gok.food_map.order.vo.UserOrderInfoVO;
 import com.gok.food_map.product.entity.ProductSku;
+import com.gok.food_map.product.entity.ProductSpu;
 import com.gok.food_map.product.service.ProductSkuServiceImpl;
+import com.gok.food_map.product.service.ProductSpuServiceImpl;
 import com.gok.food_map.product.vo.ProductSkuGetListVO;
 import com.gok.food_map.shoppingCart.mapper.ShoppingCartMapper;
 import com.gok.food_map.shoppingCart.service.ShoppingCartServiceImpl;
@@ -76,5 +79,14 @@ class FoodMapApplicationTests {
 //        List<UserOrderInfoVO> userOrderInfos = productOrderService.getUserOrderInfos(1973790950878760962L);
 //        userOrderInfos.forEach(System.out::println);
 //        System.out.println();
+    }
+    @Resource
+    private ProductSpuServiceImpl productSpuService;
+    @Test
+    void testOrder(){
+        LambdaQueryWrapper<ProductSpu> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ProductSpu::getMerchantId,1973385448478883842L);
+        List<ProductSpu> list = productSpuService.list(wrapper);
+        System.out.println(list);
     }
 }

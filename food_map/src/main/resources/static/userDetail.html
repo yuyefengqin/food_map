@@ -115,7 +115,7 @@
                                                 <div class="card-goods-item">
                                                     <div>
                                                         <h1 class="card-goods-name">{{item.spuName}}</h1>
-                                                        <span v-for="(price, spec) in item.specsPrice" class="selected-spec"> {{ spec }}</span>
+                                                        <span v-for=" spec in item.specs" class="selected-spec"> {{ spec }}</span>
                                                     </div>
                                                     <div class="card-goods-floor">
                                                         <h1 class="card-goods-price">￥{{item.totalPrice}}</h1>
@@ -452,14 +452,8 @@
                 calculateCartItemsPrice() {
                     this.userShoppingCarts.forEach(item => {
                         // 计算规格价格总和
-                        let unitPrice = 0;
-                        if (item.specsPrice && typeof item.specsPrice === 'object') {
-                            Object.values(item.specsPrice).forEach(price => {
-                                unitPrice += parseFloat(price) || 0;
-                            });
-                        }
-
-                        item.totalPrice = parseFloat(unitPrice * (item.quantity || 1).toFixed(2));
+                        item.totalPrice = parseFloat(item.unitPrice * (item.quantity || 1).toFixed(2));
+                        return item.totalPrice;
                     });
                 },
                 uploadAvatar(f) {
@@ -720,14 +714,11 @@
                     let total = 0;
                     this.userShoppingCarts.forEach(item => {
                         if (item.isSelected) {
+                            const sum =  item.unitPrice * (item.quantity || 1);
+                            total += sum;
                             // 计算规格价格总和
-                            let unitPrice = 0;
-                            if (item.specsPrice && typeof item.specsPrice === 'object') {
-                                Object.values(item.specsPrice).forEach(price => {
-                                    unitPrice += parseFloat(price) || 0;
-                                });
-                            }
-                            total += unitPrice * (item.quantity || 1);
+                            item.totalPrice = parseFloat(sum).toFixed(2);
+
                         }
                     });
                     this.finalBuyPrice = parseFloat(total); // 保留两位小数
@@ -736,18 +727,28 @@
                 // 结算按钮处理函数
                 confirmBuy() {
                     // 1. 检查是否有选中商品
-                    const selectedItems = this.userShoppingCarts.filter(item => item.isSelected);
-                    if (selectedItems.length === 0) {
+                    const cartItems = this.userShoppingCarts.filter(item => item.isSelected);
+                    this.userShoppingCarts = this.userShoppingCarts.filter(item => !item.isSelected);
+                    if (cartItems.length === 0) {
                         this.$message.warning('请至少选择一件商品进行结算');
-                        return;
+                        return false;
                     }
 
-                    // 2. 这里可添加结算逻辑（API调用等）
-                    console.log('结算的商品:', selectedItems);
+                    // 2. 添加结算
+                    console.log('结算的商品:', cartItems);
                     console.log('总金额:', this.finalBuyPrice);
+                    axios.post('http://localhost:8080/order/buyByCart',{
+                        cartItems
+                    }).then(response => {
+                        if (response.status === 200 && response.data === true) {
+                            this.$message.success(`结算成功！总金额：¥${this.finalBuyPrice}`);
+                            this.toShoppingCart();
+                            this.calculateTotal();
+                        }
+                    }).catch(error => {
 
-                    // 3. 提示用户
-                    this.$message.success(`结算成功！总金额：¥${this.finalBuyPrice}`);
+                    })
+
                 }
             },
 
