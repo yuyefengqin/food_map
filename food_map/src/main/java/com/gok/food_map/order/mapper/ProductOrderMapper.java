@@ -1,5 +1,6 @@
 package com.gok.food_map.order.mapper;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gok.food_map.order.entity.ProductOrder;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.gok.food_map.order.vo.OrderGetListVO;
@@ -24,6 +25,16 @@ public interface ProductOrderMapper extends BaseMapper<ProductOrder> {
                                   @Param("beginTime") LocalDateTime beginTime,
                                   @Param("endTime") LocalDateTime endTime,
                                   @Param("payMethod") String payMethod
+    );
+    IPage<OrderGetListVO> selectIPageBy(
+            IPage<OrderGetListVO> page,
+            @Param("orderId") Long orderId,
+            @Param("orderStatus") Integer orderStatus,
+            @Param("merchantName") String merchantName,
+            @Param("userCode") String  userCode,
+            @Param("beginTime") LocalDateTime beginTime,
+            @Param("endTime") LocalDateTime endTime,
+            @Param("payMethod") String payMethod
     );
 }
 

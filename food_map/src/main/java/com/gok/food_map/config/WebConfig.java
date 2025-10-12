@@ -45,10 +45,8 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(new LoginInterceptor())
                 .addPathPatterns("/**")
                 .excludePathPatterns("/user/login",
+                        "/user/adminLogin",
                         "/error/**",
-                        "/MGoods/**",
-                        "/merchant/getMerchantById",
-                        "/**.html",
                         "/static_resources/**",
                         "/static/img/**.png",
                         "/favicon_logosc/**");

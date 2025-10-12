@@ -9,6 +9,7 @@ public class UserLoginVO {
     private String city;
     private Integer levelId;
     private String createTime;
+    private String cityName;
     public String getCreateTime() {
         return createTime;
     }
@@ -18,7 +19,7 @@ public class UserLoginVO {
     }
 
 
-    public UserLoginVO(String id, String code, String name, String gender, String avatar, String city, Integer levelId, String createTime) {
+    public UserLoginVO(String id, String code, String name, String gender, String avatar, String city, Integer levelId, String createTime, String cityName) {
         this.id = id;
         this.code = code;
         this.name = name;
@@ -26,6 +27,14 @@ public class UserLoginVO {
         this.avatar = avatar;
         this.city = city;
         this.levelId = levelId;
+    }
+
+    public String getCityName() {
+        return cityName;
+    }
+
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
     }
 
     public UserLoginVO() {

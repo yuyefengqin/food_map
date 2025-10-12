@@ -59,4 +59,9 @@ public class UserSaveDTO {
      * 状态
      */
     private boolean valid;
+
+    /**
+     * 身份
+     */
+    private String identity;
 }

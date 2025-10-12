@@ -13,30 +13,52 @@ comment on column m_file.path   is '路径';
 -- 用户表
 create table m_user
 (
-    id          bigint primary key,
-    code        text not null,
-    password    text not null,       -- 计划采用sh256加密存储
-    name        text      default null,
-    gender      text      default '男',
-    avatar      bigint,
-    city        bigint,
-    level_id    smallint  default 1, -- 关联member_level，默认普通会员
-    create_time timestamp default current_timestamp,
-    update_time timestamp,
-    valid      boolean   default true
+    id            bigint      not null
+        primary key,
+    code          text        not null
+        constraint m_user_pk
+            unique,
+    password_hash varchar(64) not null,
+    password_salt varchar(24) not null,
+    name          text,
+    gender        text      default '男'::text,
+    avatar        bigint,
+    city          bigint,
+    level_id      smallint  default 1,
+    create_time   timestamp default CURRENT_TIMESTAMP,
+    update_time   timestamp,
+    valid         boolean   default true,
+    identity      varchar(20) default 'user' not null
+
 );
+
 comment on table m_user is '用户表';
+
 comment on column m_user.id is '用户ID';
-comment on column m_user.code is '登录账号'; -- 登录需要邮箱或手机号
-comment on column m_user.password is '加密密码';
+
+comment on column m_user.code is '登录账号';
+
+comment on column m_user.password_hash is '加密密码';
+
 comment on column m_user.name is '用户名';
+
 comment on column m_user.gender is '性别（男/女）';
+
 comment on column m_user.avatar is '头像';
+
 comment on column m_user.city is '注册城市';
+
 comment on column m_user.level_id is '会员等级';
+
 comment on column m_user.create_time is '注册时间';
+
 comment on column m_user.update_time is '更新时间';
+
 comment on column m_user.valid is '状态';
+
+comment on column m_user.identity is '身份';
+
+comment on column m_user.password_salt is '盐值';
 
 -- 会员等级表
 create table member_level
@@ -87,36 +109,45 @@ comment on column m_address.is_default is '是否默认地址';
 -- 商户表
 create table m_merchant
 (
-    merchant_id      bigint primary key,
-    merchant_no      text   not null,
+    merchant_id      bigint not null
+        primary key,
+    user_id          bigint not null,
     merchant_name    text   not null,
-    notes            text      default null,
+    notes            text,
     merchant_address text   not null,
     contact_phone    text   not null,
     enterprise_type  text   not null,
-    logo_url         bigint not null,
-    business_license bigint not null, -- 默认一张即可
-    manage_account   text   not null,
-    manage_password  text   not null,
+    logo_url         bigint,
+    business_license bigint not null,
     status           smallint  default 1,
-    create_time      timestamp default current_timestamp,
+    create_time      timestamp default CURRENT_TIMESTAMP,
+
     update_time      timestamp
 );
+
 comment on table m_merchant is '商户表';
+
 comment on column m_merchant.merchant_id is '商户ID';
-comment on column m_merchant.merchant_no is '商户编号';
+
 comment on column m_merchant.merchant_name is '商户名称';
+
 comment on column m_merchant.notes is '备注';
+
 comment on column m_merchant.merchant_address is '所在城市';
+
 comment on column m_merchant.contact_phone is '联系人电话';
+
 comment on column m_merchant.enterprise_type is '企业类型';
+
 comment on column m_merchant.logo_url is 'logo图片URL';
+
 comment on column m_merchant.business_license is '营业执照URL';
-comment on column m_merchant.manage_account is '商户管理账号';
-comment on column m_merchant.manage_password is '管理账号密码';
+
 comment on column m_merchant.status is '商户状态';
+
 comment on column m_merchant.create_time is '创建时间';
-comment on column m_merchant.update_time is '更新时间';
+
+comment on column m_merchant.user_id is '用户编号';
 
 -- 商品SPU表
 create table product_spu

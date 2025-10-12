@@ -78,7 +78,7 @@
                                     range-separator="To"
                                     start-placeholder="Start date"
                                     end-placeholder="End date"
-                                    :size="size"
+                                    :size="datePickerSize"
                             />
                         </el-form-item>
                         <el-form-item label="  "></el-form-item>
@@ -100,27 +100,12 @@
                     </el-row>
                 </template>
                     <template v-if="isDetail">
-                        <el-button  text="plain" @click=" showDetail"> < 返回</el-button>
+                        <el-button  text="plain" @click=" isDetail = false"> < 返回</el-button>
                         <vxe-grid v-bind="OrderOptions" style="width: 100%" >
                             <template #toolbar >
                                 <h3>📕基本信息</h3>
                             </template>
                         </vxe-grid>
-                        <vxe-grid v-bind="addressOptions" style="width: 100%" >
-                            <template #toolbar >
-                                <h3>📕收货人信息</h3>
-                            </template>
-                        </vxe-grid>
-                        <vxe-grid v-bind="OrderItemOptions" style="width: 100%" >
-                            <template #toolbar >
-                                <h3>📕商品信息</h3>
-                            </template>
-                            <template #pager>
-                                <vxe-pager :layouts="['Sizes', 'PrevPage', 'Number', 'NextPage', 'Total']" v-model:current-page="orderItemPage.current" v-model:page-size="orderItemPage.size" :total="orderItemPage.total" @page-change="onOrderPageChange">
-                                </vxe-pager>
-                            </template>
-                        </vxe-grid>
-                        <el-col :offset="16"><h2 v-model="massage" style="font-size: 16px">配送方式:{{massage.deliveryMethod}}&emsp;配送费:{{massage.deliveryFee}}&emsp;商品订单金额:{{massage.orderAmount}} </h2></el-col>
                     </template>
                 </el-main>
             </el-container>
@@ -134,8 +119,8 @@
     const app =Vue.createApp({
         data(){
             return {
-                massage:{},
-                orderItemForm:{},
+                datePickerSize:'large',
+                itemNumber: '4',
                 orderStatusMap: [],
                 isDetail: false,
                 form: {
@@ -200,11 +185,10 @@
                     toolbarConfig: {
                         custom: true,
                         slots: {buttons: 'toolbar_buttons'}
-                        }
                     },
                     addressOptions: {
                         border: true,
-                        height: 100,
+                        height: 400,
                         data: [],
                         headerAlign: 'center',
                         align: 'center',
@@ -222,7 +206,7 @@
                     },
                     OrderOptions: {
                         border: true,
-                        height: 100,
+                        height: 400,
                         data: [],
                         headerAlign: 'center',
                         align: 'center',
@@ -247,26 +231,27 @@
                             headerAlign: 'center',
                             align: 'center',
                             columns: [
-                                {field: 'orderId', title: '商户名'},
-                                {field: 'createTime', title: '子订单id'},
-                                {field: 'merchantName', title: '商品名称'},
-                                {field: 'userCode', title: '货号'},
-                                {field: 'orderAmount', title: '规格'},
-                                {field: 'payMethod', title: '数量'},
-                                {field: 'payMethod', title: '商品单价'},
-                                {field: 'payMethod', title: '小计'},
+                                {type: 'seq', width: 50},
+                                {field: 'orderId', title: '订单编号'},
+                                {field: 'createTime', title: '创建时间'},
+                                {field: 'merchantName', title: '商户名'},
+                                {field: 'userCode', title: '用户账号'},
+                                {field: 'orderAmount', title: '订单金额'},
+                                {field: 'payMethod', title: '支付方式'},
+                                {
+                                    field: 'orderStatus', title: '订单状态', formatter: ({cellValue}) => {
+                                        return this.orderStatusMap[cellValue] || `未知等级(${cellValue})`;
+                                    }
+                                },
+                                {title: '操作', slots: {default: 'operate'}, width: 220}
                             ],
                             toolbarConfig: {
                                 custom: true,
                                 slots: {buttons: 'toolbar_buttons'}
                             }
-                        },
-                    page: {
-                        current: 1,
-                        size: 20,
-                        total: 0
+                        }
                     },
-                    orderItemPage:{
+                    page: {
                         current: 1,
                         size: 20,
                         total: 0
@@ -277,20 +262,20 @@
             this.init();
             this.getList();
         },
-        methods: {
-            toUserManage() {
+        methods:{
+            toUserManage(){
                 window.location.href = 'http://localhost:8080/user.html';
             },
-            toMerchantManage() {
+            toMerchantManage(){
                 window.location.href = 'http://localhost:8080/merchant.html';
             },
-            toProductManage() {
+            toProductManage(){
                 window.location.href = 'http://localhost:8080/product.html';
             },
-            toOrderManage() {
+            toOrderManage(){
                 window.location.href = 'http://localhost:8080/order.html';
             },
-            init() {
+            init(){
                 this.orderStatusMap = Object.fromEntries(
                     this.options.map(option => [option.value, option.label])
                 );
@@ -315,17 +300,17 @@
                 this.page.total = response.data.total;
                 console.log(this.gridOptions.data);
             },
-            onSearch() {
+            onSearch(){
                 this.getList();
             },
             onPageChange() {
                 this.getList();
             },
-            onReset() {
+            onReset(){
                 this.form.orderId = '';
                 this.form.merchantName = '';
-                this.form.time = [];
-                this.form.userCode = '';
+                this.form.time =[];
+                this.form = '';
                 this.form.payMethod = '';
                 this.form.orderStatus = '';
                 this.getList();
@@ -335,51 +320,32 @@
                 window.location.href = `/order/export?orderId=${this.form.orderId}&orderStatus=${this.form.orderStatus}
                 &merchantName=${this.form.merchantName}&userCode=${this.form.userCode}&time=${this.form.time}&payMethod=${this.form.payMethod}&current=${this.page.current}&size=${this.page.size}`;
             },
-            showDetail(){
-                this.OrderOptions.data =[];
-                this.isDetail=false;
-            },
-            showDetailDialog(row) {
+            showDetailDialog(row){
                 this.isDetail = true;
-                this.orderItemForm.orderId = row.orderId;
-                this.orderItemForm.orderAmount = row.orderAmount;
-                this.orderItemForm.userCode = row.userCode;
-                this.orderItemForm.payMethod = row.payMethod;
-                this.orderItemForm.tradeNo = row.tradeNo;
-                this.orderItemForm.logisticsCompany = row.logisticsCompany;
-                this.orderItemForm.logisticsNo = row.logisticsNo;
-                this.massage.deliveryMethod = row.deliveryMethod;
-                this.massage.deliveryFee = row.deliveryFee;
-                this.massage.orderAmount = row.orderAmount;
-                const newItem = {...this.orderItemForm};
-                this.OrderOptions.data.push(newItem);
+                this.OrderOptions = {
+                    ...this.OrderOptions,
+                    data: row.records
+                }
+                // this.OrderOptions.data.orderId = row.data.orderId;
+                // this.OrderOptions.data.orderAmount = row.data.orderAmount;
+                // this.OrderOptions.data.userCode = row.data.userCode;
+                // this.OrderOptions.data.payMethod = row.data.payMethod;
+                // this.OrderOptions.data.tradeNo = row.data.tradeNo;
+                // this.OrderOptions.data.logisticsCompany = row.data.logisticsCompany;
+                // this.OrderOptions.data.logisticsNo = row.data.logisticsNo;
                 this.getUserAddress(row.addressId);
-                this.resetOrderItemForm();
             },
-            getUserAddress(id) {
+            getUserAddress(id){
                 axios.post('/address/getAddress',
                     {addressId: id}
                 ).then(response => {
-                    try {
+                    try{
                         this.addressOptions.data = response.data.records;
-                    } catch (error) {
+                    }catch(error){
                         console.log(error);
                     }
                 });
-            },
-            onOrderPageChange() {
-            },
-            resetOrderItemForm() {
-                this.orderItemForm = {
-                    orderId: '',
-                    orderAmount: '',
-                    userCode: '',
-                    payMethod: '',
-                    tradeNo: '',
-                    logisticsCompany: '',
-                    logisticsNo: ''
-                };
-            },
+            }
         }
     });
     for(const[key, component] of Object.entries(ElementPlusIconsVue)) {app.component(key, component)}

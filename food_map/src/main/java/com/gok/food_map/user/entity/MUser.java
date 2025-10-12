@@ -32,7 +32,11 @@ public class MUser implements Serializable {
     /**
      * 加密密码
      */
-    private String password;
+    private String passwordHash;
+    /**
+     * 盐值
+     */
+    private String passwordSalt;
 
     /**
      * 用户名
@@ -73,6 +77,11 @@ public class MUser implements Serializable {
      * 状态
      */
     private Boolean valid;
+
+    /**
+     * 身份
+     */
+    private String identity;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

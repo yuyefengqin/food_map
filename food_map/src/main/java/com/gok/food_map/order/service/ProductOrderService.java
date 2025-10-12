@@ -15,6 +15,7 @@ import com.gok.food_map.order.mapper.OrderItemMapper;
 import com.gok.food_map.order.mapper.ProductOrderMapper;
 import com.gok.food_map.order.vo.BuyProduct;
 import com.gok.food_map.order.vo.OrderGetListVO;
+import com.gok.food_map.order.vo.OrderItemGetListVO;
 import com.gok.food_map.order.vo.UserOrderInfoVO;
 import com.gok.food_map.product.entity.ProductSpu;
 import com.gok.food_map.product.mapper.ProductSpuMapper;
@@ -311,14 +312,37 @@ public class ProductOrderService{
         }
     }
     //查
+    public IPage<OrderItemGetListVO> getOrderItems(OrderItemGetListDTO dto) {
+        IPage<OrderItem> page = new Page<>(dto.getCurrent() == null ? 1 : Integer.parseInt(dto.getCurrent()), dto.getSize() == null ? 10 : Integer.parseInt(dto.getSize()));
+        LambdaQueryWrapper<OrderItem> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderItem::getOrderId,Long.valueOf(dto.getOrderId()));
+        page = orderItemMapper.selectPage(page,queryWrapper);
+        IPage<OrderItemGetListVO> res = new Page<>();
+        BeanUtils.copyProperties(page, res);
+        res.setRecords(page.getRecords().stream().map(oi ->{
+            OrderItemGetListVO vo = new OrderItemGetListVO();
+            BeanUtils.copyProperties(oi, vo);
+            vo.setItemId(oi.getItemId().toString());
+            vo.setMerchantName(dto.getMerchantName());
+//            vo.setProductName(oi.getProductName());
+//            vo.setSpecs(oi.getSpecs());
+//            vo.setQuantity(oi.getQuantity());
+//            vo.setUnitPrice(oi.getUnitPrice());
+//            vo.setSubAmount(oi.getSubAmount());
+            return vo;
+        }).toList());
+        return res;
+    }
+    //查
     public IPage<OrderGetListVO> getList(OrderGetListDTO dto) {
-        IPage<ProductOrder> page = new Page<>(dto.getCurrent() == null ? 1 : Integer.parseInt(dto.getCurrent()), dto.getSize() == null ? 20 : Integer.parseInt(dto.getSize()));
+        IPage<OrderGetListVO> page = new Page<>(dto.getCurrent() == null ? 1 : Integer.parseInt(dto.getCurrent()), dto.getSize() == null ? 20 : Integer.parseInt(dto.getSize()));
         List<String> timeList = dto.getTime();
         if(timeList.isEmpty()){
             timeList.add(null);
             timeList.add(null);
         }
-        List<OrderGetListVO> orders = productOrderMapper.selectBy(
+        page = productOrderMapper.selectIPageBy(
+                page,
                 dto.getOrderId()==null? null:dto.getOrderId(),
                 dto.getOrderStatus(),
                 (!StringUtils.hasText(dto.getMerchantName()))? null:dto.getMerchantName(),
@@ -328,10 +352,10 @@ public class ProductOrderService{
                 (!StringUtils.hasText(dto.getPayMethod())) ? null:dto.getPayMethod()
         );
         IPage<OrderGetListVO> res = new Page<>();
-        BeanUtils.copyProperties(page, res);
-        res.setRecords(orders.stream().map(orderGetListVO->{
+        BeanUtils.copyProperties(page,res);
+        res.setRecords(page.getRecords().stream().map(orders->{
             OrderGetListVO vo = new OrderGetListVO();
-            BeanUtils.copyProperties(orderGetListVO,vo);
+            BeanUtils.copyProperties(orders,vo);
             return vo;
         }).toList());
         return res;

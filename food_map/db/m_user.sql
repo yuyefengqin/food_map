@@ -1,21 +1,49 @@
-CREATE TABLE m_user (
-    id          INT8      PRIMARY KEY, --物理主键
-    code        INT8      UNIQUE NOT NULL, --逻辑主键
-    name        TEXT      NOT NULL,
-    password    TEXT      NOT NULL,
-    avatar      INT8,
-    sex         TEXT      NOT NULL,
-    city        TEXT      NOT NULL,
-    create_time TIMESTAMP NOT NULL,
-    enable      BOOLEAN   NOT NULL
+create table m_user
+(
+    id            bigint      not null
+        primary key,
+    code          text        not null
+        constraint m_user_pk
+            unique,
+    password_hash varchar(64) not null,
+    password_salt varchar(24) not null,
+    name          text,
+    gender        text      default '男'::text,
+    avatar        bigint,
+    city          bigint,
+    level_id      smallint  default 1,
+    create_time   timestamp default CURRENT_TIMESTAMP,
+    update_time   timestamp,
+    valid         boolean   default true,
+    identity      varchar(20) default 'user' not null
+
 );
-COMMENT ON TABLE m_user              IS '用户';
-COMMENT ON COLUMN m_user.id          IS '编号';
-COMMENT ON COLUMN m_user.code        IS '账号';
-COMMENT ON COLUMN m_user.name        IS '名称';
-COMMENT ON COLUMN m_user.password    IS '密码';
-COMMENT ON COLUMN m_user.avatar      IS '头像';
-COMMENT ON COLUMN m_user.sex         IS '性别';
-COMMENT ON COLUMN m_user.city        IS '城市';
-COMMENT ON COLUMN m_user.create_time IS '创建时间';
-COMMENT ON COLUMN m_user.enable      IS '有效';
+-- 用户表
+
+comment on table m_user is '用户表';
+
+comment on column m_user.id is '用户ID';
+
+comment on column m_user.code is '登录账号';
+
+comment on column m_user.password_hash is '加密密码';
+
+comment on column m_user.name is '用户名';
+
+comment on column m_user.gender is '性别（男/女）';
+
+comment on column m_user.avatar is '头像';
+
+comment on column m_user.city is '注册城市';
+
+comment on column m_user.level_id is '会员等级';
+
+comment on column m_user.create_time is '注册时间';
+
+comment on column m_user.update_time is '更新时间';
+
+comment on column m_user.valid is '状态';
+
+comment on column m_user.identity is '身份';
+
+comment on column m_user.password_salt is '盐值';

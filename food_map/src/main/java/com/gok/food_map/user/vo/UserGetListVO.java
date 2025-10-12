@@ -61,4 +61,9 @@ public class UserGetListVO {
      * 状态
      */
     private Boolean valid;
+
+    /**
+     * 身份
+     */
+    private String identity;
 }

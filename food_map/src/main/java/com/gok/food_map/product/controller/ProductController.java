@@ -1,6 +1,7 @@
 package com.gok.food_map.product.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.gok.food_map.annotation.Auth;
 import com.gok.food_map.product.dto.*;
 import com.gok.food_map.product.service.ProductService;
 import com.gok.food_map.product.service.ProductSkuServiceImpl;
@@ -50,30 +51,36 @@ public class ProductController {
     //查找
     @Resource
     private ProductService productService;
+
+    @Auth
     @PostMapping("/getList")
     public IPage<ProductsGetListVO> getList(@RequestBody ProductsGetListDto dto) {
         return productService.getList(dto);
     }
 
     //新增
+    @Auth
     @PostMapping("/add")
     public void add(@RequestBody ProductsSpuDto dto) {
         productSpuService.add(dto);
     }
 
     //编辑
+    @Auth
     @PostMapping("/edit")
     public void edit(@RequestBody ProductsSpuDto dto) {
         productSpuService.edit(dto);
     }
 
 //    删除
+    @Auth
     @PostMapping("/remove")
     public void remove(@RequestBody ProductRemoveDto dto) {
         productService.remove(dto);
     }
 
     //跳转
+    @Auth
     @RequestMapping("/detail")
     public String detail() {
         return "product_detail";

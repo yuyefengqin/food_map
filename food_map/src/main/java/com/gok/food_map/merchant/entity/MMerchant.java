@@ -20,6 +20,10 @@ public class MMerchant {
     private Long merchantId;
 
     /**
+     * 用户编号
+     */
+    private Long userId;
+    /**
      * 商户名称
      */
     private String merchantName;
@@ -54,15 +58,6 @@ public class MMerchant {
      */
     private Long businessLicense;
 
-    /**
-     * 商户管理账号
-     */
-    private String manageAccount;
-
-    /**
-     * 管理账号密码
-     */
-    private String managePassword;
 
     /**
      * 商户状态
@@ -88,6 +83,18 @@ public class MMerchant {
 
     public String getMerchantName() {
         return merchantName;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public void setMerchantId(Long merchantId) {
+        this.merchantId = merchantId;
     }
 
     public void setMerchantName(String merchantName) {
@@ -140,22 +147,6 @@ public class MMerchant {
 
     public void setBusinessLicense(Long businessLicense) {
         this.businessLicense = businessLicense;
-    }
-
-    public String getManageAccount() {
-        return manageAccount;
-    }
-
-    public void setManageAccount(String manageAccount) {
-        this.manageAccount = manageAccount;
-    }
-
-    public String getManagePassword() {
-        return managePassword;
-    }
-
-    public void setManagePassword(String managePassword) {
-        this.managePassword = managePassword;
     }
 
     public Integer getStatus() {

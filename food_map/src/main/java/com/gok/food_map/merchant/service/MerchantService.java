@@ -13,19 +13,29 @@ import com.gok.food_map.merchant.entity.MMerchant;
 import com.gok.food_map.merchant.mapper.MMerchantMapper;
 import com.gok.food_map.merchant.vo.MerchantGetListVO;
 import com.gok.food_map.merchant.vo.MerchantInfoVO;
+import com.gok.food_map.user.dto.UserSaveDTO;
+import com.gok.food_map.user.entity.MUser;
+import com.gok.food_map.user.mapper.MUserMapper;
+import com.gok.food_map.user.service.UserService;
+import com.gok.food_map.util.PasswordEncryptionUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.BeansException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor(onConstructor_ = @Lazy)
 public class MerchantService extends ServiceImpl<MMerchantMapper, MMerchant>
         implements IService<MMerchant> {
+    private final MUserMapper userMapper;
     private final MMerchantMapper mMerchantMapper;
     private final FileService fileService;
+    private final UserService userService;
     private static final String PASSWORD = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z\\W]{6,20}$";//密码
 
     // 获取单商户
@@ -38,13 +48,39 @@ public class MerchantService extends ServiceImpl<MMerchantMapper, MMerchant>
     @Transactional
     public void add(MerchantSaveDTO dto) {
         //checkSave(dto, true);
-        MMerchant mMerchant = new MMerchant();
-        BeanUtils.copyProperties(dto, mMerchant);
-        mMerchantMapper.insert(mMerchant);//保存用户数据
-        fileService.enable(mMerchant.getBusinessLicense());//生效营业执照
-        fileService.enable(mMerchant.getLogoUrl());//生效logo
+        if (saveUser(dto)) {
+            try {
+                MMerchant mMerchant = new MMerchant();
+                BeanUtils.copyProperties(dto, mMerchant);
+                mMerchant.setCreateTime(LocalDateTime.now());
+                mMerchantMapper.insert(mMerchant);//保存用户数据
+                fileService.enable(mMerchant.getBusinessLicense());//生效营业执照
+                fileService.enable(mMerchant.getLogoUrl());//生效logo
+            } catch (BeansException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
-
+    @Transactional
+    protected boolean saveUser(MerchantSaveDTO dto) {
+        if (dto != null) {
+            try {
+                String salt = PasswordEncryptionUtil.generateSalt();
+                String encryptPassword = PasswordEncryptionUtil.encryptPassword(dto.getManagePassword(), salt);
+                MUser mUser = new MUser();
+                mUser.setCode(dto.getManageAccount());
+                mUser.setCreateTime(LocalDateTime.now());
+                mUser.setIdentity("merchant");
+                mUser.setPasswordSalt(salt);
+                mUser.setPasswordHash(encryptPassword);
+                mUser.setValid(true);
+                return true;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return false;
+    }
     //编辑
     @Transactional
     public void edit(MerchantSaveDTO dto) {
@@ -74,14 +110,23 @@ public class MerchantService extends ServiceImpl<MMerchantMapper, MMerchant>
 
     //获取列表
     public IPage<MerchantGetListVO> getList(MerchantGetListDTO dto) {
+        //先判断是否通过账户查询
         //前端传后端
+
         IPage<MMerchant> page = new Page<>(dto.getCurrent() == null ? 1 : dto.getCurrent(), dto.getSize() == null ? 20 : dto.getSize());
         LambdaQueryWrapper<MMerchant> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(dto.getMerchantId() != null, MMerchant::getMerchantId, dto.getMerchantId());
         wrapper.like(StringUtils.hasText(dto.getMerchantName()),MMerchant::getMerchantName, dto.getMerchantName());
         wrapper.eq(dto.getStatus() != null, MMerchant::getStatus, dto.getStatus());
         wrapper.ge(dto.getCreateTime() != null, MMerchant::getCreateTime, dto.getCreateTime());
-        wrapper.like(StringUtils.hasText(dto.getManageAccount()),MMerchant::getManageAccount, dto.getManageAccount());
+        if (dto.getManageAccount() != null  && !dto.getManageAccount().isEmpty()) {
+            MUser user = checkMerchantAccount(dto.getManageAccount());
+            if (user != null) {
+                wrapper.eq(MMerchant::getUserId, user.getId());
+            }else {
+                return null;
+            }
+        }
         page = mMerchantMapper.selectPage(page, wrapper);
 
         //后端传前端
@@ -89,6 +134,8 @@ public class MerchantService extends ServiceImpl<MMerchantMapper, MMerchant>
         BeanUtils.copyProperties(page, res);
         res.setRecords(page.getRecords().stream().map(mMerchant ->{MerchantGetListVO vo= new MerchantGetListVO();
             BeanUtils.copyProperties(mMerchant, vo);
+                    MUser mUser = userMapper.selectById(mMerchant.getUserId());
+                    vo.setManageAccount(mUser.getCode());
                     vo.setMerchantId(mMerchant.getMerchantId().toString());
                     vo.setCreateTime(mMerchant.getCreateTime());
                     vo.setBusinessLicense(mMerchant.getBusinessLicense() == null ? null : mMerchant.getBusinessLicense().toString());
@@ -97,6 +144,13 @@ public class MerchantService extends ServiceImpl<MMerchantMapper, MMerchant>
                 }
         ).toList());
         return res;
+    }
+
+    // 获得商户账户
+    private MUser checkMerchantAccount(String code){
+        LambdaQueryWrapper<MUser> wrapper = new LambdaQueryWrapper<>();
+        wrapper.like( code != null,MUser::getCode, code);
+        return userMapper.selectOne(wrapper);
     }
 
     //删除

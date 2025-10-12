@@ -4,13 +4,4 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.gok.food_map.user.mapper.MemberLevelMapper">
 
-    <resultMap id="BaseResultMap" type="com.gok.food_map.user.entity.MemberLevel">
-            <id property="levelId" column="level_id" />
-            <result property="levelName" column="level_name" />
-            <result property="discountRate" column="discount_rate" />
-    </resultMap>
-
-    <sql id="Base_Column_List">
-        level_id,level_name,discount_rate
-    </sql>
 </mapper>

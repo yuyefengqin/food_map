@@ -58,10 +58,6 @@ public class MerchantGetListVO {
      */
     private String manageAccount;
 
-    /**
-     * 管理账号密码
-     */
-    private String managePassword;
 
     /**
      * 商户状态

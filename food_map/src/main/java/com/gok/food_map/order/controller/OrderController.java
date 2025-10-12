@@ -70,4 +70,8 @@ public class OrderController {
        List<BuyByCartDto> buyByCartDtos = cartItems.get("cartItems");
        return service.buyByCart(buyByCartDtos,request);
    }
+    @PostMapping("/getOrderItems")
+    public IPage<OrderItemGetListVO> getOrderItems(@RequestBody OrderItemGetListDTO dto){
+        return service.getOrderItems(dto);
+    }
 }

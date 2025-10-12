@@ -1,5 +1,6 @@
 package com.gok.food_map.shoppingCart.controller;
 
+import com.gok.food_map.annotation.Auth;
 import com.gok.food_map.exception.ServiceException;
 import com.gok.food_map.shoppingCart.dto.ShoppingCartGetDto;
 import com.gok.food_map.shoppingCart.dto.ShoppingCartRemoveDto;
@@ -20,10 +21,12 @@ import java.util.List;
 public class ShoppingCartController {
     @Resource
     private ShoppingCartServiceImpl shoppingCartService;
+    @Auth
     @PostMapping("/getShoppingCartById")
     public List<ShoppingCartGetVO> getShoppingCartById(HttpServletRequest request) {
         return shoppingCartService.getShoppingCart(request);
     }
+    @Auth
     @PostMapping("/deleteShoppingCart")
     public void deleteShoppingCart(@RequestBody ShoppingCartRemoveDto dto) {
         if (shoppingCartService.removeById(Long.valueOf(dto.getCartId()))) {
@@ -32,6 +35,7 @@ public class ShoppingCartController {
             ServiceException.build("删除失败：数据不存在");
         }
     }
+    @Auth
     @PostMapping("/addShoppingCart")
     public void addShoppingCart(@RequestBody ShoppingCartGetDto cart) {
         shoppingCartService.savaShoppingCart(cart);

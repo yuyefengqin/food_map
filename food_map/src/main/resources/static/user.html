@@ -130,6 +130,11 @@
                                         </template>
                                     </el-radio-group>
                                 </el-form-item>
+                                <el-form-item label="商品分类">
+                                    <el-select v-model="editForm.identity" placeholder="请选择" style="width: 240px">
+                                        <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"/>
+                                    </el-select>
+                                </el-form-item>
                                 <el-form-item label="创建时间" prop="createTime">
                                     <el-date-picker
                                             v-model="editForm.createTime"
@@ -142,7 +147,7 @@
                                 <el-form-item v-if="isEdit"  label="有效" prop="valid">
                                     <el-switch v-model="editForm.valid" :active-value=true :inactive-value=false />
                                 </el-form-item>
-                                <el-form-item  label="密码" prop="password">
+                                <el-form-item  label="密码">
                                     <el-input v-model="editForm.password" />
                                 </el-form-item>
                             </el-form>
@@ -248,6 +253,20 @@
                         slots: {buttons: 'toolbar_buttons'}
                     },
                 },
+                options: [
+                    {
+                        value: 'user',
+                        label: '普通用户',
+                    },
+                    {
+                        value: 'merchant',
+                        label: '商户',
+                    },
+                    {
+                        value: 'admin',
+                        label: '管理员',
+                    },
+                ],
                 levels:[],
                 memberLevelMap: {},
                 form: {
@@ -267,7 +286,7 @@
                         {field: 'name', title: '名称'},
                         {field: 'gender', title: '性别'},
                         {field: 'levelId', title: '会员等级', formatter: ({cellValue}) => {
-                                return this.memberLevelMap[cellValue] || `未知等级(${cellValue})`;}
+                                return this.memberLevelMap[cellValue] || `未知等级`;}
                         },
                         {field: 'createTime', title: '创建时间'},
                         {field: 'valid', title: '有效', slots: {default: 'valid'}, width: 80} ,
@@ -318,6 +337,7 @@
                     valid: true,
                     avatar: '',
                     password: '',
+                    identity:'',
                 },
                 detailForm: {
                     id: '',

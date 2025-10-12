@@ -3,27 +3,4 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.gok.food_map.merchant.mapper.MMerchantMapper">
-
-    <resultMap id="BaseResultMap" type="com.gok.food_map.merchant.entity.MMerchant">
-            <id property="merchantId" column="merchant_id" />
-            <result property="merchantNo" column="merchant_no" />
-            <result property="merchantName" column="merchant_name" />
-            <result property="notes" column="notes" />
-            <result property="merchantAddress" column="merchant_address" />
-            <result property="contactPhone" column="contact_phone" />
-            <result property="enterpriseType" column="enterprise_type" />
-            <result property="logoUrl" column="logo_url" />
-            <result property="businessLicense" column="business_license" />
-            <result property="manageAccount" column="manage_account" />
-            <result property="managePassword" column="manage_password" />
-            <result property="status" column="status" />
-            <result property="createTime" column="create_time" />
-            <result property="updateTime" column="update_time" />
-    </resultMap>
-
-    <sql id="Base_Column_List">
-        merchant_id,merchant_no,merchant_name,notes,merchant_address,contact_phone,
-        enterprise_type,logo_url,business_license,manage_account,manage_password,
-        status,create_time,update_time
-    </sql>
 </mapper>

@@ -1,6 +1,7 @@
 package com.gok.food_map.merchant.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.gok.food_map.annotation.Auth;
 import com.gok.food_map.merchant.dto.MerchantGetListDTO;
 import com.gok.food_map.merchant.dto.MerchantRemoveDTO;
 import com.gok.food_map.merchant.dto.MerchantSaveDTO;
@@ -21,6 +22,7 @@ public class MerchantController {
     private MerchantService merchantService;
 
     //获取列表
+    @Auth
     @PostMapping("/getList")
     public IPage<MerchantGetListVO> getList(@RequestBody MerchantGetListDTO dto) {
 
@@ -28,18 +30,21 @@ public class MerchantController {
     }
 
     //新增
+    @Auth
     @PostMapping("/add")
     public void add(@RequestBody MerchantSaveDTO dto) {
         merchantService.add(dto);
     }
 
     //编辑
+    @Auth
     @PostMapping("/edit")
     public void edit(@RequestBody MerchantSaveDTO dto) {
         merchantService.edit(dto);
     }
 
     //删除
+    @Auth
     @PostMapping("/remove")
     public void remove(@RequestBody MerchantRemoveDTO dto) {
 

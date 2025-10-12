@@ -1,7 +1,11 @@
+-- 用户
+INSERT INTO public.m_user (id, code, password_hash, name, gender, avatar, city, level_id, create_time, update_time, valid, identity, password_salt) VALUES (1977341004373962753, '12345678987', '2Fa64xsll0VBcsX9IWyX9EBa3tWRFj7NsCTmcsWg8EA=', 'admin', null, 1977340791949242369, null, null, '2025-10-01 00:00:00.000000', '2025-10-12 19:56:31.790037', true, 'admin', '4LO9JwzsJOTeLIkh8qP8zQ==');
+INSERT INTO public.m_user (id, code, password_hash, name, gender, avatar, city, level_id, create_time, update_time, valid, identity, password_salt) VALUES (1977300920773844993, '12345698765', '09JKhQumxXOrY13MTQDzf7Gd9/njxJJDdlnazPFsh7k=', '统一商户', '男', null, 1011, 3, '2025-10-01 00:00:00.000000', '2025-10-12 18:01:54.077346', true, 'merchant', '4grwpxm8LpMDGGxQ+ShjAQ==');
+
 -- 商户
-INSERT INTO public.m_merchant (merchant_id, merchant_name, notes, merchant_address, contact_phone, enterprise_type, logo_url, business_license, manage_account, manage_password, status, create_time) VALUES (1973386479124234242, '烧烤店', null, '翔安', '13950141663', '烧烤公司', 1973386433821556737, 1973386415748300801, '2317151393', 'czh123456', 1, '2025-10-01 21:56:15.035082');
-INSERT INTO public.m_merchant (merchant_id, merchant_name, notes, merchant_address, contact_phone, enterprise_type, logo_url, business_license, manage_account, manage_password, status, create_time) VALUES (1973385448478883842, '水产专卖店', null, '集美', '18850565667', '水产公司', 1973386056489385986, 1973384655986180097, '2418239028', 'czh123456', 1, '2025-10-01 21:52:09.316314');
-INSERT INTO public.m_merchant (merchant_id, merchant_name, notes, merchant_address, contact_phone, enterprise_type, logo_url, business_license, manage_account, manage_password, status, create_time) VALUES (1973386025069854721, '水果店', null, '同安', '18359724828', '水果公司', 1973385995936219137, 1973385982501863426, '2975999645', 'czh123456', 1, '2025-10-01 21:54:26.780406');
+INSERT INTO public.m_merchant (merchant_id, user_id,merchant_name, notes, merchant_address, contact_phone, enterprise_type, logo_url, business_license,  status, create_time) VALUES (1973386479124234242, 1977300920773844993,'烧烤店', null, '翔安', '13950141663', '烧烤公司', 1973386433821556737, 1973386415748300801, 1, '2025-10-01 21:56:15.035082');
+INSERT INTO public.m_merchant (merchant_id,user_id, merchant_name, notes, merchant_address, contact_phone, enterprise_type, logo_url, business_license,  status, create_time) VALUES (1973385448478883842,1977300920773844993 ,'水产专卖店', null, '集美', '18850565667', '水产公司', 1973386056489385986, 1973384655986180097, 1, '2025-10-01 21:52:09.316314');
+INSERT INTO public.m_merchant (merchant_id,user_id, merchant_name, notes, merchant_address, contact_phone, enterprise_type, logo_url, business_license, status, create_time) VALUES (1973386025069854721,1977300920773844993 ,'水果店', null, '同安', '18359724828', '水果公司', 1973385995936219137, 1973385982501863426,  1, '2025-10-01 21:54:26.780406');
 
 
 

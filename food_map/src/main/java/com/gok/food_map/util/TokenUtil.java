@@ -20,7 +20,7 @@ public class TokenUtil {
     private final static String ENCRYPT_KEY = "czh0418";
 
 //    JWT令牌的过期时间 单位为分钟
-    private final static int EXPIRE_TIME = 30;
+    private final static int EXPIRE_TIME = 60;
 
 
 //    JWT令牌的发行者
