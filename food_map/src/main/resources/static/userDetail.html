@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <title>用户的详情</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="/static_resources/vue.global.js"></script>
     <link rel="stylesheet" href="/static_resources/element-plus-index.css" />
     <link rel="stylesheet" href="/static_resources/vxe-table-style.css">
-    <script src="/static_resources/vue.global.js"></script>
     <script src="/static_resources/element-plus-index.full.js"></script>
     <script src="/static_resources/xe-utils.js"></script>
     <script src="/static_resources/vxe-table@4.6.25.js"></script>
@@ -24,7 +24,7 @@
         <div class="container">
             <div class="content">
                 <h2>美食地图欢迎你</h2>
-                <el-button type="primary" @click="backStore">返回</el-button>
+                <el-button type="primary" @click="backStore"><el-icon><Shop /></el-icon>返回</el-button>
             </div>
         </div>
     </div>
@@ -46,11 +46,11 @@
                                 class="el-menu-vertical-demo"
                         >
                             <el-menu-item index="1" @click="toUserDetail">
-                                <el-icon><document /></el-icon>
+                                <el-icon><User /></el-icon>
                                 <span>详细信息</span>
                             </el-menu-item>
                             <el-menu-item index="2" @click="toShoppingCart">
-                                <el-icon><document /></el-icon>
+                                <el-icon><Dish /></el-icon>
                                 <span>购物车</span>
                             </el-menu-item>
                             <el-menu-item index="3" @click="toOrder">
@@ -165,7 +165,7 @@
                                     <el-button type="danger" @click="confirmBuy" >结算</el-button>
                                 </div>
                             </div>
-                            <div class="shopping-card-content">
+                            <div class="shopping-card-content" style="height: 100vh; overflow-y: scroll">
                                 <template v-for="item in userShoppingCarts" :key="item.cartId">
                                     <el-card style="width: 960px; height: 200px; margin: 15px 0" shadow="hover">
                                         <div class="shopping-card-item">
@@ -198,7 +198,7 @@
                         <div v-if="isOrderPage">
                             <!-- 订单 -->
                             <h2>订单</h2>
-                            <div class="order-card">
+                            <div class="order-card" style="height: 100vh; overflow-y: scroll">
                                 <template v-for="item in userOrderInfo" :key="item.orderId">
                                     <el-card style="width: 960px; margin: 15px 0" shadow="hover" @click="onOrderDetail(item)">
                                         <template #header>
@@ -483,7 +483,6 @@
             this.getUserInfo();
             await this.initDistricts();
             this.activateDefaultItem();
-            // this.getUserInfo();
             this.initDistricts();
         },
         methods:{
@@ -513,7 +512,14 @@
             },
             // 删除地址
             async handleDelete(addressId) {
-                await axios.post('/address/delete', {addressId});
+                await axios.post('/address/delete', {addressId}).then(res => {
+                }).catch(error => {
+                    this.$message({
+                        message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
+                        type: 'error'
+                    });
+                    console.error('请求出错：', error.response.data);
+                });
                 await this.getAddressList();
             },
             // 提交地址（新增/编辑）
@@ -525,7 +531,13 @@
                         this.$message.success(this.isEdit ? '修改成功' : '新增成功');
                         this.dialogVisible = false;
                         this.getAddressList();
+                    }).catch(error => {
+                    this.$message({
+                        message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
+                        type: 'error'
                     });
+                    console.error('请求出错：', error.response.data);
+                });
             },
             toAddressManage() {
                 // 切换到地址管理页面
@@ -552,7 +564,11 @@
                     this.addressList = response.data.records || [];
                     this.total = response.data.total || 0;
                 }).catch(error => {
-                    this.$message.error('获取地址失败: ' + (error.response?.data?.message || error.message));
+                    this.$message({
+                        message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
+                        type: 'error'
+                    });
+                    console.error('请求出错：', error.response.data);
                 });
             },
             onOrderDetail(item){
@@ -561,8 +577,7 @@
                 console.log(item);
             },
             backStore(){
-                // window.location.href = 'http://localhost:8080/app.html';
-                window.open('http://localhost:8080/app.html','_self');
+                window.location.href = 'http://localhost:8080/foodMap';
             },
             deleteShoppingCart(cartId){
                 axios.post('http://localhost:8080/shoppingCart/deleteShoppingCart', {
@@ -580,11 +595,12 @@
                             type: 'error'
                         })
                     }
-                }).catch((err) => {
+                }).catch((error) => {
                     this.$message({
-                        message:err.message,
+                        message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
                         type: 'error'
-                    })
+                    });
+                    console.error('请求出错：', error.response.data);
                 })
             },
             calculateCartItemsPrice() {
@@ -602,11 +618,12 @@
                         this.editForm.avatar = res.data.id;
                         return false;
                     }
-                }).catch((err) =>{
+                }).catch((error) =>{
                     this.$message({
-                        message: '上传失败: ' + err.message,
-                        type:'error'
-                    })
+                        message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
+                        type: 'error'
+                    });
+                    console.error('请求出错：', error.response.data);
                 })
             },
             deleteAccount(){
@@ -624,6 +641,12 @@
                             type: 'warning'
                         });
                     }
+                }).catch((error) =>{
+                    this.$message({
+                        message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
+                        type: 'error'
+                    });
+                    console.error('请求出错：', error.response.data);
                 })
             },
             editPassword(){
@@ -655,11 +678,17 @@
                             type: 'warning'
                         });
                     }
+                }).catch((error) =>{
+                    this.$message({
+                        message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
+                        type: 'error'
+                    });
+                    console.error('请求出错：', error.response.data);
                 })
             },
             // 根据地区编码获取地区名称
             getFullRegionPath(districts, districtCode) {
-                // 1. 查找目标节点并记录路径
+                //  查找目标节点并记录路径
                 const findPath = (nodes, code, path = []) => {
                     for (const node of nodes) {
                         // 检查当前节点
@@ -686,7 +715,7 @@
                 if (this.loginedUserData.city != null) {
                     this.loginedUserData.cityName = this.getFullRegionPath(this.districts,this.loginedUserData.city);
                 } else {
-                    // this.detailForm.cityName = '';
+                    this.detailForm.cityName = '';
                 }
             },
             //解析url参数
@@ -762,11 +791,12 @@
                             type: 'warning'
                         })
                     }
-                }).catch((err) =>{
+                }).catch((error) =>{
                     this.$message({
-                        message:err.message,
-                        type: 'warning'
-                    })
+                        message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
+                        type: 'error'
+                    });
+                    console.error('请求出错：', error.response.data);
                 })
                 this.updateUrlItemNumber('2');
                 console.log('购物车');
@@ -791,11 +821,12 @@
                             type: 'warning'
                         })
                     }
-                }).catch((err) =>{
+                }).catch((error) =>{
                     this.$message({
-                        message:'获取订单失败'+ err.message,
+                        message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
                         type: 'error'
-                    })
+                    });
+                    console.error('请求出错：', error.response.data);
                 })
                 console.log('订单')
             },
@@ -813,7 +844,7 @@
                 const convertValues = (nodes) => {
                     return nodes.map(node => ({
                         ...node,
-                        value: String(node.value), // 强制转为字符串
+                        value: String(node.value),
                         children: node.children ? convertValues(node.children) : []
                     }));
                 };
@@ -838,12 +869,11 @@
                         });
                         console.error('请求失败，状态码：', response.status);
                     }
-                }).catch(error => {
+                }).catch(err => {
                     this.$message({
-                        message: '获取用户失败',
-                        type: 'warning'
+                        message: '异常:{状态:' + err.response.data.code + ', 消息:' + err.response.data.msg + ', 时间:' + err.response.data.time+'}',
+                        type: 'error'
                     });
-                    console.error('请求出错：', error);
                 });
             },
             editUserInfo(){
@@ -878,6 +908,12 @@
                         this.showDialog = false;
                         this.isEdit = false;
                     }
+                }).catch((error) =>{
+                    this.$message({
+                        message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
+                        type: 'error'
+                    });
+                    console.error('请求出错：', error.response.data);
                 })
             },
             calculateTotal() {
@@ -892,12 +928,11 @@
 
                     }
                 });
-                this.finalBuyPrice = parseFloat(total); // 保留两位小数
+                this.finalBuyPrice = parseFloat(total).toFixed(2);
             },
 
-            // 结算按钮处理函数
+            // 结算按钮处理
             confirmBuy() {
-                // 1. 检查是否有选中商品
                 const cartItems = this.userShoppingCarts.filter(item => item.isSelected);
                 this.userShoppingCarts = this.userShoppingCarts.filter(item => !item.isSelected);
                 if (cartItems.length === 0) {
@@ -905,7 +940,6 @@
                     return false;
                 }
 
-                // 2. 添加结算
                 console.log('结算的商品:', cartItems);
                 console.log('总金额:', this.finalBuyPrice);
                 axios.post('http://localhost:8080/order/buyByCart',{
@@ -917,7 +951,11 @@
                         this.calculateTotal();
                     }
                 }).catch(error => {
-
+                    this.$message({
+                        message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
+                        type: 'error'
+                    });
+                    console.error('请求出错：', error.response.data);
                 })
 
             }
@@ -930,7 +968,9 @@
         }
 
     });
-    for(const[key, component] of Object.entries(ElementPlusIconsVue)) {app.component(key, component)}
+    for ([name, comp] of Object.entries(ElementPlusIconsVue)) {
+        app.component(name, comp);
+    }
     app.use(ElementPlus).use(VxeUITable).mount('#app');
 </script>
 </body>

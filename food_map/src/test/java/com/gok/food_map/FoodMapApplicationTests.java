@@ -89,4 +89,6 @@ class FoodMapApplicationTests {
         List<ProductSpu> list = productSpuService.list(wrapper);
         System.out.println(list);
     }
+
 }
+

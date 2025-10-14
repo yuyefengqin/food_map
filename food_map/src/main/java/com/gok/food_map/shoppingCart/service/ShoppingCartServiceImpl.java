@@ -2,6 +2,7 @@ package com.gok.food_map.shoppingCart.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gok.food_map.exception.ResponseEnum;
 import com.gok.food_map.exception.ServiceException;
 import com.gok.food_map.shoppingCart.dto.ShoppingCartGetDto;
 import com.gok.food_map.shoppingCart.entity.ShoppingCart;
@@ -45,7 +46,7 @@ public class ShoppingCartServiceImpl extends ServiceImpl<ShoppingCartMapper, Sho
         shoppingCart.setMerchantId(Long.parseLong(cart.getMerchantId()));
         shoppingCart.setTotalPrice(BigDecimal.valueOf(Long.parseLong(cart.getTotalPrice())));
         if (shoppingCartMapper.insert(shoppingCart) == 0) {
-            ServiceException.build("添加失败");
+            ServiceException.build(ResponseEnum.ADD_FAIL);
         }
     }
 }

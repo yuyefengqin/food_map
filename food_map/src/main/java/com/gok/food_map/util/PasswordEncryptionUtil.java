@@ -58,12 +58,11 @@ public class PasswordEncryptionUtil {
         return slowEquals(inputHash, storedHash);
     }
 
-    // 比较方法
+    // 比较方法 使用固定时间比较算法
     private static boolean slowEquals(String a, String b) {
         byte[] aBytes = a.getBytes();
         byte[] bBytes = b.getBytes();
 
-        // 使用固定时间比较算法
         int diff = aBytes.length ^ bBytes.length;
         for (int i = 0; i < aBytes.length && i < bBytes.length; i++) {
             diff |= aBytes[i] ^ bBytes[i];

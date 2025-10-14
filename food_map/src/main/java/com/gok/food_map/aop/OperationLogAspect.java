@@ -1,8 +1,8 @@
-package com.gok.food_map.log.aspect;
+package com.gok.food_map.aop;
 
 import com.baomidou.mybatisplus.core.incrementer.DefaultIdentifierGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gok.food_map.log.annotation.OperationLog;
+import com.gok.food_map.annotation.OperationLog;
 import com.gok.food_map.log.entity.OperationLogDO;
 import com.gok.food_map.log.mapper.OperationLogMapper;
 import jakarta.annotation.Resource;
@@ -14,7 +14,6 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -40,7 +39,7 @@ public class OperationLogAspect {
     //切点
     //但是这个是单独的项目，controller的包名是不知道的
     //等会我搞个测试样例
-    @Pointcut("@annotation(com.gok.food_map.log.annotation.OperationLog)")
+    @Pointcut("@annotation(com.gok.food_map.annotation.OperationLog)")
     public void logPointCut() {}
 
     //尤其是这里

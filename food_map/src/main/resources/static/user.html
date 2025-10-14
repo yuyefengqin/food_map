@@ -35,19 +35,19 @@
                             class="el-menu-vertical-demo"
                     >
                         <el-menu-item index="1" @click="toUserManage">
-                            <el-icon><document /></el-icon>
+                            <el-icon><User /></el-icon>
                             <span>用户管理</span>
                         </el-menu-item>
                         <el-menu-item index="2" @click="toMerchantManage">
-                            <el-icon><document /></el-icon>
+                            <el-icon><Shop /></el-icon>
                             <span>商户管理</span>
                         </el-menu-item>
                         <el-menu-item index="3" @click="toProductManage">
-                            <el-icon><document /></el-icon>
+                            <el-icon><Goods /></el-icon>
                             <span>商品管理</span>
                         </el-menu-item>
                         <el-menu-item index="4" @click="toOrderManage">
-                            <el-icon><setting /></el-icon>
+                            <el-icon><Document /></el-icon>
                             <span>订单管理</span>
                         </el-menu-item>
                     </el-menu>
@@ -382,7 +382,7 @@
         },
         async created(){
             await this.initDistricts();
-            await this.initLevel()
+            await this.initLevel();
             await this.getList();
         },
         methods: {
@@ -585,16 +585,16 @@
                 );
             },
             toUserManage(){
-                window.location.href = 'http://localhost:8080/user.html';
+                window.location.href = 'http://localhost:8080/userAdmin';
             },
             toMerchantManage(){
-                window.location.href = 'http://localhost:8080/merchant.html';
+                window.location.href = 'http://localhost:8080/merchantAdmin';
             },
             toProductManage(){
-                window.location.href = 'http://localhost:8080/product.html';
+                window.location.href = 'http://localhost:8080/productAdmin';
             },
             toOrderManage(){
-                window.location.href = 'http://localhost:8080/order.html';
+                window.location.href = 'http://localhost:8080/orderAdmin';
             }
         },
         watch: {

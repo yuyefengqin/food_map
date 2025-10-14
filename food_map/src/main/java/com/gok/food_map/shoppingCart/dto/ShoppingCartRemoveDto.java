@@ -1,5 +1,6 @@
 package com.gok.food_map.shoppingCart.dto;
 
+import com.gok.food_map.exception.ResponseEnum;
 import com.gok.food_map.exception.ServiceException;
 import lombok.Data;
 
@@ -12,7 +13,7 @@ public class ShoppingCartRemoveDto {
 
     public ShoppingCartRemoveDto(String cartId) {
         if (cartId == null || cartId.isEmpty()) {
-            ServiceException.build("参数异常");
+            ServiceException.build(ResponseEnum.PARA_EX);
         }
         this.cartId = cartId;
     }

@@ -1,5 +1,8 @@
 package com.gok.food_map.user.dto;
 
+import org.springframework.validation.annotation.Validated;
+
+@Validated
 public class UserLoginDto {
     private String code;
     private String password;

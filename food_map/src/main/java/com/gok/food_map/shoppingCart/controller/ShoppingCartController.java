@@ -1,6 +1,7 @@
 package com.gok.food_map.shoppingCart.controller;
 
 import com.gok.food_map.annotation.Auth;
+import com.gok.food_map.exception.ResponseEnum;
 import com.gok.food_map.exception.ServiceException;
 import com.gok.food_map.shoppingCart.dto.ShoppingCartGetDto;
 import com.gok.food_map.shoppingCart.dto.ShoppingCartRemoveDto;
@@ -32,7 +33,7 @@ public class ShoppingCartController {
         if (shoppingCartService.removeById(Long.valueOf(dto.getCartId()))) {
             return;
         }else {
-            ServiceException.build("删除失败：数据不存在");
+            ServiceException.build(ResponseEnum.NO_EXIST_DATA);
         }
     }
     @Auth

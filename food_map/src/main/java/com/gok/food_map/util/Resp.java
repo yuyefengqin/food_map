@@ -13,7 +13,7 @@ public class Resp<T> implements Serializable {
 
     private Integer code;
 
-    private String message;
+    private String msg;
 
     private T data;
 
@@ -23,7 +23,7 @@ public class Resp<T> implements Serializable {
     public static <T> Resp<T> ok(T data) {
         Resp<T> response = new Resp<>();
         response.setCode(ResponseEnum.SUCCESS.getCode());
-        response.setMessage(ResponseEnum.SUCCESS.getMsg());
+        response.setMsg(ResponseEnum.SUCCESS.getMsg());
         response.setData(data);
         return response;
     }
@@ -31,14 +31,21 @@ public class Resp<T> implements Serializable {
     public static <T> Resp<T> error(Integer errCode, String errMessage) {
         Resp<T> response = new Resp<>();
         response.setCode(errCode);
-        response.setMessage(errMessage);
+        response.setMsg(errMessage);
+        return response;
+    }
+    public static <T> Resp<T> error(Integer errCode, String errMessage, T data) {
+        Resp<T> response = new Resp<>();
+        response.setCode(errCode);
+        response.setMsg(errMessage);
+        response.setData(data);
         return response;
     }
 
     public static <T> Resp<T> error(ResponseEnum responseEnum) {
         Resp<T> response = new Resp<>();
         response.setCode(responseEnum.getCode());
-        response.setMessage(responseEnum.getMsg());
+        response.setMsg(responseEnum.getMsg());
         return response;
     }
 }

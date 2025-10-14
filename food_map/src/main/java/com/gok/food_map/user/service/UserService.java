@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.gok.food_map.district.mapper.MAddressMapper;
+import com.gok.food_map.exception.ResponseEnum;
 import com.gok.food_map.exception.ServiceException;
 import com.gok.food_map.file.service.FileService;
 import com.gok.food_map.user.dto.*;
@@ -68,7 +69,7 @@ public class UserService extends ServiceImpl<MUserMapper, MUser> implements ISer
     public UserLoginVO adminLogin(UserLoginDto dto,HttpServletRequest request) throws ServiceException {
         UserLoginVO vo = new UserLoginVO();
         if (!isExistedUser(dto.getCode())) {
-            ServiceException.build("用户不存在");
+            ServiceException.build(ResponseEnum.USER_NO_EXIST);
         }
         LambdaQueryWrapper<MUser> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(MUser::getCode, dto.getCode());
@@ -77,11 +78,11 @@ public class UserService extends ServiceImpl<MUserMapper, MUser> implements ISer
         String salt = mUser.getPasswordSalt();
         String passwordHash = mUser.getPasswordHash();
         if (!PasswordEncryptionUtil.verifyPassword(dto.getPassword(),passwordHash,salt)) {
-            ServiceException.build("登录失败");
+            ServiceException.build(ResponseEnum.USERNAME_PASSWORD_ERROR);
         }
 
         if (!mUser.getIdentity().equals("admin")) {
-            ServiceException.build("你不是管理员");
+            ServiceException.build(ResponseEnum.IDENTITY_EX);
         }
 
         JSONObject createJsonp = JSONUtil.createObj().put("id", mUser.getId());
@@ -127,7 +128,7 @@ public class UserService extends ServiceImpl<MUserMapper, MUser> implements ISer
     public UserLoginVO userLogin(UserLoginDto dto, HttpServletRequest request) {
         UserLoginVO vo = new UserLoginVO();
         if(!isExistedUser(dto.getCode())){
-            ServiceException.build("用户不存在，请先登录");
+            ServiceException.build(ResponseEnum.USER_NO_EXIST);
         }
         LambdaQueryWrapper<MUser> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(MUser::getCode, dto.getCode());
@@ -136,7 +137,7 @@ public class UserService extends ServiceImpl<MUserMapper, MUser> implements ISer
         String salt = mUser.getPasswordSalt();
         String passwordHash = mUser.getPasswordHash();
         if (!PasswordEncryptionUtil.verifyPassword(dto.getPassword(),passwordHash,salt)) {
-            ServiceException.build("登录失败");
+            ServiceException.build(ResponseEnum.USERNAME_PASSWORD_ERROR);
         }
         JSONObject createJsonp = JSONUtil.createObj().put("id", mUser.getId());
         assert createJsonp != null;
@@ -154,7 +155,7 @@ public class UserService extends ServiceImpl<MUserMapper, MUser> implements ISer
     public void UserRegister(UserRegisterDto dto){
         MUser saveUser = new MUser();
         if (isExistedUser(dto.getCode())) {
-            ServiceException.build("用户已存在");
+            ServiceException.build(ResponseEnum.USER_EXISTED);
         }
         if (!dto.getCode().isEmpty() && !dto.getPassword().isEmpty()) {
             String salt = PasswordEncryptionUtil.generateSalt();
@@ -419,7 +420,7 @@ public class UserService extends ServiceImpl<MUserMapper, MUser> implements ISer
         Map<String, String> map = TokenUtil.getIdByTokenSafe(request);
         MUser user = mUserMapper.selectById(Long.valueOf(map.get("id")));
         if (user == null) {
-            ServiceException.build("无效会话或数据不存在");
+            ServiceException.build(ResponseEnum.NO_TOKEN);
         }
         UserLoginVO vo = new UserLoginVO();
         BeanUtils.copyProperties(user, vo);
@@ -439,19 +440,19 @@ public class UserService extends ServiceImpl<MUserMapper, MUser> implements ISer
                 Long.valueOf(token.get("id")));
         MUser mUser = mUserMapper.selectOne(wrapper);
         if (mUser == null) {
-            ServiceException.build("用户不存在");
+            ServiceException.build(ResponseEnum.USER_NO_EXIST);
         }
         String salt = mUser.getPasswordSalt();
         String passwordHash = mUser.getPasswordHash();
         if (!PasswordEncryptionUtil.verifyPassword(dto.getOldPassword(),passwordHash,salt)){
-            ServiceException.build("密码错误");
+            ServiceException.build(ResponseEnum.USERNAME_PASSWORD_ERROR);
         }
         String newSalt = PasswordEncryptionUtil.generateSalt();
         String newPasswordHash = PasswordEncryptionUtil.encryptPassword(dto.getNewPassword(), newSalt);
         mUser.setPasswordHash(newPasswordHash);
         mUser.setPasswordSalt(newSalt);
         if(mUserMapper.updateById(mUser) == 0){
-            ServiceException.build("修改失败");
+            ServiceException.build(ResponseEnum.FAIL);
         }
     }
 

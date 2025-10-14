@@ -8,11 +8,11 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class ServiceException extends RuntimeException {
     private ServiceMsg serviceMsg;
-    public ServiceException(String msg) {
-        this.serviceMsg = new ServiceMsg(msg);
+    public ServiceException(ResponseEnum responseEnum) {
+        this.serviceMsg = new ServiceMsg(responseEnum);
     }
-    public static void build(String msg) {
-        throw new ServiceException(msg);
+    public static void build(ResponseEnum responseEnum) {
+        throw new ServiceException(responseEnum);
     }
 
     public ServiceMsg getServiceMsg() {

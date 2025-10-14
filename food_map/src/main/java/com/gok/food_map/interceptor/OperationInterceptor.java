@@ -67,7 +67,7 @@ public class OperationInterceptor implements HandlerInterceptor {
         if (ex != null) {
             result = "出现异常:" + ex.getMessage();
             // 异常日志使用error级别
-            log.error("[拦截器] {} {} - 处理完成 - 耗时: {}ms - 结果: {}",
+            log.warn("[拦截器] {} {} - 处理完成 - 耗时: {}ms - 结果: {}",
                     request.getMethod(), request.getRequestURI(), executeTime, result);
         } else {
             result = "请求成功,状态码:"+ response.getStatus();

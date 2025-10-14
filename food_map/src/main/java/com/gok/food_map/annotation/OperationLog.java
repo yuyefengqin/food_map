@@ -1,4 +1,4 @@
-package com.gok.food_map.log.annotation;
+package com.gok.food_map.annotation;
 
 import java.lang.annotation.*;
 

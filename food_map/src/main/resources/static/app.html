@@ -485,7 +485,11 @@
                             }
                         }
                     }).catch(error => {
-
+                    this.$message({
+                        message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
+                        type: 'error'
+                    });
+                    console.error('请求出错：', error.response.data);
                 })
             },
             addShoppingCart(){
@@ -513,11 +517,12 @@
                                 type: 'error'
                             })
                         }
-                    }).catch(err => {
+                    }).catch(error => {
                         this.$message({
-                            message:'异常'+err.message,
+                            message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
                             type: 'error'
-                        })
+                        });
+                        console.error('请求出错：', error.response.data);
                     })
                 }else {
                     this.$message({
@@ -582,19 +587,13 @@
                             type: 'success'
                         });
                         console.log(response.data);
-                    } else {
-                        this.$message({
-                            message: response.data,
-                            type: 'warning'
-                        });
-                        console.error('请求失败，状态码：', response.status);
                     }
                 }).catch(error => {
                     this.$message({
-                        message: '测试失败',
-                        type: 'warning'
+                        message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
+                        type: 'error'
                     });
-                    console.error('请求出错：', error);
+                    console.error('请求出错：', error.response.data);
                 });
             },
             outLogin(){
@@ -656,10 +655,10 @@
                         }
                     }).catch(error => {
                         this.$message({
-                            message: '登录失败，请检查账号密码',
-                            type: 'warning'
+                            message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
+                            type: 'error'
                         });
-                        console.error('请求出错：', error);
+                        console.error('请求出错：', error.response.data);
                     });
                 }
             },
@@ -698,13 +697,13 @@
                             }
                         }).catch(error => {
                             this.$message({
-                                message: '注册失败，请检查账号是否已被注册',
-                                type: 'warning'
+                                message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
+                                type: 'error'
                             });
-                            console.error('请求出错：', error);
+                            console.error('请求出错：', error.response.data);
                         });
-                    };
-                };
+                    }
+                }
 
 
             },
@@ -719,7 +718,11 @@
                         console.error('请求失败，状态码：', response.status);
                     }
                 }).catch(error => {
-                    console.error('请求出错：', error);
+                    this.$message({
+                        message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
+                        type: 'error'
+                    });
+                    console.error('请求出错：', error.response.data);
                 });
             },
             async getGoodsList(){
@@ -738,7 +741,11 @@
                         console.error('请求失败，状态码：', response.status);
                     }
                 } catch (error) {
-                    console.error('请求出错：', error);
+                    this.$message({
+                        message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
+                        type: 'error'
+                    });
+                    console.error('请求出错：', error.response.data);
                 }
             },
             onMerchantDetail(){
@@ -761,7 +768,11 @@
                         console.error('请求失败，状态码：', response.status);
                     }
                 }).catch(error => {
-                    console.error('请求出错：', error);
+                    this.$message({
+                        message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
+                        type: 'error'
+                    });
+                    console.error('请求出错：', error.response.data);
                 });
             },
             async getBanner(){
@@ -774,7 +785,11 @@
                         console.error('请求失败，状态码：', response.status);
                     }
                 } catch (error) {
-                    console.error('请求出错：', error);
+                    this.$message({
+                        message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
+                        type: 'error'
+                    });
+                    console.error('请求出错：', error.response.data);
                 }
             },
             onPageChange(){
@@ -848,8 +863,12 @@
                     } else {
                         console.error('请求失败，状态码：', response.status);
                     }
-                }).catch(error => {
-                    console.error('请求出错：', error);
+                }).catch((error) => {
+                    this.$message({
+                        message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
+                        type: 'error'
+                    });
+                    console.error('请求出错：', error.response.data);
                 });
             },
             handleSku(){
@@ -909,10 +928,11 @@
                         this.clearData();
                     }
                 }).catch(error => {
-                        this.$message({
-                            message:error.message,
-                            type:'error'
-                        })
+                    this.$message({
+                        message: '异常:{状态:' + error.response.data.code +', 消息:' + error.response.data.msg + ', 时间:' + error.response.data.time+'}',
+                        type: 'error'
+                    });
+                    console.error('请求出错：', error.response.data);
                 })
             },
             calculateUnitPrice(){

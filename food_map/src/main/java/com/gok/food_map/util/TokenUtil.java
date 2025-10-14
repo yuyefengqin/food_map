@@ -5,6 +5,7 @@ import cn.hutool.json.JSONObject;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.gok.food_map.exception.ResponseEnum;
 import com.gok.food_map.exception.ServiceException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +27,7 @@ public class TokenUtil {
 //    JWT令牌的发行者
     private static final String ISSUER = "ChenZhiHao";
 
-//    通过设置json格式的形参传入，内容通常是id等识别参数
+//    通过设置json格式的形参传入 内容为用户id
 //    返回生成的JWT令牌字符串
     public static String createToken(JSONObject json) {
         // 使用JWT创建一个令牌
@@ -66,20 +67,21 @@ public class TokenUtil {
     public static boolean checkToken(String token) {
         return JWT.decode(token).getExpiresAt().before(new Date());
     }
+
     public static Map<String,String> getIdByTokenSafe(HttpServletRequest request) {
         if(request == null){
-            ServiceException.build("request is null");
+            ServiceException.build(ResponseEnum.NO_TOKEN);
         }
         Object o = request.getSession().getAttribute("token");
         if(o == null){
-            ServiceException.build("token is null");
+            ServiceException.build(ResponseEnum.NO_TOKEN);
         }
         String token = o.toString();
         if (token.isEmpty() || token.isBlank()) {
-            ServiceException.build("无效请求");
+            ServiceException.build(ResponseEnum.TOKEN_VERIFY_ERROR);
         }
         if (TokenUtil.checkToken(token)) {
-            ServiceException.build("登录过期");
+            ServiceException.build(ResponseEnum.TOKEN_EX);
         }
         return TokenToMap(token);
 

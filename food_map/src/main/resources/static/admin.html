@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./static_resources/element-plus-index.css" />
+    <link rel="stylesheet" href="./static_resources/vxe-table-style.css">
+    <script src="./static_resources/vue.global.js"></script>
+    <script src="./static_resources/element-plus-index.full.js"></script>
+    <script src="./static_resources/xe-utils.js"></script>
+    <script src="./static_resources/vxe-table@4.6.25.js"></script>
+    <script src="./static_resources/axios.min.js"></script>
+    <script src="./static_resources/element-plus_icons-vue.js"></script>
+    <link rel="apple-touch-icon" sizes="180x180" href="./favicon_logosc/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon_logosc/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./favicon_logosc/favicon-16x16.png">
+    <link rel="manifest" href="./favicon_logosc/site.webmanifest">
+    <title>管理员登录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        
+        .container {
+            width: 100%;
+            height: 1080px;
+            display: flex;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .left-section {
+            flex: 3;
+            background-image: -webkit-linear-gradient(135deg, #d16ba5, #c777b9, #ba83ca, #aa8fd8, #9a9ae1, #8aa7ec, #79b3f4, #69bff8, #52cffe, #41dfff, #46eefa, #5ffbf1);
+            background-size: cover;
+            position: relative;
+            clip-path: polygon(0 0, 85% 0, 100% 100%, 0% 100%);
+            transition: all 0.5s ease-in-out;
+        }
+        
+        
+        .right-section {
+            flex: 1;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            clip-path: polygon(0 15%, 100% 15%, 100% 100%, 25% 100%);
+            transition: all 0.5s ease-in-out;
+            
+        }
+        .right-section:hover{
+            flex: 2;
+            clip-path: polygon(0 15%, 100% 15%, 100% 100%, 15% 100%);
+        }
+        
+        .login-form {
+            width: 250px;
+            padding: 30px;
+            border-radius: 8px;
+        }
+        
+        .login-form h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            border-color: #4a90e2;
+            outline: none;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .login-btn:hover {
+            background-color: #3a7bc8;
+        }
+        
+        
+        
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                width: 90%;
+                height: auto;
+            }
+            
+            .left-section, .right-section {
+                clip-path: none;
+                width: 100%;
+            }
+            
+            .left-section {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <div class="left-section"></div>
+            <div class="right-section">
+                <form class="login-form">
+                    <h2>管理员登录</h2>
+                    <el-form
+                            ref="ruleFormRef"
+                            style="max-width: 600px"
+                            :model="loginInfo"
+                            status-icon
+                            :rules="rules"
+                            label-width="auto"
+                            class="Form"
+                    >
+                        <el-form-item prop="username" placeholder="请输入账户">
+                            <el-input v-model="loginInfo.username" type="text" autocomplete="off"></el-input>
+                        </el-form-item>
+                        <el-form-item  prop="password" placeholder="请输入密码">
+                            <el-input
+                                    v-model="loginInfo.password"
+                                    type="password"
+                                    autocomplete="off"></el-input>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button type="primary" @click="login">登录</el-button>
+                            <el-button @click="reset">重置</el-button>
+                        </el-form-item>
+                    </el-form>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    Vue.createApp({
+        data() {
+            return {
+                loginInfo:{
+                    username:'',
+                    password:'',
+                },
+                rules:{
+                    username: [{required: true, message: '请输入名称'}],
+                    password: [{required: true, message: '请输入密码'}]
+                }
+            };
+        },
+        methods: {
+            login(){
+                console.log(this.loginInfo.username);
+                console.log(this.loginInfo.password);
+                axios.post('/user/adminLogin', {
+                    code: this.loginInfo.username,
+                    password: this.loginInfo.password
+                }).then((res) => {
+                    if(res.status === 200){
+                        this.$message({
+                            message:'登录成功',
+                            type: 'success'
+                        })
+                        window.location.href = 'http://localhost:8080/userAdmin';
+                    }else {
+                        this.$message({
+                            message:'登录失败' + res.data.message,
+                            type: 'error'
+                        })
+                    }
+
+                }).catch((err) => {
+                    this.$message({
+                        message:'登录失败' + err.message,
+                        type: 'error'
+                    })
+                })
+            },
+            reset(){
+                // this.loginInfo = {};
+                this.loginInfo.username = '';
+                this.loginInfo.password = '';
+            }
+        }
+    }).use(ElementPlus).mount('#app');
+</script>
+</html>
