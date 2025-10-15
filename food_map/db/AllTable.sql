@@ -106,6 +106,26 @@ comment on column m_address.detail_address is '详细地址';
 comment on column m_address.zip_code is '邮政编码';
 comment on column m_address.is_default is '是否默认地址';
 
+-- 地址快照表
+create table address_snapshot_table
+(
+    address_id     bigint primary key,
+    user_id        bigint not null,
+    receiver       text   not null,
+    telephone      text   not null,
+    detail_address text   not null,
+    zip_code       text    default null,
+    snapshot_date  timestamp default CURRENT_TIMESTAMP
+);
+comment on table address_snapshot_table is '地址快照表';
+comment on column address_snapshot_table.address_id is '地址ID';
+comment on column address_snapshot_table.user_id is '所属用户ID';
+comment on column address_snapshot_table.receiver is '收件人';
+comment on column address_snapshot_table.telephone is '联系电话';
+comment on column address_snapshot_table.detail_address is '详细地址';
+comment on column address_snapshot_table.zip_code is '邮政编码';
+comment on column address_snapshot_table.snapshot_date is '快照时间';
+
 -- 商户表
 create table m_merchant
 (

@@ -4,8 +4,12 @@ import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.gok.food_map.district.entity.AddressSnapshotTable;
 import com.gok.food_map.district.entity.MAddress;
+import com.gok.food_map.district.mapper.AddressSnapshotTableMapper;
 import com.gok.food_map.district.mapper.MAddressMapper;
+import com.gok.food_map.exception.ResponseEnum;
+import com.gok.food_map.exception.ServiceException;
 import com.gok.food_map.merchant.entity.MMerchant;
 import com.gok.food_map.merchant.mapper.MMerchantMapper;
 import com.gok.food_map.order.dto.*;
@@ -41,10 +45,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
 * @author 32741
@@ -63,6 +64,7 @@ public class ProductOrderService{
     private final ProductSpuMapper productSpuMapper;
     private final MMerchantMapper mMerchantMapper;
     private final ShoppingCartMapper shoppingCartMapper;
+    private final AddressSnapshotTableMapper addressSnapshotTableMapper;
 
     @Transactional(rollbackFor = Exception.class)
     public void directBuy(OrderDirectBuyDto dto) {
@@ -91,6 +93,7 @@ public class ProductOrderService{
                 .createTime(LocalDateTime.now())
                 .subAmount(new BigDecimal(dto.getTotalPrice()))
                 .build();
+        insertAddressSnapshot(mAddress);
         productOrderMapper.insert(productOrder);
         orderItemMapper.insert(orderItem);
     }
@@ -98,13 +101,30 @@ public class ProductOrderService{
         LambdaQueryWrapper<MAddress> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq((userId != null ),MAddress::getUserId,userId);
         wrapper.eq(MAddress::getisDefault,true);
-        return mAddressMapper.selectOne(wrapper);
+        MAddress mAddress = mAddressMapper.selectOne(wrapper);
+        if (mAddress == null) {
+            ServiceException.build(ResponseEnum.ADDRESS_EX);
+        }
+        return mAddress;
+    }
+    private AddressSnapshotTable checkUserAddressSnapshot(Long addressId){
+        LambdaQueryWrapper<AddressSnapshotTable> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq((addressId != null ),AddressSnapshotTable::getAddressId,addressId);
+        return addressSnapshotTableMapper.selectOne(wrapper);
     }
     private ProductSpu checkProduct(Long productId){
-        return productSpuMapper.selectById(productId);
+        ProductSpu productSpu = productSpuMapper.selectById(productId);
+        if (productSpu == null) {
+            ServiceException.build(ResponseEnum.PRODUCT_EX);
+        }
+        return productSpu;
     }
     private MMerchant checkMerchantByID(Long merchantId){
-        return mMerchantMapper.selectById(merchantId);
+        MMerchant mMerchant = mMerchantMapper.selectById(merchantId);
+        if (mMerchant == null){
+            ServiceException.build(ResponseEnum.MERCHANT_EX);
+        }
+        return mMerchant;
     }
     private MMerchant checkMerchantSpuId(Long SpuId){
         return mMerchantMapper.selectById(SpuId);
@@ -120,11 +140,11 @@ public class ProductOrderService{
         List<ProductOrder> productOrders = productOrderMapper.selectList(wrapper);
         productOrders.forEach(pO -> {
             List<BuyProduct> buyProducts = new ArrayList<>();
-            MAddress mAddress = checkUserAddress(pO.getUserId());
+            AddressSnapshotTable mAddress = checkUserAddressSnapshot(pO.getAddressId());
             UserOrderInfoVO VO = UserOrderInfoVO.builder()
                     .orderId(pO.getOrderId().toString())
                     .tradeNo(pO.getTradeNo().toString())
-                    .merchantName(checkMerchantByID(pO.getMerchantId()).getMerchantName())
+                    .merchantName(pO.getMerchantName())
                     .orderAmount(pO.getOrderAmount().add(pO.getDeliveryFee()).toString())
                     .deliveryFee(pO.getDeliveryFee().toString())
                     .deliveryMethod(pO.getDeliveryMethod())
@@ -178,7 +198,7 @@ public class ProductOrderService{
         try {
             Map<String, String> idByTokenSafe = TokenUtil.getIdByTokenSafe(request);
             Long id = Long.parseLong(idByTokenSafe.get("id"));
-            Long addressId = checkUserAddress(id).getAddressId();
+            MAddress mAddress = checkUserAddress(id);
             HashMap<Long, List<BuyByCartDto>> map = new HashMap<>();
             buyByCartDtos.forEach(dto ->
                     map.computeIfAbsent(Long.valueOf(dto.getMerchantId()
@@ -195,10 +215,11 @@ public class ProductOrderService{
                     price.setProductAmount(v.getTotalPrice());
                 });
                 price.setOrderAmount(price.getProductAmount().add(BigDecimal.TEN));
-                ProductOrder productOrder = setProductOrder(orderId,id,key,addressId,price.getOrderAmount(),price.getProductAmount());
+                ProductOrder productOrder = setProductOrder(orderId,id,key,mAddress.getAddressId(),price.getOrderAmount(),price.getProductAmount());
 
                 productOrderMapper.insert(productOrder);
             });
+            insertAddressSnapshot(mAddress);
             return deleteShoppingCart(buyByCartDtos);
         } catch (NumberFormatException e) {
             throw new RuntimeException(e);
@@ -213,7 +234,20 @@ public class ProductOrderService{
             throw new RuntimeException(e);
         }
     }
+    @Transactional(rollbackFor = Exception.class)
+    protected boolean insertAddressSnapshot(MAddress mAddress) {
+        AddressSnapshotTable addressSnapshotTable = new AddressSnapshotTable();
+        BeanUtils.copyProperties(mAddress,addressSnapshotTable);
+        addressSnapshotTable.setSnapshotDate(LocalDateTime.now());
 
+        LambdaQueryWrapper<AddressSnapshotTable> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(AddressSnapshotTable::getAddressId, mAddress.getAddressId());
+        if (addressSnapshotTableMapper.exists(wrapper)) {
+            return addressSnapshotTableMapper.updateById(addressSnapshotTable) != 0;
+        }else {
+            return addressSnapshotTableMapper.insert(addressSnapshotTable) != 0;
+        }
+    }
     @Data
     static class Price{
         private BigDecimal orderAmount = BigDecimal.ZERO;
@@ -249,6 +283,7 @@ public class ProductOrderService{
                             .orderId(orderId)
                             .userId(userId)
                             .merchantId(merchantId)
+                            .merchantName(checkMerchantByID(merchantId).getMerchantName())
                             .orderAmount(orderAmount)
                             .productAmount(productAmount)
                             .deliveryFee(BigDecimal.TEN)

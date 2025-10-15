@@ -38,6 +38,11 @@ public class ProductOrder {
     private Long merchantId;
 
     /**
+     * 商户ID
+     */
+    private String merchantName;
+
+    /**
      * 订单总金额（商品+配送费）
      */
     private BigDecimal orderAmount;

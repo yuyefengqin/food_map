@@ -17,15 +17,7 @@
             </otherwise>
         </choose>
         p.merchant_id as merchantId,
-        <!-- 商户名称处理 -->
-        <choose>
-            <when test="merchantName != null">
-                m.merchant_name as merchantName,
-            </when>
-            <otherwise>
-                (SELECT merchant_name FROM m_merchant WHERE merchant_id = p.merchant_id) as merchantName,
-            </otherwise>
-        </choose>
+        p.merchant_name as merchantName,
         p.order_amount as orderAmount,
         p.product_amount as productAmount,
         p.delivery_fee as deliveryFee,
@@ -40,7 +32,6 @@
         FROM product_order AS p
         <!-- 使用LEFT JOIN确保即使关联表没有数据也能返回订单 -->
         LEFT JOIN m_user AS u ON p.user_id = u.id
-        LEFT JOIN m_merchant AS m ON p.merchant_id = m.merchant_id
         <where>
             <!-- 当userCode参数不为空时，添加用户编码过滤条件 -->
             <if test="userCode != null">
@@ -48,7 +39,7 @@
             </if>
             <!-- 当merchantName参数不为空时，添加商户名称过滤条件 -->
             <if test="merchantName != null">
-                AND m.merchant_name LIKE CONCAT('%', #{merchantName}, '%')
+                AND p.merchant_name LIKE CONCAT('%', #{merchantName}, '%')
             </if>
             <!-- 其他查询条件 -->
             <if test="orderId != null">
@@ -83,15 +74,7 @@
             </otherwise>
         </choose>
         p.merchant_id as merchantId,
-        <!-- 商户名称处理 -->
-        <choose>
-            <when test="merchantName != null">
-                m.merchant_name as merchantName,
-            </when>
-            <otherwise>
-                (SELECT merchant_name FROM m_merchant WHERE merchant_id = p.merchant_id) as merchantName,
-            </otherwise>
-        </choose>
+        p.merchant_name as merchantName,
         p.order_amount as orderAmount,
         p.product_amount as productAmount,
         p.delivery_fee as deliveryFee,
@@ -106,7 +89,6 @@
         FROM product_order AS p
         <!-- 使用LEFT JOIN确保即使关联表没有数据也能返回订单 -->
         LEFT JOIN m_user AS u ON p.user_id = u.id
-        LEFT JOIN m_merchant AS m ON p.merchant_id = m.merchant_id
         <where>
             <!-- 当userCode参数不为空时，添加用户编码过滤条件 -->
             <if test="userCode != null">
@@ -114,7 +96,7 @@
             </if>
             <!-- 当merchantName参数不为空时，添加商户名称过滤条件 -->
             <if test="merchantName != null">
-                AND m.merchant_name LIKE CONCAT('%', #{merchantName}, '%')
+                AND p.merchant_name LIKE CONCAT('%', #{merchantName}, '%')
             </if>
             <!-- 其他查询条件 -->
             <if test="orderId != null">

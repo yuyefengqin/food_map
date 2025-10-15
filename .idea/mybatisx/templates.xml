@@ -6,7 +6,7 @@
         <option name="generateConfig">
           <GenerateConfig>
             <option name="annotationType" value="MYBATIS_PLUS3" />
-            <option name="basePackage" value="com.gok.food_map.shoppingCard" />
+            <option name="basePackage" value="com.gok.food_map.district" />
             <option name="basePath" value="src/main/java" />
             <option name="classNameStrategy" value="camel" />
             <option name="encoding" value="UTF-8" />
@@ -68,8 +68,8 @@
             <option name="tableUIInfoList">
               <list>
                 <TableUIInfo>
-                  <option name="className" value="ShoppingCart" />
-                  <option name="tableName" value="shopping_cart" />
+                  <option name="className" value="AddressSnapshotTable" />
+                  <option name="tableName" value="address_snapshot_table" />
                 </TableUIInfo>
               </list>
             </option>

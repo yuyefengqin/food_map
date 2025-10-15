@@ -7,6 +7,12 @@ import lombok.Getter;
 @Getter
 public enum ResponseEnum {
 
+    ADDRESS_EX(300,"请先设置默认收获地址或地址不存在"),
+
+    PRODUCT_EX(300,"商品不存在或已下架"),
+
+    MERCHANT_EX(300,"商户不存在"),
+
     PARAM_ERROR(400, "参数错误"),
 
     UNAUTHORIZED(401, "未授权"),
